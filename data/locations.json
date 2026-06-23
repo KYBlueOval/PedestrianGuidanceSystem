@@ -1,0 +1,225 @@
+[
+  {
+    "id": "main_guard_house",
+    "name": "Plant Entry - Main Guard House",
+    "type": "entry",
+    "category": "Visitor / Security",
+    "x": 510,
+    "y": 162,
+    "access": "Visitor + Employee",
+    "photo": "",
+    "description": "Primary visitor and plant personnel entry point."
+  },
+  {
+    "id": "sub_guard_house",
+    "name": "Trade Entry - Sub Guard House",
+    "type": "entry",
+    "category": "Security",
+    "x": 171,
+    "y": 140,
+    "access": "Trade / Contractor",
+    "photo": "",
+    "description": "West-side trade/contractor entry point."
+  },
+  {
+    "id": "module_guard_house",
+    "name": "Trade Entry - Module Guard House",
+    "type": "entry",
+    "category": "Security",
+    "x": 826,
+    "y": 139,
+    "access": "Trade / Contractor",
+    "photo": "",
+    "description": "East-side module guard house entry point."
+  },
+  {
+    "id": "west_junction",
+    "name": "West Access Junction",
+    "type": "junction",
+    "category": "Route Node",
+    "x": 235,
+    "y": 374,
+    "access": "Controlled",
+    "description": "Major west green/red route crossing."
+  },
+  {
+    "id": "center_junction",
+    "name": "Center Access Junction",
+    "type": "junction",
+    "category": "Route Node",
+    "x": 515,
+    "y": 379,
+    "access": "Controlled",
+    "description": "Main vertical plant entry corridor intersection."
+  },
+  {
+    "id": "east_junction",
+    "name": "East Access Junction",
+    "type": "junction",
+    "category": "Route Node",
+    "x": 819,
+    "y": 376,
+    "access": "Controlled",
+    "description": "East module / personnel route junction."
+  },
+  {
+    "id": "west_service_corridor",
+    "name": "West Service Corridor",
+    "type": "corridor",
+    "category": "Employee Navigation",
+    "x": 112,
+    "y": 374,
+    "access": "Construction Trade Access",
+    "description": "West green access corridor."
+  },
+  {
+    "id": "east_service_corridor",
+    "name": "East Service Corridor",
+    "type": "corridor",
+    "category": "Employee Navigation",
+    "x": 940,
+    "y": 376,
+    "access": "Construction Trade Access",
+    "description": "East green access corridor."
+  },
+  {
+    "id": "south_center_access",
+    "name": "South Center Access",
+    "type": "corridor",
+    "category": "Employee Navigation",
+    "x": 516,
+    "y": 595,
+    "access": "Construction Trade Access",
+    "description": "South center green pedestrian access route."
+  },
+  {
+    "id": "anode",
+    "name": "Anode Area",
+    "type": "production",
+    "category": "Production",
+    "x": 238,
+    "y": 625,
+    "access": "Authorized Personnel",
+    "description": "Anode-side production zone."
+  },
+  {
+    "id": "cathode",
+    "name": "Cathode Area",
+    "type": "production",
+    "category": "Production",
+    "x": 238,
+    "y": 220,
+    "access": "Authorized Personnel",
+    "description": "Cathode-side production zone."
+  },
+  {
+    "id": "formation",
+    "name": "Formation / Aging",
+    "type": "production",
+    "category": "Production",
+    "x": 612,
+    "y": 485,
+    "access": "Authorized Personnel",
+    "description": "Formation, charging, and aging production zone."
+  },
+  {
+    "id": "cell_assembly",
+    "name": "Cell Assembly",
+    "type": "production",
+    "category": "Production",
+    "x": 700,
+    "y": 353,
+    "access": "Authorized Personnel",
+    "description": "Cell assembly production route area."
+  },
+  {
+    "id": "module_area",
+    "name": "Module Area",
+    "type": "production",
+    "category": "Production",
+    "x": 900,
+    "y": 600,
+    "access": "Authorized Personnel",
+    "description": "Module production and east-side access area."
+  },
+  {
+    "id": "employee_lobby",
+    "name": "Employee Lobby / Controlled Entry",
+    "type": "checkpoint",
+    "category": "Visitor / Security",
+    "x": 370,
+    "y": 373,
+    "access": "Badge Required",
+    "description": "Controlled point along the central pedestrian access route."
+  },
+  {
+    "id": "visitor_badging",
+    "name": "Visitor Badging / Escort Checkpoint",
+    "type": "checkpoint",
+    "category": "Visitor / Security",
+    "x": 516,
+    "y": 256,
+    "access": "Visitor Escort Required",
+    "description": "Visitor check-in and escort start point."
+  },
+  {
+    "id": "training_center",
+    "name": "Training / Orientation",
+    "type": "destination",
+    "category": "Visitor",
+    "x": 405,
+    "y": 326,
+    "access": "Visitor Escort Required",
+    "description": "Recommended visitor-facing destination for orientation/training."
+  },
+  {
+    "id": "break_area",
+    "name": "Break Area / Amenities",
+    "type": "amenity",
+    "category": "Employee Services",
+    "x": 160,
+    "y": 454,
+    "access": "Employee / Authorized Visitor",
+    "description": "Break area and service amenities."
+  },
+  {
+    "id": "restrooms",
+    "name": "Restrooms / Locker Support",
+    "type": "amenity",
+    "category": "Employee Services",
+    "x": 315,
+    "y": 331,
+    "access": "Employee / Authorized Visitor",
+    "description": "Restroom and locker support area."
+  },
+  {
+    "id": "muster_west",
+    "name": "West Muster / Safety Point",
+    "type": "safety",
+    "category": "Emergency",
+    "x": 132,
+    "y": 300,
+    "access": "Emergency",
+    "description": "West emergency reference point."
+  },
+  {
+    "id": "muster_center",
+    "name": "Center Muster / Safety Point",
+    "type": "safety",
+    "category": "Emergency",
+    "x": 527,
+    "y": 440,
+    "access": "Emergency",
+    "description": "Center emergency reference point."
+  },
+  {
+    "id": "muster_east",
+    "name": "East Muster / Safety Point",
+    "type": "safety",
+    "category": "Emergency",
+    "x": 895,
+    "y": 435,
+    "access": "Emergency",
+    "description": "East emergency reference point."
+  }
+]

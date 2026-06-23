@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Ford Energy SiteNav Command</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="panel">
+      <div class="brand-row">
+        <div class="logo-mark">FE</div>
+        <div>
+          <h1>SiteNav Command</h1>
+          <p>Visitor & Pedestrian Guidance</p>
+        </div>
+      </div>
+
+      <div class="status-card">
+        <span class="pulse-dot"></span>
+        <div>
+          <strong>Navigation Core Online</strong>
+          <small>Ground Floor • Pedestrian Access Routes</small>
+        </div>
+      </div>
+
+      <label>Mode</label>
+      <div class="segmented">
+        <button class="mode active" data-mode="visitor">Visitor</button>
+        <button class="mode" data-mode="employee">Employee</button>
+        <button class="mode" data-mode="emergency">Emergency</button>
+      </div>
+
+      <label for="startSelect">Start</label>
+      <select id="startSelect"></select>
+
+      <label for="endSelect">Destination</label>
+      <select id="endSelect"></select>
+
+      <button id="routeBtn" class="primary">Generate Authorized Route</button>
+
+      <div class="route-card">
+        <div class="route-title">
+          <span>Route Status</span>
+          <b id="routeStatus">Awaiting destination</b>
+        </div>
+        <div class="metric-grid">
+          <div><strong id="distanceMetric">--</strong><small>Distance</small></div>
+          <div><strong id="timeMetric">--</strong><small>Est. Walk</small></div>
+        </div>
+      </div>
+
+      <div class="steps" id="steps"></div>
+    </aside>
+
+    <main class="map-area">
+      <div class="topbar">
+        <div>
+          <b>BlueOval Glendale • Ground Floor</b>
+          <span id="subtitle">Mission-control routing overlay</span>
+        </div>
+        <div class="legend">
+          <span><i class="green"></i>Construction Trade Access</span>
+          <span><i class="red"></i>Plant Personnel Only</span>
+          <span><i class="blue"></i>Active Route</span>
+        </div>
+      </div>
+
+      <div class="map-frame" id="mapFrame">
+        <img id="plantMap" src="assets/plant-access-map.png" alt="Plant pedestrian access map" />
+        <svg id="overlay" viewBox="0 0 1024 768" preserveAspectRatio="xMidYMid meet">
+          <defs>
+            <filter id="glow">
+              <feGaussianBlur stdDeviation="3.5" result="coloredBlur"/>
+              <feMerge>
+                <feMergeNode in="coloredBlur"/>
+                <feMergeNode in="SourceGraphic"/>
+              </feMerge>
+            </filter>
+            <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+              <path d="M0,0 L0,6 L9,3 z" fill="#34d5ff" />
+            </marker>
+          </defs>
+          <g id="networkLayer"></g>
+          <g id="routeLayer"></g>
+          <g id="nodeLayer"></g>
+        </svg>
+      </div>
+
+      <section class="destination-drawer" id="drawer">
+        <div>
+          <span class="eyebrow">Destination Intel</span>
+          <h2 id="drawerTitle">Select a destination</h2>
+          <p id="drawerDesc">Click any glowing point or generate a route.</p>
+        </div>
+        <div class="access-pill" id="drawerAccess">ACCESS STATUS</div>
+      </section>
+    </main>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
