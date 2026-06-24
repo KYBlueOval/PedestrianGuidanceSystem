@@ -1,38 +1,32 @@
-# Ford Energy SiteNav Command — Pedestrian Guidance System
+# Ford Energy SiteNav Command — PGS v9.0
 
-GitHub Pages-ready static web app for visitor and pedestrian navigation.
+GitHub Pages-ready Pedestrian Guidance System web app.
 
-## Upload to GitHub
+## Upload
 
 1. Extract this ZIP.
-2. Open your GitHub repo.
+2. Open your GitHub repository.
 3. Click **Add file → Upload files**.
-4. Drag **all files and folders** from this extracted folder into GitHub.
+4. Drag all extracted files and folders into GitHub.
 5. Click **Commit changes**.
-6. Go to **Settings → Pages**.
-7. Source: **Deploy from a branch**.
-8. Branch: **main**.
-9. Folder: **/ (root)**.
-10. Save and wait 1–3 minutes.
+6. Wait for GitHub Pages to redeploy.
+7. Refresh your live site with **Ctrl + F5**.
 
-Your live URL should be:
+## v9.0 Updates
 
-```text
-https://KYBlueOval.github.io/PedestrianGuidanceSystem/
-```
-
-## Included
-
-- Ford Energy themed UI
-- Cleaned map background
-- Pan and zoom
-- Clickable waypoints
-- Visitor / Employee / Emergency modes
-- Search
-- Route generation
-- Destination info
-- App icons in PNG, SVG, and ICO
+- Rebuilt UI as a command-center style app.
+- Final PGS app icon and PWA manifest included.
+- Larger waypoint markers.
+- Cleaner waypoint labels with white halo.
+- Restored proper Legend panel.
+- Added Layers panel with category toggles.
+- Visitor, Employee, Contractor, and Emergency modes.
+- Search with destination suggestions.
+- Quick routes.
+- Route summary and turn-by-turn steps.
+- Pan, zoom, reset, and fit route.
+- Mobile responsive layout.
 
 ## Important
 
-Do not publish sensitive security layers, camera locations, access control details, or confidential restricted-area content on a public GitHub Pages site.
+Do not publish confidential security overlays, camera locations, badge reader data, or restricted-area details on a public GitHub Pages site.

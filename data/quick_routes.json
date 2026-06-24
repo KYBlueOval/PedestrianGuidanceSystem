@@ -1,0 +1,32 @@
+[
+  {
+    "label": "Visitor to Check-In",
+    "start": "main_guard_house",
+    "end": "visitor_badging",
+    "mode": "visitor"
+  },
+  {
+    "label": "Main GH to Training",
+    "start": "main_guard_house",
+    "end": "training_center",
+    "mode": "visitor"
+  },
+  {
+    "label": "Main GH to Formation",
+    "start": "main_guard_house",
+    "end": "formation",
+    "mode": "employee"
+  },
+  {
+    "label": "Module GH to Module",
+    "start": "module_guard_house",
+    "end": "module_area",
+    "mode": "employee"
+  },
+  {
+    "label": "Nearest Center Muster",
+    "start": "center_junction",
+    "end": "muster_center",
+    "mode": "emergency"
+  }
+]

@@ -1,5 +1,9 @@
 {
+  "version": "9.0.0",
   "mapWidth": 1024,
   "mapHeight": 768,
-  "mapImage": "assets/map-full.png"
+  "mapImage": "assets/map-full.png",
+  "brand": "Ford Energy",
+  "appName": "SiteNav Command",
+  "systemName": "Pedestrian Guidance System"
 }

@@ -1,40 +1,32 @@
-# Ford Energy PGS — v5 Fixed Alignment
+# Ford Energy SiteNav Command — PGS v9.0
 
-This version uses the full 1024x768 map background so all waypoint coordinates stay aligned.
+GitHub Pages-ready Pedestrian Guidance System web app.
 
 ## Upload
 
-1. Extract ZIP.
-2. GitHub repo → Add file → Upload files.
-3. Drag all extracted files/folders.
-4. Commit changes.
-5. Refresh GitHub Pages with Ctrl+F5.
+1. Extract this ZIP.
+2. Open your GitHub repository.
+3. Click **Add file → Upload files**.
+4. Drag all extracted files and folders into GitHub.
+5. Click **Commit changes**.
+6. Wait for GitHub Pages to redeploy.
+7. Refresh your live site with **Ctrl + F5**.
 
-## Included
+## v9.0 Updates
 
-- Ford Energy logo theme
-- PGS app icons
-- Corrected full-map waypoint alignment
-- Moderate waypoint/label sizing
-- Visitor, Employee, Emergency modes
-- Pan, zoom, reset, fit route
+- Rebuilt UI as a command-center style app.
+- Final PGS app icon and PWA manifest included.
+- Larger waypoint markers.
+- Cleaner waypoint labels with white halo.
+- Restored proper Legend panel.
+- Added Layers panel with category toggles.
+- Visitor, Employee, Contractor, and Emergency modes.
+- Search with destination suggestions.
+- Quick routes.
+- Route summary and turn-by-turn steps.
+- Pan, zoom, reset, and fit route.
+- Mobile responsive layout.
 
+## Important
 
-## Corrected PGS Icon
-
-The app icons have been replaced with the mockup-style icon: navigation ring, map pin, walking pedestrian, PGS, and Ford Energy logo branding.
-
-
-## v7 User-Provided App Icon
-
-This build uses the provided 3D Ford Energy PGS app icon as the live web app icon.
-
-Included icon assets:
-- assets/icons/pgs-icon-1024.png
-- assets/icons/pgs-icon-512.png
-- assets/icons/pgs-icon-192.png
-- assets/icons/apple-touch-icon.png
-- assets/icons/android-chrome-512x512.png
-- assets/icons/android-chrome-192x192.png
-- assets/icons/favicon.ico
-- manifest.json
+Do not publish confidential security overlays, camera locations, badge reader data, or restricted-area details on a public GitHub Pages site.
