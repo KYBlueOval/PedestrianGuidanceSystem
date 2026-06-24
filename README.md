@@ -1,38 +1,40 @@
-# Ford Energy SiteNav Command — Pedestrian Guidance System
+# Ford Energy PGS — v5 Fixed Alignment
 
-GitHub Pages-ready static web app for visitor and pedestrian navigation.
+This version uses the full 1024x768 map background so all waypoint coordinates stay aligned.
 
-## Upload to GitHub
+## Upload
 
-1. Extract this ZIP.
-2. Open your GitHub repo.
-3. Click **Add file → Upload files**.
-4. Drag **all files and folders** from this extracted folder into GitHub.
-5. Click **Commit changes**.
-6. Go to **Settings → Pages**.
-7. Source: **Deploy from a branch**.
-8. Branch: **main**.
-9. Folder: **/ (root)**.
-10. Save and wait 1–3 minutes.
-
-Your live URL should be:
-
-```text
-https://KYBlueOval.github.io/PedestrianGuidanceSystem/
-```
+1. Extract ZIP.
+2. GitHub repo → Add file → Upload files.
+3. Drag all extracted files/folders.
+4. Commit changes.
+5. Refresh GitHub Pages with Ctrl+F5.
 
 ## Included
 
-- Ford Energy themed UI
-- Cleaned map background
-- Pan and zoom
-- Clickable waypoints
-- Visitor / Employee / Emergency modes
-- Search
-- Route generation
-- Destination info
-- App icons in PNG, SVG, and ICO
+- Ford Energy logo theme
+- PGS app icons
+- Corrected full-map waypoint alignment
+- Moderate waypoint/label sizing
+- Visitor, Employee, Emergency modes
+- Pan, zoom, reset, fit route
 
-## Important
 
-Do not publish sensitive security layers, camera locations, access control details, or confidential restricted-area content on a public GitHub Pages site.
+## Corrected PGS Icon
+
+The app icons have been replaced with the mockup-style icon: navigation ring, map pin, walking pedestrian, PGS, and Ford Energy logo branding.
+
+
+## v7 User-Provided App Icon
+
+This build uses the provided 3D Ford Energy PGS app icon as the live web app icon.
+
+Included icon assets:
+- assets/icons/pgs-icon-1024.png
+- assets/icons/pgs-icon-512.png
+- assets/icons/pgs-icon-192.png
+- assets/icons/apple-touch-icon.png
+- assets/icons/android-chrome-512x512.png
+- assets/icons/android-chrome-192x192.png
+- assets/icons/favicon.ico
+- manifest.json
