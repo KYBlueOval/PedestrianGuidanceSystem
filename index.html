@@ -1,16 +1,80 @@
 <!doctype html>
-<html lang="en"><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><title>Ford Energy SiteNav Command</title><link rel="stylesheet" href="style.css"/></head>
-<body><div class="app-shell">
-<aside class="panel"><div class="brand-row"><div class="logo-mark">FE</div><div><h1>SiteNav Command</h1><p>Visitor & Pedestrian Guidance</p></div></div>
-<div class="status-card"><span class="pulse-dot"></span><div><strong>Navigation Core Online</strong><small>Ground Floor • Full map alignment</small></div></div>
-<label>Mode</label><div class="segmented"><button class="mode active" data-mode="visitor">Visitor</button><button class="mode" data-mode="employee">Employee</button><button class="mode" data-mode="emergency">Emergency</button></div>
-<label for="searchBox">Quick Search</label><input id="searchBox" placeholder="Search destination..."/>
-<label for="startSelect">Start</label><select id="startSelect"></select>
-<label for="endSelect">Destination</label><select id="endSelect"></select>
-<button id="routeBtn" class="primary">Generate Authorized Route</button>
-<div class="preset-row"><button class="preset" data-start="main_guard_house" data-end="visitor_badging">Visitor Check-In</button><button class="preset" data-start="main_guard_house" data-end="training_center">Training</button><button class="preset" data-start="module_guard_house" data-end="module_area">Module</button></div>
-<div class="route-card"><div class="route-title"><span>Route Status</span><b id="routeStatus">Awaiting destination</b></div><div class="metric-grid"><div><strong id="distanceMetric">--</strong><small>Distance</small></div><div><strong id="timeMetric">--</strong><small>Est. Walk</small></div></div></div>
-<div class="steps" id="steps"></div></aside>
-<main class="map-area"><div class="topbar"><div><b>BlueOval Glendale • Ground Floor</b><span id="subtitle">Visitor-safe guided routing</span></div><div class="tools"><button id="zoomOut">−</button><button id="resetView">Reset</button><button id="zoomIn">+</button><button id="fitRoute">Fit Route</button><label><input type="checkbox" id="labelsToggle" checked> Labels</label><label><input type="checkbox" id="networkToggle" checked> Network</label></div><div class="legend"><span><i class="green"></i>Construction Trade Access</span><span><i class="red"></i>Plant Personnel Only</span><span><i class="blue"></i>Active Route</span></div></div>
-<div class="map-frame" id="mapFrame"><div class="map-stage" id="mapStage"><img id="plantMap" src="assets/plant-access-map.png" alt="Plant pedestrian access map"/><svg id="overlay" viewBox="0 0 1024 768" preserveAspectRatio="none"><defs><filter id="glow"><feGaussianBlur stdDeviation="3" result="coloredBlur"/><feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge></filter><marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth"><path d="M0,0 L0,6 L9,3 z" fill="#34d5ff"/></marker></defs><g id="networkLayer"></g><g id="routeLayer"></g><g id="nodeLayer"></g></svg></div><div class="map-help">Mouse wheel = zoom • Drag = pan • Reset if lost</div></div>
-<section class="destination-drawer" id="drawer"><div><span class="eyebrow">Destination Intel</span><h2 id="drawerTitle">Select a destination</h2><p id="drawerDesc">Click any point or generate a route.</p></div><div class="access-pill" id="drawerAccess">ACCESS STATUS</div></section></main></div><script src="app.js"></script></body></html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Ford Energy SiteNav Command</title>
+<link rel="icon" href="assets/icons/favicon.ico"/>
+<link rel="apple-touch-icon" href="assets/icons/pgs-icon-180.png"/>
+<link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+<div class="app-shell">
+  <aside class="panel">
+    <div class="brand">
+      <img src="assets/ford_energy_logo_white.png" alt="Ford Energy" onerror="this.src='assets/ford-energy-logo.svg'"/>
+    </div>
+    <div class="title-block">
+      <h1>SiteNav Command</h1>
+      <p>Pedestrian Guidance System</p>
+    </div>
+    <div class="status-card"><span class="pulse-dot"></span><div><strong>Navigation Core Online</strong><small>Ground Floor • Cleaned route layer</small></div></div>
+    <label>Mode</label>
+    <div class="mode-grid">
+      <button class="mode active" data-mode="visitor">👥<span>Visitor</span></button>
+      <button class="mode" data-mode="employee">🏭<span>Employee</span></button>
+      <button class="mode emergency" data-mode="emergency">🚨<span>Emergency</span></button>
+    </div>
+    <label for="searchBox">Quick Search</label>
+    <div class="search-wrap"><input id="searchBox" placeholder="Search destination..."/><span>⌕</span></div>
+    <label for="startSelect">Start</label><select id="startSelect"></select>
+    <label for="endSelect">Destination</label><select id="endSelect"></select>
+    <button id="routeBtn" class="primary">Generate Authorized Route</button>
+    <div class="preset-row">
+      <button class="preset" data-start="main_guard_house" data-end="visitor_badging">Visitor to Check-In <b>→</b></button>
+      <button class="preset" data-start="main_guard_house" data-end="training_center">Main GH to Training <b>→</b></button>
+      <button class="preset" data-start="module_guard_house" data-end="module_area">Module GH to Module <b>→</b></button>
+    </div>
+    <div class="route-card">
+      <div class="route-title"><span>Route Status</span><b id="routeStatus">Awaiting</b></div>
+      <div class="metric-grid"><div><strong id="distanceMetric">--</strong><small>Distance</small></div><div><strong id="timeMetric">--</strong><small>Est. Walk</small></div></div>
+    </div>
+    <div class="steps" id="steps"></div>
+    <div class="version"><span></span> SiteNav Command v4.0.0</div>
+  </aside>
+  <main class="main">
+    <header class="topbar">
+      <div><b>BlueOval Glendale • Ground Floor</b><span id="subtitle">Visitor-safe guided routing</span></div>
+      <div class="toolbar">
+        <button id="searchFocus">⌕ Search</button><button id="legendBtn">Legend</button><button id="layersBtn">Layers</button><button id="fullscreenBtn">⛶</button><button id="resetView">Reset</button><button id="fitRoute" class="bluebtn">Fit Route</button>
+      </div>
+      <div class="clock"><span id="clock">--:--</span><small>System Online</small></div>
+    </header>
+    <section class="map-card">
+      <div class="map-help">Mouse wheel = zoom&nbsp;&nbsp;&nbsp; Drag = pan&nbsp;&nbsp;&nbsp;<label><input type="checkbox" id="labelsToggle" checked> Labels</label>&nbsp;<label><input type="checkbox" id="networkToggle" checked> Network</label></div>
+      <div class="map-frame" id="mapFrame">
+        <div class="map-stage" id="mapStage">
+          <img id="plantMap" src="assets/map-clean.png" alt="Pedestrian access routes"/>
+          <svg id="overlay" viewBox="0 0 12096 3460" preserveAspectRatio="none">
+            <defs>
+              <filter id="glow"><feGaussianBlur stdDeviation="4" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+              <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth"><path d="M0,0 L0,6 L9,3 z" fill="#0f6cff"/></marker>
+            </defs>
+            <g id="networkLayer"></g><g id="routeLayer"></g><g id="nodeLayer"></g>
+          </svg>
+        </div>
+      </div>
+      <div class="zoom-stack"><button id="zoomIn">+</button><button id="zoomOut">−</button><button id="centerView">⌖</button></div>
+      <div class="legend-box"><b>LEGEND</b><span><i class="green"></i>Construction / Trade Access</span><span><i class="red"></i>Plant Personnel Only</span><span><i class="blue"></i>Active Route</span></div>
+    </section>
+    <section class="info-card">
+      <div class="destination-info"><span class="eyebrow">Destination Info</span><h2 id="drawerTitle">Select a destination</h2><p id="drawerDesc">Click a point or generate a route.</p><div class="info-line">👥 <b>Access:</b> <span id="drawerAccess">--</span></div><div class="info-line">📍 <b>Location:</b> Ground Floor</div><div class="info-line">🧭 <b>Type:</b> Pedestrian Guidance Destination</div></div>
+      <div class="photo-card"><div>VISITOR<br/>CHECK-IN</div></div>
+      <div class="summary-card"><span class="eyebrow">Route Summary</span><p>⌘ Distance <b id="sumDistance">--</b></p><p>🚶 Est. Walk Time <b id="sumTime">--</b></p><p>🟢 Start <b id="sumStart">--</b></p><p>🔵 End <b id="sumEnd">--</b></p><button>Directions</button><button class="secondary">Share Route</button></div>
+    </section>
+  </main>
+</div>
+<div class="modal" id="layersModal"><div><button class="close" id="closeModal">×</button><h2>Layers</h2><label><input type="checkbox" id="modalLabels" checked> Show labels</label><label><input type="checkbox" id="modalNetwork" checked> Show route network</label><p>Use this as the clean public/visitor guidance layer. Keep sensitive CCTV/access-control data off public GitHub Pages.</p></div></div>
+<script src="app.js"></script>
+</body>
+</html>

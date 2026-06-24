@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 220">
+<rect width="900" height="220" fill="none"/>
+<ellipse cx="170" cy="110" rx="145" ry="58" fill="#06145f" stroke="#fff" stroke-width="11"/>
+<text x="82" y="132" font-family="Georgia,serif" font-style="italic" font-size="82" fill="#fff">Ford</text>
+<text x="350" y="146" font-family="Arial Black,Arial,sans-serif" font-size="128" fill="#fff">Energy</text>
+</svg>
