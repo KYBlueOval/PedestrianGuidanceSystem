@@ -16,6 +16,7 @@
 .three-walk-button{margin-top:3px;padding:7px 9px;border:1px solid rgba(72,184,255,.45);border-radius:7px;background:#0f6cff;color:#fff;font-size:11px;font-weight:900;cursor:pointer}
 .three-walk-button:disabled{opacity:.45;cursor:not-allowed}
 .three-semantic-label{padding:3px 6px;border:1px solid rgba(116,204,255,.4);border-radius:6px;background:rgba(2,18,34,.88);color:#e8f7ff;font-size:10px;font-weight:800;white-space:nowrap;box-shadow:0 4px 12px rgba(0,0,0,.38);transform:translate(-50%,-115%);pointer-events:none}
+.three-semantic-label[data-kind="area"]{border-color:rgba(72,184,255,.7);color:#d9f3ff;font-size:11px}
 .three-semantic-label[data-kind="corridor"]{border-color:rgba(77,255,179,.58);color:#bfffe1}.three-semantic-label[data-kind="amenity"]{border-color:rgba(255,201,73,.62);color:#ffe7a6}.three-semantic-label[data-kind="vertical"]{border-color:rgba(190,139,255,.65);color:#e8d5ff}
 .three-editor-divider{height:1px;margin:3px 0;background:rgba(118,173,222,.24)}
 .three-editor-button{padding:8px 9px;border:1px solid rgba(255,95,95,.55);border-radius:7px;background:#9c2631;color:#fff;font-size:11px;font-weight:900;cursor:pointer}.three-editor-button.active{background:#ef3340;box-shadow:0 0 16px rgba(239,51,64,.42)}

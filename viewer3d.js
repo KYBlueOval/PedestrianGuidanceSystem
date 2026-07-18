@@ -227,7 +227,8 @@ function createSemanticLabels(records){
   records.forEach(record=>{
     const position=record.model_position;
     if(!position||![position.x,position.y,position.z].every(Number.isFinite))return;
-    const category=semanticKind(record.kind);
+    const layer=semanticLayer(record.floor_id);
+    const category=layer==="site"?"area":semanticKind(record.kind);
     const element=document.createElement("div");
     element.className="three-semantic-label";
     element.dataset.kind=category;
@@ -235,7 +236,7 @@ function createSemanticLabels(records){
     element.title=`${record.name} • ${record.review_status||"unreviewed"}`;
     const label=new CSS2DObject(element);
     label.position.set(position.x,position.y+1.5,position.z);
-    label.userData={category,layer:semanticLayer(record.floor_id),record};
+    label.userData={category,layer,record};
     label.visible=false;
     model.add(label);
     semanticLabels.push(label);
@@ -331,6 +332,18 @@ function marker(position,color,radius){
 function renderRoute(route){
   if(!model)return;
   clearRoute();
+  const certified=spatialOverrides.review?.route_certified===true;
+  const routeToggle=document.getElementById("threeRouteToggle");
+  const routeStatus=document.getElementById("threeRouteStatus");
+  if(!certified){
+    routeToggle.checked=false;
+    routeToggle.disabled=true;
+    document.getElementById("threeWalkToggle").disabled=true;
+    routeStatus.textContent="3D route hidden — trace and approve the pedestrian network first";
+    return;
+  }
+  routeToggle.disabled=false;
+  routeStatus.textContent="Approved pedestrian route loaded";
   const points=routePositions(route);
   const walkButton=document.getElementById("threeWalkToggle");
   if(points.length<2){

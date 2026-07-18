@@ -17,10 +17,51 @@ function buildGraph(){
   routes.forEach(([a,b,w])=>{graph[a].push({id:b,weight:w});graph[b].push({id:a,weight:w});});
 }
 
-function populateSelects(){
+function destinationGroup(destination){
+  if(destination.zone==="Visitor")return "Visitor / Check-In";
+  if(destination.zone==="Security")return "Entrances / Security";
+  if(destination.zone==="Production")return "Production Areas";
+  if(destination.zone==="Amenities")return "Amenities / Employee Services";
+  if(destination.zone==="Emergency")return "Emergency / Muster";
+  return "Other";
+}
+
+function matchesDestinationCategory(destination,category){
+  if(category==="all")return true;
+  if(category==="visitor")return destination.zone==="Visitor"||destination.category.includes("Visitor");
+  if(category==="security")return destination.zone==="Security";
+  if(category==="production")return destination.zone==="Production";
+  if(category==="amenities")return destination.zone==="Amenities";
+  if(category==="emergency")return destination.zone==="Emergency";
+  return true;
+}
+
+function addGroupedOptions(select,items){
+  const groups=new Map();
+  items.forEach(destination=>{
+    const group=destinationGroup(destination);
+    if(!groups.has(group))groups.set(group,[]);
+    groups.get(group).push(destination);
+  });
+  groups.forEach((groupItems,label)=>{
+    const optgroup=document.createElement("optgroup");
+    optgroup.label=label;
+    groupItems.sort((a,b)=>a.name.localeCompare(b.name)).forEach(destination=>{
+      optgroup.appendChild(new Option(destination.name,destination.id));
+    });
+    select.appendChild(optgroup);
+  });
+}
+
+function populateSelects(category=$("destinationCategory")?.value||"all"){
   const s=$("startSelect"), e=$("endSelect");
+  const previousStart=s.value,previousEnd=e.value;
   s.innerHTML=""; e.innerHTML="";
-  destinations.forEach(d=>{s.add(new Option(d.name,d.id)); e.add(new Option(d.name,d.id));});
+  const selectable=destinations.filter(destination=>!["junction","corridor"].includes(destination.type));
+  addGroupedOptions(s,selectable);
+  addGroupedOptions(e,selectable.filter(destination=>matchesDestinationCategory(destination,category)));
+  if([...s.options].some(option=>option.value===previousStart))s.value=previousStart;
+  if([...e.options].some(option=>option.value===previousEnd))e.value=previousEnd;
 }
 
 function renderQuickRoutes(){
@@ -29,13 +70,14 @@ function renderQuickRoutes(){
     const btn=document.createElement("button");
     btn.className="quick-route";
     btn.innerHTML=`<span>${q.label}</span><b>→</b>`;
-    btn.onclick=()=>{$("startSelect").value=q.start;$("endSelect").value=q.end; if(q.mode) setMode(q.mode,false); generateRoute(); fitRoute();};
+    btn.onclick=()=>{if(q.mode)setMode(q.mode,false);$("startSelect").value=q.start;$("endSelect").value=q.end;generateRoute();fitRoute();};
     wrap.appendChild(btn);
   });
 }
 
 function wireEvents(){
   $("routeBtn").onclick=generateRoute;
+  $("destinationCategory").onchange=event=>populateSelects(event.target.value);
   $("zoomIn").onclick=()=>zoom(1.2);
   $("zoomOut").onclick=()=>zoom(.83);
   $("resetView").onclick=()=>workspaceView==="3d"?window.pgs3d?.reset():resetView();
@@ -90,13 +132,17 @@ function setMode(m, generate=true){
   mode=m;
   document.querySelectorAll(".mode").forEach(b=>b.classList.toggle("active",b.dataset.mode===m));
   if(m==="visitor"){
+    $("destinationCategory").value="visitor"; populateSelects("visitor");
     $("startSelect").value="main_guard_house"; $("endSelect").value="visitor_badging"; $("subtitle").textContent="Visitor-safe guided routing";
   } else if(m==="employee"){
+    $("destinationCategory").value="production"; populateSelects("production");
     $("startSelect").value="main_guard_house"; $("endSelect").value="formation"; $("subtitle").textContent="Employee pedestrian movement";
   } else if(m==="contractor"){
-    $("startSelect").value="sub_guard_house"; $("endSelect").value="west_service_corridor"; $("subtitle").textContent="Contractor / trade access routing";
+    $("destinationCategory").value="production"; populateSelects("production");
+    $("startSelect").value="sub_guard_house"; $("endSelect").value="anode"; $("subtitle").textContent="Contractor / trade access routing";
   } else {
-    $("startSelect").value="center_junction"; $("endSelect").value="muster_center"; $("subtitle").textContent="Emergency reference routing";
+    $("destinationCategory").value="emergency"; populateSelects("emergency");
+    $("startSelect").value="employee_lobby"; $("endSelect").value="muster_center"; $("subtitle").textContent="Emergency reference routing";
   }
   if(generate) generateRoute();
 }
@@ -124,7 +170,7 @@ function drawNodes(){
       <circle class="marker-ring" r="12"></circle>
       <circle class="marker-dot marker-core" r="8"></circle>
       <text x="16" y="-9">${escapeHtml(d.label)}</text>`;
-    g.onclick=()=>{$("endSelect").value=d.id;showDestination(d.id);};
+    g.onclick=()=>{if(!["junction","corridor"].includes(d.type))$("endSelect").value=d.id;showDestination(d.id);};
     l.appendChild(g);
   });
 }
@@ -168,7 +214,7 @@ function drawRoute(path){
 
 function updateRoute(r){
   const feet=Math.round(r.distance*1.7), mins=Math.max(1,Math.round(feet/250));
-  $("routeStatus").textContent="AUTHORIZED";
+  $("routeStatus").textContent="DRAFT PREVIEW";
   $("distanceMetric").textContent=feet+" ft"; $("timeMetric").textContent=mins+" min";
   $("sumDistance").textContent=feet+" ft"; $("sumTime").textContent=mins+" min";
   $("sumStart").textContent=loc(r.path[0]).name; $("sumEnd").textContent=loc(r.path.at(-1)).name;
@@ -191,7 +237,13 @@ function renderSearch(q){
   q=q.toLowerCase().trim();
   const box=$("searchResults"); box.innerHTML="";
   if(q.length<2){box.classList.remove("show");return;}
-  const matches=destinations.filter(d=>(d.name+" "+d.label+" "+d.category+" "+d.zone).toLowerCase().includes(q)).slice(0,8);
+  const category=$("destinationCategory").value;
+  const matches=destinations
+    .filter(d=>!["junction","corridor"].includes(d.type))
+    .filter(d=>matchesDestinationCategory(d,category))
+    .filter(d=>(d.name+" "+d.label+" "+d.category+" "+d.zone).toLowerCase().includes(q))
+    .sort((a,b)=>destinationGroup(a).localeCompare(destinationGroup(b))||a.name.localeCompare(b.name))
+    .slice(0,10);
   matches.forEach(d=>{
     const btn=document.createElement("button");
     btn.innerHTML=`<b>${escapeHtml(d.name)}</b><br><small>${escapeHtml(d.category)} • ${escapeHtml(d.access)}</small>`;

@@ -13,7 +13,11 @@ When a route is generated, the 3D twin displays the current preview as a blue pa
 
 The 3D Layers panel can also display floor-aware room, corridor, amenity, stair, and elevator labels from the local DTTK `spatial_labels.json` handoff. These labels remain review-only until site approval.
 
+Destination choices are grouped by visitor/check-in, entrances/security, production, amenities, and emergency use. Internal junctions and corridor waypoints are no longer presented as end-user destinations.
+
 Use **Start Route Edit** after positioning the 3D camera to trace an approved hallway or sidewalk centerline. Click the model at each turn or intersection, then save the draft locally or export `pedestrian_network_draft_YYYY-MM-DD.json` for review. Draft paths are never treated as approved routes automatically.
+
+Approximate straight-line 3D routes are intentionally hidden while the local DTTK handoff reports `route_certified: false`. The authored network must be reviewed and compiled before PGS will present a 3D route as approved.
 
 The model and generated spatial JSON are excluded from Git because this repository is public. The existing 2D map remains the default and continues to provide the authoritative routing experience during the v10 alpha.
 

@@ -49,13 +49,23 @@
       </div>
       <div id="searchResults" class="search-results"></div>
 
+      <label for="destinationCategory">Destination Category</label>
+      <select id="destinationCategory">
+        <option value="all">All Approved Destinations</option>
+        <option value="visitor">Visitor / Check-In</option>
+        <option value="security">Entrances / Security</option>
+        <option value="production">Production Areas</option>
+        <option value="amenities">Amenities / Employee Services</option>
+        <option value="emergency">Emergency / Muster</option>
+      </select>
+
       <label for="startSelect">Start</label>
       <select id="startSelect"></select>
 
       <label for="endSelect">Destination</label>
       <select id="endSelect"></select>
 
-      <button id="routeBtn" class="primary-action">Generate Authorized Route</button>
+      <button id="routeBtn" class="primary-action">Generate Route Preview</button>
     </section>
 
     <section class="quick-routes">
@@ -64,7 +74,7 @@
     </section>
 
     <section class="route-status">
-      <div class="route-title"><span>Route Status</span><b id="routeStatus">Ready</b></div>
+      <div class="route-title"><span>Route Status</span><b id="routeStatus">DRAFT PREVIEW</b></div>
       <div class="metric-grid">
         <div><strong id="distanceMetric">--</strong><small>Distance</small></div>
         <div><strong id="timeMetric">--</strong><small>Est. Walk</small></div>
@@ -134,11 +144,13 @@
           <label><input type="checkbox" data-3d-layer="mezzanine"/> Mezzanine</label>
           <label><input type="checkbox" data-3d-layer="roof"/> Roof</label>
           <label><input type="checkbox" id="threeLabelsToggle" checked/> Building Labels</label>
-          <label><input type="checkbox" data-semantic-label="room"/> Rooms / Areas</label>
+          <label><input type="checkbox" data-semantic-label="area" checked/> Departments / Key Areas</label>
+          <label><input type="checkbox" data-semantic-label="room"/> Individual Rooms</label>
           <label><input type="checkbox" data-semantic-label="corridor"/> Corridors</label>
           <label><input type="checkbox" data-semantic-label="amenity"/> Amenities</label>
           <label><input type="checkbox" data-semantic-label="vertical"/> Stairs / Elevators</label>
           <label><input type="checkbox" id="threeRouteToggle" checked/> Route &amp; Tracking</label>
+          <small id="threeRouteStatus">Awaiting approved pedestrian network</small>
           <button id="threeWalkToggle" class="three-walk-button" type="button">Pause Walk Preview</button>
           <div class="three-editor-divider"></div>
           <b>Pedestrian Path Editor</b>
