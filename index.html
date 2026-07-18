@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>Ford Energy SiteNav Command v9</title>
+<title>Ford Energy SiteNav Command v10</title>
 <link rel="manifest" href="manifest.json"/>
 <link rel="icon" href="assets/icons/favicon.ico" sizes="any"/>
 <link rel="icon" type="image/png" sizes="32x32" href="assets/icons/pgs-icon-32.png"/>
@@ -28,7 +28,7 @@
         <span class="online-dot"></span>
         <div>
           <b>Navigation Core Online</b>
-          <small>Ground Floor • v9.0 production UI</small>
+          <small>Ground Floor • v10 digital-twin preview</small>
         </div>
       </div>
     </section>
@@ -76,7 +76,7 @@
       <div id="steps"></div>
     </section>
 
-    <footer class="version-footer"><span></span> PGS v9.0.0</footer>
+    <footer class="version-footer"><span></span> PGS v10.0.0 Alpha</footer>
   </aside>
 
   <main class="workspace">
@@ -86,6 +86,10 @@
         <p id="subtitle">Visitor-safe guided routing</p>
       </div>
       <nav class="top-actions">
+        <div class="view-switch" aria-label="Map view">
+          <button id="view2DBtn" class="active" aria-pressed="true">2D Map</button>
+          <button id="view3DBtn" aria-pressed="false">3D Twin</button>
+        </div>
         <button id="searchFocus">⌕ Search</button>
         <button id="legendOpen">Legend</button>
         <button id="layersOpen">Layers</button>
@@ -119,6 +123,26 @@
             <g id="nodeLayer"></g>
           </svg>
         </div>
+      </div>
+
+      <div id="threeFrame" class="three-frame" hidden aria-label="Interactive 3D facility view">
+        <div id="threeCanvas" class="three-canvas"></div>
+        <div class="three-layers" aria-label="3D model layers">
+          <b>3D Layers</b>
+          <label><input type="checkbox" data-3d-layer="site" checked/> Site / Exterior</label>
+          <label><input type="checkbox" data-3d-layer="ground" checked/> Ground Floor</label>
+          <label><input type="checkbox" data-3d-layer="mezzanine"/> Mezzanine</label>
+          <label><input type="checkbox" data-3d-layer="roof"/> Roof</label>
+          <label><input type="checkbox" id="threeLabelsToggle" checked/> Building Labels</label>
+          <label><input type="checkbox" id="threeRouteToggle" checked/> Route &amp; Tracking</label>
+          <button id="threeWalkToggle" class="three-walk-button" type="button">Pause Walk Preview</button>
+        </div>
+        <div id="threeStatus" class="three-status" role="status">
+          <span class="three-spinner" aria-hidden="true"></span>
+          <span>3D twin loads when selected</span>
+        </div>
+        <div class="three-hint">Drag to orbit • Scroll to zoom • Right-drag to pan</div>
+        <div class="three-badge">Mobile model profile • Guided routing remains available in 2D</div>
       </div>
 
       <div class="zoom-stack">
@@ -187,6 +211,10 @@
 </div>
 
 <div id="toast" class="toast">Route copied</div>
+<script type="importmap">
+{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.185.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.185.0/examples/jsm/"}}
+</script>
 <script src="app.js"></script>
+<script type="module" src="viewer3d.js"></script>
 </body>
 </html>

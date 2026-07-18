@@ -1,5 +1,6 @@
 let destinations=[],routes=[],quickRoutes=[],graph={},lastPath=[],mode="visitor";
 let view={scale:1,x:0,y:0},dragging=false,dragStart=null;
+let workspaceView="2d";
 const MAP_W=1024,MAP_H=768;
 const $=id=>document.getElementById(id);
 const loc=id=>destinations.find(d=>d.id===id);
@@ -37,9 +38,11 @@ function wireEvents(){
   $("routeBtn").onclick=generateRoute;
   $("zoomIn").onclick=()=>zoom(1.2);
   $("zoomOut").onclick=()=>zoom(.83);
-  $("resetView").onclick=resetView;
+  $("resetView").onclick=()=>workspaceView==="3d"?window.pgs3d?.reset():resetView();
   $("centerView").onclick=resetView;
   $("fitRoute").onclick=fitRoute;
+  $("view2DBtn").onclick=()=>setWorkspaceView("2d");
+  $("view3DBtn").onclick=()=>setWorkspaceView("3d");
   $("searchFocus").onclick=()=>$("searchBox").focus();
   $("fullscreenBtn").onclick=()=>document.documentElement.requestFullscreen?.();
 
@@ -65,7 +68,22 @@ function wireEvents(){
   f.onmousedown=e=>{dragging=true;dragStart={x:e.clientX,y:e.clientY,vx:view.x,vy:view.y};f.classList.add("dragging");};
   window.onmousemove=e=>{if(!dragging)return;view.x=dragStart.vx+e.clientX-dragStart.x;view.y=dragStart.vy+e.clientY-dragStart.y;applyView();};
   window.onmouseup=()=>{dragging=false;f.classList.remove("dragging");};
-  window.onresize=resetView;
+  window.onresize=()=>{if(workspaceView==="2d")resetView();};
+}
+
+function setWorkspaceView(next){
+  workspaceView=next==="3d"?"3d":"2d";
+  const is3d=workspaceView==="3d";
+  document.querySelector(".map-shell").classList.toggle("three-active",is3d);
+  $("mapFrame").hidden=is3d;
+  $("threeFrame").hidden=!is3d;
+  $("view2DBtn").classList.toggle("active",!is3d);
+  $("view3DBtn").classList.toggle("active",is3d);
+  $("view2DBtn").setAttribute("aria-pressed",String(!is3d));
+  $("view3DBtn").setAttribute("aria-pressed",String(is3d));
+  ["zoomIn","zoomOut","centerView","fitRoute"].forEach(id=>$(id).disabled=is3d);
+  if(is3d) window.pgs3d?.show();
+  else { window.pgs3d?.hide(); resetView(); }
 }
 
 function setMode(m, generate=true){
@@ -133,6 +151,9 @@ function generateRoute(){
   const result=dijkstra(start,end);
   lastPath=result.path;
   drawRoute(result.path); updateRoute(result); showDestination(end);
+  const routeDetail={path:[...result.path],destinations:result.path.map(id=>loc(id)),distance:result.distance};
+  window.pgsCurrentRoute=routeDetail;
+  window.dispatchEvent(new CustomEvent("pgs:route",{detail:routeDetail}));
 }
 
 function drawRoute(path){
@@ -191,6 +212,7 @@ function resetView(){ const f=$("mapFrame"); view.scale=Math.min(f.clientWidth/M
 function zoom(f){ view.scale=Math.max(.25,Math.min(5,view.scale*f)); applyView(); }
 function fitRoute(){
   if(!lastPath.length)return;
+  if(workspaceView!=="2d")setWorkspaceView("2d");
   const f=$("mapFrame"), pts=lastPath.map(loc);
   const minX=Math.min(...pts.map(p=>p.x)), maxX=Math.max(...pts.map(p=>p.x)), minY=Math.min(...pts.map(p=>p.y)), maxY=Math.max(...pts.map(p=>p.y));
   const pad=130;
