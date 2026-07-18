@@ -10,8 +10,17 @@ let renderer,labelRenderer,scene,camera,controls,model,resizeObserver;
 let initialized=false,loading=false,visible=false;
 const layerObjects={site:[],ground:[],mezzanine:[],roof:[]};
 const buildingLabels=[];
+const semanticLabels=[];
+const floorLayerIndex=new Map();
 let spatialOverrides={},routeGroup,routeCurve,tracker;
 let routeProgress=0,trackingPaused=false,routeDuration=24,lastFrameTime=performance.now();
+let editorActive=false,editorGroup,editorLine;
+let editorNodes=[];
+let pointerStart=null;
+let animationFrameCount=0;
+const raycaster=new THREE.Raycaster();
+const pointer=new THREE.Vector2();
+const EDITOR_STORAGE_KEY="pgs-v10-pedestrian-network-draft";
 
 function setStatus(message,{error=false,hidden=false}={}){
   status.classList.toggle("error",error);
@@ -63,10 +72,20 @@ function initialize(){
   document.getElementById("threeLabelsToggle").addEventListener("change",event=>{
     frame.classList.toggle("three-labels-hidden",!event.target.checked);
   });
+  document.querySelectorAll("[data-semantic-label]").forEach(input=>{
+    input.addEventListener("change",updateSemanticLabelVisibility);
+  });
   document.getElementById("threeRouteToggle").addEventListener("change",event=>{
     if(routeGroup)routeGroup.visible=event.target.checked;
   });
   document.getElementById("threeWalkToggle").addEventListener("click",toggleWalkPreview);
+  document.getElementById("threeEditToggle").addEventListener("click",toggleRouteEditor);
+  document.getElementById("threeEditUndo").addEventListener("click",undoEditorNode);
+  document.getElementById("threeEditClear").addEventListener("click",clearEditorDraft);
+  document.getElementById("threeEditSave").addEventListener("click",saveEditorDraft);
+  document.getElementById("threeEditExport").addEventListener("click",exportEditorDraft);
+  renderer.domElement.addEventListener("pointerdown",event=>{pointerStart={x:event.clientX,y:event.clientY};});
+  renderer.domElement.addEventListener("pointerup",handleEditorPointerUp);
   window.addEventListener("pgs:route",event=>renderRoute(event.detail));
   animate();
 }
@@ -81,9 +100,14 @@ async function loadModel(){
       return response.json();
     });
     const modelUrl=config.views?.model||"assets/models/site_mobile.glb";
-    spatialOverrides=await fetch("data/generated/destination_spatial.json")
-      .then(response=>response.ok?response.json():{})
-      .catch(()=>({}));
+    const [destinationsPayload,labelsPayload,floorsPayload]=await Promise.all([
+      fetch("data/generated/destination_spatial.json").then(response=>response.ok?response.json():{}).catch(()=>({})),
+      fetch("data/generated/spatial_labels.json").then(response=>response.ok?response.json():{}).catch(()=>({})),
+      fetch("data/generated/floor_layers.json").then(response=>response.ok?response.json():{}).catch(()=>({}))
+    ]);
+    spatialOverrides=destinationsPayload;
+    floorLayerIndex.clear();
+    (floorsPayload.layers||[]).forEach(layer=>floorLayerIndex.set(layer.floor_id,layer.code||"OUTDOOR"));
     const loader=new GLTFLoader();
     const gltf=await loader.loadAsync(modelUrl,event=>{
       if(event.total){
@@ -96,6 +120,8 @@ async function loadModel(){
     fitModel();
     indexLayers();
     createBuildingLabels();
+    createSemanticLabels(labelsPayload.labels||[]);
+    restoreEditorDraft();
     applyInitialLayerState();
     if(window.pgsCurrentRoute)renderRoute(window.pgsCurrentRoute);
     setStatus("3D twin ready",{hidden:true});
@@ -124,6 +150,7 @@ function setLayerVisibility(layer,isVisible){
   buildingLabels.forEach(label=>{
     if(label.userData.layer===layer)label.visible=isVisible;
   });
+  updateSemanticLabelVisibility();
 }
 
 function applyInitialLayerState(){
@@ -179,6 +206,63 @@ function createBuildingLabels(){
     label.userData.layer="ground";
     anchor.add(label);
     buildingLabels.push(label);
+  });
+}
+
+function semanticKind(kind){
+  if(kind==="stair"||kind==="elevator")return "vertical";
+  if(kind==="corridor"||kind==="amenity")return kind;
+  return "room";
+}
+
+function semanticLayer(floorId){
+  const code=floorLayerIndex.get(floorId)||"1F";
+  if(code==="MF")return "mezzanine";
+  if(code==="RF")return "roof";
+  if(code==="OUTDOOR")return "site";
+  return "ground";
+}
+
+function createSemanticLabels(records){
+  records.forEach(record=>{
+    const position=record.model_position;
+    if(!position||![position.x,position.y,position.z].every(Number.isFinite))return;
+    const category=semanticKind(record.kind);
+    const element=document.createElement("div");
+    element.className="three-semantic-label";
+    element.dataset.kind=category;
+    element.textContent=record.name;
+    element.title=`${record.name} • ${record.review_status||"unreviewed"}`;
+    const label=new CSS2DObject(element);
+    label.position.set(position.x,position.y+1.5,position.z);
+    label.userData={category,layer:semanticLayer(record.floor_id),record};
+    label.visible=false;
+    model.add(label);
+    semanticLabels.push(label);
+  });
+  updateSemanticLabelVisibility();
+}
+
+function updateSemanticLabelVisibility(){
+  const enabledCategories=new Set(
+    [...document.querySelectorAll("[data-semantic-label]:checked")].map(input=>input.dataset.semanticLabel)
+  );
+  const enabledLayers=new Set(
+    [...document.querySelectorAll("[data-3d-layer]:checked")].map(input=>input.dataset["3dLayer"])
+  );
+  semanticLabels.forEach(label=>{
+    label.userData.enabled=enabledCategories.has(label.userData.category)&&enabledLayers.has(label.userData.layer);
+  });
+  updateSemanticLabelLOD();
+}
+
+function updateSemanticLabelLOD(){
+  if(!model||!camera)return;
+  const world=new THREE.Vector3();
+  semanticLabels.forEach(label=>{
+    const limit=label.userData.category==="room"||label.userData.category==="corridor"?260:420;
+    label.getWorldPosition(world);
+    label.visible=Boolean(label.userData.enabled)&&world.distanceTo(camera.position)<=limit;
   });
 }
 
@@ -294,6 +378,150 @@ function toggleWalkPreview(){
   document.getElementById("threeWalkToggle").textContent=trackingPaused?"Resume Walk Preview":"Pause Walk Preview";
 }
 
+function toggleRouteEditor(){
+  if(!model)return;
+  editorActive=!editorActive;
+  controls.enabled=!editorActive;
+  frame.classList.toggle("route-editing",editorActive);
+  const button=document.getElementById("threeEditToggle");
+  button.classList.toggle("active",editorActive);
+  button.textContent=editorActive?"Finish Route Edit":"Start Route Edit";
+  document.querySelector(".three-hint").textContent=editorActive
+    ?"Click the center of each approved hallway or sidewalk segment"
+    :"Drag to orbit • Scroll to zoom • Right-drag to pan";
+  updateEditorControls();
+}
+
+function activeEditorLayer(){
+  const selected=[...document.querySelectorAll("[data-3d-layer]:checked")].map(input=>input.dataset["3dLayer"]);
+  return selected.includes("ground")?"ground":selected.includes("mezzanine")?"mezzanine":selected.includes("roof")?"roof":"site";
+}
+
+function handleEditorPointerUp(event){
+  if(!editorActive||event.button!==0||!pointerStart)return;
+  const movement=Math.hypot(event.clientX-pointerStart.x,event.clientY-pointerStart.y);
+  pointerStart=null;
+  if(movement>5)return;
+  const rect=renderer.domElement.getBoundingClientRect();
+  pointer.x=((event.clientX-rect.left)/rect.width)*2-1;
+  pointer.y=-((event.clientY-rect.top)/rect.height)*2+1;
+  raycaster.setFromCamera(pointer,camera);
+  const hits=raycaster.intersectObject(model,true).filter(hit=>{
+    const object=hit.object;
+    return object.isMesh&&object.visible&&!routeGroup?.getObjectById(object.id)&&!editorGroup?.getObjectById(object.id);
+  });
+  if(!hits.length)return;
+  const local=model.worldToLocal(hits[0].point.clone());
+  local.y+=.35;
+  editorNodes.push({
+    id:`draft-node-${editorNodes.length+1}`,
+    position:{x:+local.x.toFixed(4),y:+local.y.toFixed(4),z:+local.z.toFixed(4)},
+    layer:activeEditorLayer(),
+    access:["visitor","employee","contractor","emergency"],
+    approved:false
+  });
+  rebuildEditorVisuals();
+}
+
+function ensureEditorGroup(){
+  if(editorGroup)return;
+  editorGroup=new THREE.Group();
+  editorGroup.name="PGS_PEDESTRIAN_NETWORK_DRAFT";
+  model.add(editorGroup);
+}
+
+function rebuildEditorVisuals(){
+  ensureEditorGroup();
+  while(editorGroup.children.length){
+    const child=editorGroup.children.pop();
+    child.traverse(descendant=>descendant.element?.remove?.());
+    disposeObject(child);
+  }
+  const points=editorNodes.map(node=>new THREE.Vector3(node.position.x,node.position.y,node.position.z));
+  points.forEach((position,index)=>{
+    const nodeMarker=marker(position,0xef3340,2.1);
+    nodeMarker.name=editorNodes[index].id;
+    const element=document.createElement("div");
+    element.className="three-semantic-label";
+    element.dataset.kind="vertical";
+    element.textContent=String(index+1);
+    const numberLabel=new CSS2DObject(element);
+    numberLabel.position.set(0,5,0);
+    nodeMarker.add(numberLabel);
+    editorGroup.add(nodeMarker);
+  });
+  if(points.length>1){
+    editorLine=new THREE.Line(
+      new THREE.BufferGeometry().setFromPoints(points),
+      new THREE.LineBasicMaterial({color:0xef3340,linewidth:3})
+    );
+    editorLine.name="PGS_DRAFT_CENTERLINE";
+    editorGroup.add(editorLine);
+  }
+  updateEditorControls();
+}
+
+function updateEditorControls(){
+  const count=editorNodes.length;
+  document.getElementById("threeEditStatus").textContent=`Draft: ${count} node${count===1?"":"s"}${editorActive?" • click model to add":""}`;
+  ["threeEditUndo","threeEditClear","threeEditSave","threeEditExport"].forEach(id=>{
+    document.getElementById(id).disabled=count===0;
+  });
+}
+
+function undoEditorNode(){
+  editorNodes.pop();
+  rebuildEditorVisuals();
+}
+
+function clearEditorDraft(){
+  editorNodes=[];
+  localStorage.removeItem(EDITOR_STORAGE_KEY);
+  rebuildEditorVisuals();
+}
+
+function editorPayload(){
+  return {
+    schema_version:"0.1.0-draft",
+    coordinate_system:"PGS GLB model coordinates",
+    review_status:"draft_requires_site_approval",
+    nodes:editorNodes,
+    edges:editorNodes.slice(1).map((node,index)=>({
+      id:`draft-edge-${index+1}`,
+      from:editorNodes[index].id,
+      to:node.id,
+      bidirectional:true,
+      modes:["walking"],
+      access:[...new Set([...editorNodes[index].access,...node.access])],
+      approved:false
+    }))
+  };
+}
+
+function saveEditorDraft(){
+  localStorage.setItem(EDITOR_STORAGE_KEY,JSON.stringify(editorPayload()));
+  document.getElementById("threeEditStatus").textContent=`Draft saved locally • ${editorNodes.length} nodes`;
+}
+
+function restoreEditorDraft(){
+  try{
+    const saved=JSON.parse(localStorage.getItem(EDITOR_STORAGE_KEY)||"null");
+    editorNodes=Array.isArray(saved?.nodes)?saved.nodes:[];
+  }catch{
+    editorNodes=[];
+  }
+  rebuildEditorVisuals();
+}
+
+function exportEditorDraft(){
+  const blob=new Blob([JSON.stringify(editorPayload(),null,2)],{type:"application/json"});
+  const link=document.createElement("a");
+  link.href=URL.createObjectURL(blob);
+  link.download=`pedestrian_network_draft_${new Date().toISOString().slice(0,10)}.json`;
+  link.click();
+  setTimeout(()=>URL.revokeObjectURL(link.href),1000);
+}
+
 function fitModel(){
   if(!model)return;
   const box=new THREE.Box3().setFromObject(model);
@@ -333,6 +561,8 @@ function animate(){
     routeProgress=(routeProgress+delta/routeDuration)%1;
     tracker.position.copy(routeCurve.getPointAt(routeProgress));
   }
+  animationFrameCount=(animationFrameCount+1)%12;
+  if(animationFrameCount===0)updateSemanticLabelLOD();
   controls.update();
   renderer.render(scene,camera);
   labelRenderer.render(scene,camera);

@@ -134,8 +134,24 @@
           <label><input type="checkbox" data-3d-layer="mezzanine"/> Mezzanine</label>
           <label><input type="checkbox" data-3d-layer="roof"/> Roof</label>
           <label><input type="checkbox" id="threeLabelsToggle" checked/> Building Labels</label>
+          <label><input type="checkbox" data-semantic-label="room"/> Rooms / Areas</label>
+          <label><input type="checkbox" data-semantic-label="corridor"/> Corridors</label>
+          <label><input type="checkbox" data-semantic-label="amenity"/> Amenities</label>
+          <label><input type="checkbox" data-semantic-label="vertical"/> Stairs / Elevators</label>
           <label><input type="checkbox" id="threeRouteToggle" checked/> Route &amp; Tracking</label>
           <button id="threeWalkToggle" class="three-walk-button" type="button">Pause Walk Preview</button>
+          <div class="three-editor-divider"></div>
+          <b>Pedestrian Path Editor</b>
+          <button id="threeEditToggle" class="three-editor-button" type="button">Start Route Edit</button>
+          <small id="threeEditStatus">Draft: 0 nodes</small>
+          <div class="three-editor-actions">
+            <button id="threeEditUndo" type="button" disabled>Undo</button>
+            <button id="threeEditClear" type="button" disabled>Clear</button>
+          </div>
+          <div class="three-editor-actions">
+            <button id="threeEditSave" type="button" disabled>Save Draft</button>
+            <button id="threeEditExport" type="button" disabled>Export JSON</button>
+          </div>
         </div>
         <div id="threeStatus" class="three-status" role="status">
           <span class="three-spinner" aria-hidden="true"></span>

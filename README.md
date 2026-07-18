@@ -11,6 +11,10 @@ Pedestrian Guidance System web app with the proven v9 2D routing experience and 
 
 When a route is generated, the 3D twin displays the current preview as a blue path with start, destination, and animated tracking markers. The route can be hidden or paused from the 3D Layers panel. This is a visual preview based on locally reviewed destination anchors; it is not yet a certified pedestrian path.
 
+The 3D Layers panel can also display floor-aware room, corridor, amenity, stair, and elevator labels from the local DTTK `spatial_labels.json` handoff. These labels remain review-only until site approval.
+
+Use **Start Route Edit** after positioning the 3D camera to trace an approved hallway or sidewalk centerline. Click the model at each turn or intersection, then save the draft locally or export `pedestrian_network_draft_YYYY-MM-DD.json` for review. Draft paths are never treated as approved routes automatically.
+
 The model and generated spatial JSON are excluded from Git because this repository is public. The existing 2D map remains the default and continues to provide the authoritative routing experience during the v10 alpha.
 
 ## Upload
