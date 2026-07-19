@@ -13,9 +13,41 @@ When a route is generated, the 3D twin displays the current preview as a blue pa
 
 The 3D Layers panel can also display floor-aware room, corridor, amenity, stair, and elevator labels from the local DTTK `spatial_labels.json` handoff. These labels remain review-only until site approval.
 
+The site-authored ground-floor spine and its major indoor hallway arms are
+stored in `data/authored/pedestrian_network_base.json`. PGS loads this as the
+default pedestrian walking-path layer when the browser does not already have a
+newer local editing draft. It is infrastructure used by later routing; it is
+not itself a predefined start-to-destination route.
+
 Destination choices are grouped by visitor/check-in, entrances/security, production, amenities, and emergency use. Internal junctions and corridor waypoints are no longer presented as end-user destinations.
 
-Use **Start Route Edit** after positioning the 3D camera to trace an approved hallway or sidewalk centerline. Click the model at each turn or intersection, then save the draft locally or export `pedestrian_network_draft_YYYY-MM-DD.json` for review. Draft paths are never treated as approved routes automatically.
+Use **Start Route Edit** after positioning the 3D camera to trace approved
+hallway and sidewalk centerlines. Click the model at each turn or intersection.
+The selected node is yellow and becomes the origin of the next edge.
+
+- **New Segment** ends the current chain; the next model click starts an
+  independent segment without drawing a line across rooms.
+- Click an existing numbered node to select it, then click along another
+  hallway to create a branch from that junction.
+- **Delete Selected** removes a mistaken node and its incident edges.
+- **Import JSON** loads a prior editor export so the campus network can be
+  expanded across multiple sessions.
+- **Undo** restores the graph before the last edit.
+
+Every route-editor change is auto-saved in the current browser. Use **Export
+JSON** to create the durable `pedestrian_network_draft_YYYY-MM-DD.json` file for
+review and compilation. Draft paths are never treated as approved routes
+automatically.
+
+The **Map Label Editor** creates reversible spatial annotations without editing
+the recovered Unity/XEUS source data. Choose an existing building or key-area
+label to rename/reposition it, or choose **New label**, enter a name and type,
+then click **Place / Move Label** and click the exact model feature. Label drafts
+are auto-saved locally after every placement, move, import, or removal and can
+be imported/exported as
+`label_overrides_draft_YYYY-MM-DD.json`. A newly authored entrance label is not
+automatically a routing destination; destination publication follows spatial
+and pedestrian-network review.
 
 Approximate straight-line 3D routes are intentionally hidden while the local DTTK handoff reports `route_certified: false`. The authored network must be reviewed and compiled before PGS will present a 3D route as approved.
 

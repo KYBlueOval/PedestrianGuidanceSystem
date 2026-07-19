@@ -1,47 +1,47 @@
 [
   {
     "id": "main_guard_house",
-    "name": "Main Guard House",
+    "name": "Plant Entry - Main Guard House",
     "label": "Main GH",
     "type": "entry",
     "category": "Visitor / Security",
-    "x": 515,
-    "y": 178,
+    "x": 543,
+    "y": 138,
     "access": "Visitor + Employee",
     "description": "Primary visitor and plant personnel entry."
   },
   {
     "id": "sub_guard_house",
-    "name": "Sub Guard House",
-    "label": "Sub GH",
+    "name": "South Trades Entrance - Sub Guard House",
+    "label": "South Trades GH",
     "type": "entry",
     "category": "Security",
     "x": 235,
-    "y": 170,
+    "y": 138,
     "access": "Trade / Contractor",
-    "description": "West-side trade and contractor entry."
+    "description": "South trades and contractor entrance outside the Sub Guard House."
   },
   {
     "id": "module_guard_house",
-    "name": "Module Guard House",
-    "label": "Module GH",
+    "name": "North Trades Third Turnstile",
+    "label": "North 3rd Turnstile",
     "type": "entry",
     "category": "Security",
-    "x": 818,
-    "y": 170,
+    "x": 735,
+    "y": 138,
     "access": "Trade / Contractor",
-    "description": "East-side module guard house entry."
+    "description": "North trades entrance at the third turnstile."
   },
   {
     "id": "west_junction",
-    "name": "West Access Junction",
-    "label": "West Junction",
+    "name": "South Access Junction",
+    "label": "South Junction",
     "type": "junction",
     "category": "Route Node",
     "x": 235,
-    "y": 378,
+    "y": 390,
     "access": "Controlled",
-    "description": "Major west route crossing."
+    "description": "South access intersection with the main pedestrian spine."
   },
   {
     "id": "center_junction",
@@ -49,54 +49,54 @@
     "label": "Center Junction",
     "type": "junction",
     "category": "Route Node",
-    "x": 515,
-    "y": 379,
+    "x": 543,
+    "y": 390,
     "access": "Controlled",
     "description": "Main vertical plant entry corridor intersection."
   },
   {
     "id": "east_junction",
-    "name": "East Access Junction",
-    "label": "East Junction",
+    "name": "North Access Junction",
+    "label": "North Junction",
     "type": "junction",
     "category": "Route Node",
-    "x": 818,
-    "y": 378,
+    "x": 735,
+    "y": 390,
     "access": "Controlled",
-    "description": "East module route junction."
+    "description": "North access intersection with the main pedestrian spine."
   },
   {
     "id": "west_service_corridor",
-    "name": "West Service Corridor",
-    "label": "West Corridor",
+    "name": "South Service Corridor",
+    "label": "South Corridor",
     "type": "corridor",
     "category": "Employee Navigation",
-    "x": 118,
-    "y": 378,
+    "x": 110,
+    "y": 390,
     "access": "Construction Trade Access",
-    "description": "West green access corridor."
+    "description": "South highlighted pedestrian corridor."
   },
   {
     "id": "east_service_corridor",
-    "name": "East Service Corridor",
-    "label": "East Corridor",
+    "name": "North Service Corridor",
+    "label": "North Corridor",
     "type": "corridor",
     "category": "Employee Navigation",
-    "x": 940,
-    "y": 378,
+    "x": 904,
+    "y": 390,
     "access": "Construction Trade Access",
-    "description": "East green access corridor."
+    "description": "North highlighted pedestrian corridor."
   },
   {
     "id": "south_center_access",
-    "name": "South Center Access",
-    "label": "South Access",
+    "name": "East Center Access",
+    "label": "East Access",
     "type": "corridor",
     "category": "Employee Navigation",
-    "x": 516,
+    "x": 543,
     "y": 590,
     "access": "Construction Trade Access",
-    "description": "South center green pedestrian access route."
+    "description": "East-center highlighted pedestrian access route."
   },
   {
     "id": "anode",
@@ -160,7 +160,7 @@
     "type": "checkpoint",
     "category": "Visitor / Security",
     "x": 370,
-    "y": 378,
+    "y": 390,
     "access": "Badge Required",
     "description": "Controlled point along the central pedestrian route."
   },
@@ -170,7 +170,7 @@
     "label": "Visitor Check-In",
     "type": "checkpoint",
     "category": "Visitor / Security",
-    "x": 515,
+    "x": 543,
     "y": 255,
     "access": "Visitor Escort Required",
     "description": "Visitor check-in and escort start point."
@@ -210,14 +210,14 @@
   },
   {
     "id": "muster_west",
-    "name": "West Muster / Safety Point",
-    "label": "West Muster",
+    "name": "South Muster / Safety Point",
+    "label": "South Muster",
     "type": "safety",
     "category": "Emergency",
     "x": 132,
     "y": 300,
     "access": "Emergency",
-    "description": "West emergency reference point."
+    "description": "South emergency muster and safety reference point."
   },
   {
     "id": "muster_center",
@@ -225,20 +225,20 @@
     "label": "Center Muster",
     "type": "safety",
     "category": "Emergency",
-    "x": 516,
+    "x": 543,
     "y": 440,
     "access": "Emergency",
     "description": "Center emergency reference point."
   },
   {
     "id": "muster_east",
-    "name": "East Muster / Safety Point",
-    "label": "East Muster",
+    "name": "North Muster / Safety Point",
+    "label": "North Muster",
     "type": "safety",
     "category": "Emergency",
     "x": 895,
     "y": 435,
     "access": "Emergency",
-    "description": "East emergency reference point."
+    "description": "North emergency muster and safety reference point."
   }
 ]

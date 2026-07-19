@@ -11,16 +11,21 @@ let initialized=false,loading=false,visible=false;
 const layerObjects={site:[],ground:[],mezzanine:[],roof:[]};
 const buildingLabels=[];
 const semanticLabels=[];
+const sourceLabelObjects=new Map();
 const floorLayerIndex=new Map();
 let spatialOverrides={},routeGroup,routeCurve,tracker;
 let routeProgress=0,trackingPaused=false,routeDuration=24,lastFrameTime=performance.now();
-let editorActive=false,editorGroup,editorLine;
-let editorNodes=[];
+let editorActive=false,editorGroup;
+let editorNodes=[],editorEdges=[],editorActiveNodeId=null,editorHistory=[];
+let labelOverrides=[],labelOverrideGroup,labelPlacementActive=false;
+let destinationDrafts=[],destinationDraftGroup,destinationPlacementActive=false;
 let pointerStart=null;
 let animationFrameCount=0;
 const raycaster=new THREE.Raycaster();
 const pointer=new THREE.Vector2();
 const EDITOR_STORAGE_KEY="pgs-v10-pedestrian-network-draft";
+const LABEL_STORAGE_KEY="pgs-v10-label-overrides-draft";
+const DESTINATION_STORAGE_KEY="pgs-v10-destination-anchors-draft";
 
 function setStatus(message,{error=false,hidden=false}={}){
   status.classList.toggle("error",error);
@@ -75,15 +80,35 @@ function initialize(){
   document.querySelectorAll("[data-semantic-label]").forEach(input=>{
     input.addEventListener("change",updateSemanticLabelVisibility);
   });
+  document.getElementById("threeWalkwaysToggle").addEventListener("change",event=>{
+    if(editorGroup)editorGroup.visible=event.target.checked;
+  });
   document.getElementById("threeRouteToggle").addEventListener("change",event=>{
     if(routeGroup)routeGroup.visible=event.target.checked;
   });
   document.getElementById("threeWalkToggle").addEventListener("click",toggleWalkPreview);
   document.getElementById("threeEditToggle").addEventListener("click",toggleRouteEditor);
   document.getElementById("threeEditUndo").addEventListener("click",undoEditorNode);
+  document.getElementById("threeEditSegment").addEventListener("click",startEditorSegment);
+  document.getElementById("threeEditDelete").addEventListener("click",deleteSelectedEditorNode);
   document.getElementById("threeEditClear").addEventListener("click",clearEditorDraft);
   document.getElementById("threeEditSave").addEventListener("click",saveEditorDraft);
   document.getElementById("threeEditExport").addEventListener("click",exportEditorDraft);
+  document.getElementById("threeEditImport").addEventListener("click",()=>document.getElementById("threeEditImportFile").click());
+  document.getElementById("threeEditImportFile").addEventListener("change",importEditorDraft);
+  document.getElementById("threeLabelTarget").addEventListener("change",selectLabelTarget);
+  document.getElementById("threeLabelPlace").addEventListener("click",startLabelPlacement);
+  document.getElementById("threeLabelRemove").addEventListener("click",removeLabelOverride);
+  document.getElementById("threeLabelSave").addEventListener("click",saveLabelOverrides);
+  document.getElementById("threeLabelExport").addEventListener("click",exportLabelOverrides);
+  document.getElementById("threeLabelImport").addEventListener("click",()=>document.getElementById("threeLabelImportFile").click());
+  document.getElementById("threeLabelImportFile").addEventListener("change",importLabelOverrides);
+  document.getElementById("threeDestinationSource").addEventListener("change",selectDestinationSource);
+  document.getElementById("threeDestinationPlace").addEventListener("click",startDestinationPlacement);
+  document.getElementById("threeDestinationRemove").addEventListener("click",removeDestinationDraft);
+  document.getElementById("threeDestinationExport").addEventListener("click",exportDestinationDrafts);
+  document.getElementById("threeDestinationImport").addEventListener("click",()=>document.getElementById("threeDestinationImportFile").click());
+  document.getElementById("threeDestinationImportFile").addEventListener("change",importDestinationDrafts);
   renderer.domElement.addEventListener("pointerdown",event=>{pointerStart={x:event.clientX,y:event.clientY};});
   renderer.domElement.addEventListener("pointerup",handleEditorPointerUp);
   window.addEventListener("pgs:route",event=>renderRoute(event.detail));
@@ -95,15 +120,16 @@ async function loadModel(){
   loading=true;
   setStatus("Preparing 3D twin…");
   try{
-    const config=await fetch("data/config.json").then(response=>{
+    const config=await fetch("data/config.json",{cache:"no-store"}).then(response=>{
       if(!response.ok)throw new Error(`Configuration unavailable (${response.status})`);
       return response.json();
     });
     const modelUrl=config.views?.model||"assets/models/site_mobile.glb";
-    const [destinationsPayload,labelsPayload,floorsPayload]=await Promise.all([
-      fetch("data/generated/destination_spatial.json").then(response=>response.ok?response.json():{}).catch(()=>({})),
-      fetch("data/generated/spatial_labels.json").then(response=>response.ok?response.json():{}).catch(()=>({})),
-      fetch("data/generated/floor_layers.json").then(response=>response.ok?response.json():{}).catch(()=>({}))
+    const [destinationsPayload,labelsPayload,floorsPayload,baseNetworkPayload]=await Promise.all([
+      fetch("data/generated/destination_spatial.json",{cache:"no-store"}).then(response=>response.ok?response.json():{}).catch(()=>({})),
+      fetch("data/generated/spatial_labels.json",{cache:"no-store"}).then(response=>response.ok?response.json():{}).catch(()=>({})),
+      fetch("data/generated/floor_layers.json",{cache:"no-store"}).then(response=>response.ok?response.json():{}).catch(()=>({})),
+      fetch(config.views?.basePedestrianNetwork||"data/authored/pedestrian_network_base.json",{cache:"no-store"}).then(response=>response.ok?response.json():{}).catch(()=>({}))
     ]);
     spatialOverrides=destinationsPayload;
     floorLayerIndex.clear();
@@ -121,7 +147,9 @@ async function loadModel(){
     indexLayers();
     createBuildingLabels();
     createSemanticLabels(labelsPayload.labels||[]);
-    restoreEditorDraft();
+    restoreLabelOverrides();
+    restoreEditorDraft(baseNetworkPayload);
+    restoreDestinationDrafts();
     applyInitialLayerState();
     if(window.pgsCurrentRoute)renderRoute(window.pgsCurrentRoute);
     setStatus("3D twin ready",{hidden:true});
@@ -148,6 +176,9 @@ function indexLayers(){
 function setLayerVisibility(layer,isVisible){
   (layerObjects[layer]||[]).forEach(object=>object.visible=isVisible);
   buildingLabels.forEach(label=>{
+    if(label.userData.layer===layer)label.visible=isVisible&&!label.userData.overridden;
+  });
+  (labelOverrideGroup?.children||[]).forEach(label=>{
     if(label.userData.layer===layer)label.visible=isVisible;
   });
   updateSemanticLabelVisibility();
@@ -184,6 +215,9 @@ function createBuildingLabels(){
     groups.get(key).push(object);
   });
   groups.forEach((objects,key)=>{
+    // Guard-house positions are authored in XEUS and are more reliable than a
+    // mesh bounding-box center. Their semantic labels are created below.
+    if(["Root_Main_Security_F44","Root_Secondary_Security_F43"].includes(key))return;
     const candidates=objects.filter(object=>object.geometry);
     if(!candidates.length)return;
     candidates.forEach(object=>{
@@ -203,9 +237,10 @@ function createBuildingLabels(){
     element.textContent=buildingName(key);
     const label=new CSS2DObject(element);
     label.position.copy(center);
-    label.userData.layer="ground";
+    label.userData={layer:"ground",labelId:`building:${key}`,displayName:buildingName(key),category:"building"};
     anchor.add(label);
     buildingLabels.push(label);
+    sourceLabelObjects.set(label.userData.labelId,label);
   });
 }
 
@@ -227,19 +262,27 @@ function createSemanticLabels(records){
   records.forEach(record=>{
     const position=record.model_position;
     if(!position||![position.x,position.y,position.z].every(Number.isFinite))return;
+    const guardHouse=/^(MAIN|SUB) GUARD HOUSE/i.test(record.name||"");
     const layer=semanticLayer(record.floor_id);
-    const category=layer==="site"?"area":semanticKind(record.kind);
+    const category=guardHouse?"area":layer==="site"?"area":semanticKind(record.kind);
     const element=document.createElement("div");
     element.className="three-semantic-label";
     element.dataset.kind=category;
-    element.textContent=record.name;
+    element.textContent=guardHouse
+      ? (/^MAIN/i.test(record.name)?"Main Guard House":"Secondary Guard House")
+      : record.name;
     element.title=`${record.name} • ${record.review_status||"unreviewed"}`;
     const label=new CSS2DObject(element);
     label.position.set(position.x,position.y+1.5,position.z);
-    label.userData={category,layer,record};
+    label.userData={category,layer,record,labelId:record.id,displayName:element.textContent};
     label.visible=false;
     model.add(label);
     semanticLabels.push(label);
+    // Every recovered semantic label can be promoted to a pedestrian
+    // destination.  Room labels used to be excluded here, which made labels
+    // such as "HR SUITE M-116" visible in the Individual Rooms layer but
+    // impossible to select in the Destination Anchor Editor.
+    sourceLabelObjects.set(label.userData.labelId,label);
   });
   updateSemanticLabelVisibility();
 }
@@ -263,7 +306,7 @@ function updateSemanticLabelLOD(){
   semanticLabels.forEach(label=>{
     const limit=label.userData.category==="room"||label.userData.category==="corridor"?260:420;
     label.getWorldPosition(world);
-    label.visible=Boolean(label.userData.enabled)&&world.distanceTo(camera.position)<=limit;
+    label.visible=!label.userData.overridden&&Boolean(label.userData.enabled)&&world.distanceTo(camera.position)<=limit;
   });
 }
 
@@ -398,16 +441,22 @@ function toggleWalkPreview(){
 
 function toggleRouteEditor(){
   if(!model)return;
+  if(labelPlacementActive)cancelLabelPlacement();
+  if(destinationPlacementActive)cancelDestinationPlacement();
   editorActive=!editorActive;
+  if(editorActive){
+    document.getElementById("threeWalkwaysToggle").checked=true;
+    if(editorGroup)editorGroup.visible=true;
+  }
   controls.enabled=!editorActive;
   frame.classList.toggle("route-editing",editorActive);
   const button=document.getElementById("threeEditToggle");
   button.classList.toggle("active",editorActive);
-  button.textContent=editorActive?"Finish Route Edit":"Start Route Edit";
+  button.textContent=editorActive?"Finish Mapping":"Start Mapping";
   document.querySelector(".three-hint").textContent=editorActive
-    ?"Click the center of each approved hallway or sidewalk segment"
+    ?"Click the centerline at every walkway turn or intersection"
     :"Drag to orbit • Scroll to zoom • Right-drag to pan";
-  updateEditorControls();
+  rebuildEditorVisuals();
 }
 
 function activeEditorLayer(){
@@ -416,7 +465,7 @@ function activeEditorLayer(){
 }
 
 function handleEditorPointerUp(event){
-  if(!editorActive||event.button!==0||!pointerStart)return;
+  if((!editorActive&&!labelPlacementActive&&!destinationPlacementActive)||event.button!==0||!pointerStart)return;
   const movement=Math.hypot(event.clientX-pointerStart.x,event.clientY-pointerStart.y);
   pointerStart=null;
   if(movement>5)return;
@@ -424,6 +473,41 @@ function handleEditorPointerUp(event){
   pointer.x=((event.clientX-rect.left)/rect.width)*2-1;
   pointer.y=-((event.clientY-rect.top)/rect.height)*2+1;
   raycaster.setFromCamera(pointer,camera);
+  if(destinationPlacementActive){
+    const destinationHits=raycaster.intersectObject(model,true).filter(hit=>{
+      const object=hit.object;
+      return object.isMesh&&object.visible&&!routeGroup?.getObjectById(object.id)&&!editorGroup?.getObjectById(object.id);
+    });
+    if(destinationHits.length)placeDestinationDraft(model.worldToLocal(destinationHits[0].point.clone()));
+    return;
+  }
+  if(labelPlacementActive){
+    const labelHits=raycaster.intersectObject(model,true).filter(hit=>{
+      const object=hit.object;
+      return object.isMesh&&object.visible&&!routeGroup?.getObjectById(object.id)&&!editorGroup?.getObjectById(object.id);
+    });
+    if(labelHits.length)placeLabelOverride(model.worldToLocal(labelHits[0].point.clone()));
+    return;
+  }
+  const selectedHit=(editorGroup?raycaster.intersectObject(editorGroup,true):[]).find(hit=>editorNodeId(hit.object));
+  if(selectedHit){
+    const selectedId=editorNodeId(selectedHit.object);
+    if(editorActiveNodeId&&selectedId!==editorActiveNodeId&&!editorEdges.some(edge=>
+      (edge.from===editorActiveNodeId&&edge.to===selectedId)||(edge.from===selectedId&&edge.to===editorActiveNodeId)
+    )){
+      pushEditorHistory();
+      const source=editorNodes.find(node=>node.id===editorActiveNodeId);
+      const target=editorNodes.find(node=>node.id===selectedId);
+      const settings=activeWalkwaySettings();
+      editorEdges.push({
+        id:nextEditorId("edge",editorEdges),from:source.id,to:target.id,bidirectional:true,
+        modes:["walking"],kind:settings.kind,access:settings.access,accessible:settings.accessible,approved:false
+      });
+    }
+    editorActiveNodeId=selectedId;
+    rebuildEditorVisuals();
+    return;
+  }
   const hits=raycaster.intersectObject(model,true).filter(hit=>{
     const object=hit.object;
     return object.isMesh&&object.visible&&!routeGroup?.getObjectById(object.id)&&!editorGroup?.getObjectById(object.id);
@@ -431,20 +515,61 @@ function handleEditorPointerUp(event){
   if(!hits.length)return;
   const local=model.worldToLocal(hits[0].point.clone());
   local.y+=.35;
-  editorNodes.push({
-    id:`draft-node-${editorNodes.length+1}`,
+  pushEditorHistory();
+  const settings=activeWalkwaySettings();
+  const node={
+    id:nextEditorId("node",editorNodes),
     position:{x:+local.x.toFixed(4),y:+local.y.toFixed(4),z:+local.z.toFixed(4)},
     layer:activeEditorLayer(),
-    access:["visitor","employee","contractor","emergency"],
+    access:settings.access,
+    accessible:settings.accessible,
     approved:false
-  });
+  };
+  editorNodes.push(node);
+  if(editorActiveNodeId){
+    const source=editorNodes.find(candidate=>candidate.id===editorActiveNodeId);
+    if(source)editorEdges.push({
+      id:nextEditorId("edge",editorEdges),from:source.id,to:node.id,bidirectional:true,
+      modes:["walking"],kind:settings.kind,access:settings.access,accessible:settings.accessible,approved:false
+    });
+  }
+  editorActiveNodeId=node.id;
   rebuildEditorVisuals();
+}
+
+function activeWalkwaySettings(){
+  const accessProfile=document.getElementById("threeWalkwayAccess").value;
+  return {
+    kind:document.getElementById("threeWalkwayKind").value,
+    access:accessProfile==="all"?["visitor","employee","contractor","emergency"]:[accessProfile],
+    accessible:document.getElementById("threeWalkwayAccessible").checked
+  };
+}
+
+function editorNodeId(object){
+  let current=object;
+  while(current&&current!==editorGroup){
+    if(current.userData?.editorNodeId)return current.userData.editorNodeId;
+    current=current.parent;
+  }
+  return null;
+}
+
+function nextEditorId(kind,items){
+  const highest=items.reduce((max,item)=>Math.max(max,Number(String(item.id||"").match(/(\d+)$/)?.[1]||0)),0);
+  return `draft-${kind}-${highest+1}`;
+}
+
+function pushEditorHistory(){
+  editorHistory.push(JSON.stringify({nodes:editorNodes,edges:editorEdges,active:editorActiveNodeId}));
+  if(editorHistory.length>100)editorHistory.shift();
 }
 
 function ensureEditorGroup(){
   if(editorGroup)return;
   editorGroup=new THREE.Group();
   editorGroup.name="PGS_PEDESTRIAN_NETWORK_DRAFT";
+  editorGroup.visible=document.getElementById("threeWalkwaysToggle").checked;
   model.add(editorGroup);
 }
 
@@ -455,10 +580,26 @@ function rebuildEditorVisuals(){
     child.traverse(descendant=>descendant.element?.remove?.());
     disposeObject(child);
   }
-  const points=editorNodes.map(node=>new THREE.Vector3(node.position.x,node.position.y,node.position.z));
-  points.forEach((position,index)=>{
-    const nodeMarker=marker(position,0xef3340,2.1);
-    nodeMarker.name=editorNodes[index].id;
+  const nodeIndex=new Map(editorNodes.map(node=>[node.id,node]));
+  editorEdges.forEach(edge=>{
+    const source=nodeIndex.get(edge.from),target=nodeIndex.get(edge.to);
+    if(!source||!target)return;
+    const line=new THREE.Line(
+      new THREE.BufferGeometry().setFromPoints([
+        new THREE.Vector3(source.position.x,source.position.y,source.position.z),
+        new THREE.Vector3(target.position.x,target.position.y,target.position.z)
+      ]),
+      new THREE.LineBasicMaterial({color:0xef3340,linewidth:3})
+    );
+    line.name=edge.id;
+    editorGroup.add(line);
+  });
+  if(editorActive)editorNodes.forEach((node,index)=>{
+    const position=new THREE.Vector3(node.position.x,node.position.y,node.position.z);
+    const selected=node.id===editorActiveNodeId;
+    const nodeMarker=marker(position,selected?0xffcf3a:0xef3340,selected?2.8:2.1);
+    nodeMarker.name=node.id;
+    nodeMarker.userData.editorNodeId=node.id;
     const element=document.createElement("div");
     element.className="three-semantic-label";
     element.dataset.kind="vertical";
@@ -468,76 +609,514 @@ function rebuildEditorVisuals(){
     nodeMarker.add(numberLabel);
     editorGroup.add(nodeMarker);
   });
-  if(points.length>1){
-    editorLine=new THREE.Line(
-      new THREE.BufferGeometry().setFromPoints(points),
-      new THREE.LineBasicMaterial({color:0xef3340,linewidth:3})
-    );
-    editorLine.name="PGS_DRAFT_CENTERLINE";
-    editorGroup.add(editorLine);
-  }
   updateEditorControls();
+  persistEditorDraft();
 }
 
 function updateEditorControls(){
   const count=editorNodes.length;
-  document.getElementById("threeEditStatus").textContent=`Draft: ${count} node${count===1?"":"s"}${editorActive?" • click model to add":""}`;
-  ["threeEditUndo","threeEditClear","threeEditSave","threeEditExport"].forEach(id=>{
+  const selected=editorActiveNodeId?` • selected ${editorActiveNodeId.replace("draft-node-","")}`:" • next click starts a segment";
+  document.getElementById("threeEditStatus").textContent=editorActive
+    ?`Editing network: ${count} control points / ${editorEdges.length} walkway sections${selected}`
+    :`Walking-path layer: ${editorEdges.length} sections • control points hidden`;
+  ["threeEditClear","threeEditSave","threeEditExport"].forEach(id=>{
     document.getElementById(id).disabled=count===0;
   });
+  document.getElementById("threeEditUndo").disabled=editorHistory.length===0;
+  document.getElementById("threeEditSegment").disabled=!editorActiveNodeId;
+  document.getElementById("threeEditDelete").disabled=!editorActiveNodeId;
 }
 
 function undoEditorNode(){
-  editorNodes.pop();
+  const previous=editorHistory.pop();
+  if(!previous)return;
+  const state=JSON.parse(previous);
+  editorNodes=state.nodes||[];
+  editorEdges=state.edges||[];
+  editorActiveNodeId=state.active||null;
+  rebuildEditorVisuals();
+}
+
+function startEditorSegment(){
+  editorActiveNodeId=null;
+  rebuildEditorVisuals();
+}
+
+function deleteSelectedEditorNode(){
+  if(!editorActiveNodeId)return;
+  pushEditorHistory();
+  editorNodes=editorNodes.filter(node=>node.id!==editorActiveNodeId);
+  editorEdges=editorEdges.filter(edge=>edge.from!==editorActiveNodeId&&edge.to!==editorActiveNodeId);
+  editorActiveNodeId=null;
   rebuildEditorVisuals();
 }
 
 function clearEditorDraft(){
+  pushEditorHistory();
   editorNodes=[];
+  editorEdges=[];
+  editorActiveNodeId=null;
   localStorage.removeItem(EDITOR_STORAGE_KEY);
   rebuildEditorVisuals();
 }
 
 function editorPayload(){
   return {
-    schema_version:"0.1.0-draft",
+    schema_version:"0.2.0-draft",
     coordinate_system:"PGS GLB model coordinates",
+    authoring_mode:"pedestrian_network_mapping",
     review_status:"draft_requires_site_approval",
     nodes:editorNodes,
-    edges:editorNodes.slice(1).map((node,index)=>({
-      id:`draft-edge-${index+1}`,
-      from:editorNodes[index].id,
-      to:node.id,
-      bidirectional:true,
-      modes:["walking"],
-      access:[...new Set([...editorNodes[index].access,...node.access])],
-      approved:false
-    }))
+    edges:editorEdges
   };
 }
 
 function saveEditorDraft(){
-  localStorage.setItem(EDITOR_STORAGE_KEY,JSON.stringify(editorPayload()));
-  document.getElementById("threeEditStatus").textContent=`Draft saved locally • ${editorNodes.length} nodes`;
+  persistEditorDraft();
+  document.getElementById("threeEditStatus").textContent=`Network saved locally • ${editorNodes.length} nodes / ${editorEdges.length} walkways`;
 }
 
-function restoreEditorDraft(){
+function persistEditorDraft(){
+  try{
+    localStorage.setItem(EDITOR_STORAGE_KEY,JSON.stringify(editorPayload()));
+  }catch(error){
+    console.warn("Could not auto-save pedestrian network draft",error);
+  }
+}
+
+function restoreEditorDraft(baseNetwork={}){
   try{
     const saved=JSON.parse(localStorage.getItem(EDITOR_STORAGE_KEY)||"null");
-    editorNodes=Array.isArray(saved?.nodes)?saved.nodes:[];
+    const source=Array.isArray(saved?.nodes)&&saved.nodes.length?saved:baseNetwork;
+    editorNodes=Array.isArray(source?.nodes)?source.nodes:[];
+    editorEdges=(Array.isArray(source?.edges)?source.edges:editorNodes.slice(1).map((node,index)=>({
+      id:`draft-edge-${index+1}`,from:editorNodes[index].id,to:node.id,bidirectional:true,
+      modes:["walking"],access:node.access||["visitor","employee","contractor","emergency"],approved:false
+    }))).map(edge=>({kind:"hallway",accessible:true,...edge}));
   }catch{
     editorNodes=[];
+    editorEdges=[];
   }
+  editorActiveNodeId=null;
+  editorHistory=[];
   rebuildEditorVisuals();
+}
+
+async function importEditorDraft(event){
+  const file=event.target.files?.[0];
+  event.target.value="";
+  if(!file)return;
+  try{
+    const payload=JSON.parse(await file.text());
+    if(payload.coordinate_system!=="PGS GLB model coordinates"||!Array.isArray(payload.nodes)||!Array.isArray(payload.edges)){
+      throw new Error("unsupported pedestrian draft format");
+    }
+    pushEditorHistory();
+    editorNodes=payload.nodes;
+    editorEdges=payload.edges.map(edge=>({kind:"hallway",accessible:true,...edge}));
+    editorActiveNodeId=null;
+    rebuildEditorVisuals();
+    document.getElementById("threeEditStatus").textContent=`Imported ${file.name} • ${editorNodes.length} nodes / ${editorEdges.length} walkways`;
+  }catch(error){
+    setStatus(`Could not import route draft: ${error.message}`,{error:true});
+  }
 }
 
 function exportEditorDraft(){
   const blob=new Blob([JSON.stringify(editorPayload(),null,2)],{type:"application/json"});
   const link=document.createElement("a");
   link.href=URL.createObjectURL(blob);
-  link.download=`pedestrian_network_draft_${new Date().toISOString().slice(0,10)}.json`;
+  link.download=`pedestrian_network_map_${new Date().toISOString().slice(0,10)}.json`;
   link.click();
   setTimeout(()=>URL.revokeObjectURL(link.href),1000);
+}
+
+function labelOverridePayload(){
+  return {
+    schema_version:"0.1.0-draft",
+    coordinate_system:"PGS GLB model coordinates",
+    review_status:"draft_requires_site_approval",
+    labels:labelOverrides
+  };
+}
+
+function populateLabelTargets(selectedValue="new"){
+  const select=document.getElementById("threeLabelTarget");
+  const options=[...sourceLabelObjects.entries()].map(([id,label])=>({
+    id,name:label.userData.displayName||id,group:label.userData.category||"building"
+  }));
+  labelOverrides.filter(item=>item.source_label_id?.startsWith("custom-label:")).forEach(item=>{
+    options.push({id:item.source_label_id,name:item.name,group:item.kind||"area"});
+  });
+  select.innerHTML='<option value="new">New label</option>';
+  options.sort((a,b)=>a.name.localeCompare(b.name)).forEach(item=>{
+    const option=new Option(`${item.name} (${item.group})`,item.id);
+    select.appendChild(option);
+  });
+  select.value=[...select.options].some(option=>option.value===selectedValue)?selectedValue:"new";
+  selectLabelTarget();
+  populateDestinationSources();
+}
+
+function selectLabelTarget(){
+  const target=document.getElementById("threeLabelTarget").value;
+  const override=labelOverrides.find(item=>item.source_label_id===target);
+  const source=sourceLabelObjects.get(target);
+  document.getElementById("threeLabelName").value=override?.name||source?.userData.displayName||"";
+  document.getElementById("threeLabelKind").value=override?.kind||source?.userData.category||"building";
+  document.getElementById("threeLabelRemove").disabled=target==="new"||!override;
+}
+
+function startLabelPlacement(){
+  if(labelPlacementActive){cancelLabelPlacement();return;}
+  const name=document.getElementById("threeLabelName").value.trim();
+  if(!name){
+    document.getElementById("threeLabelStatus").textContent="Enter a label name first";
+    return;
+  }
+  if(editorActive)toggleRouteEditor();
+  labelPlacementActive=true;
+  controls.enabled=false;
+  frame.classList.add("label-editing");
+  document.getElementById("threeLabelPlace").classList.add("active");
+  document.getElementById("threeLabelStatus").textContent="Click the exact feature in the 3D model";
+  document.querySelector(".three-hint").textContent="Click the exact label anchor location";
+}
+
+function cancelLabelPlacement(){
+  labelPlacementActive=false;
+  controls.enabled=true;
+  frame.classList.remove("label-editing");
+  document.getElementById("threeLabelPlace").classList.remove("active");
+  document.getElementById("threeLabelStatus").textContent="Label placement cancelled";
+  document.querySelector(".three-hint").textContent="Drag to orbit • Scroll to zoom • Right-drag to pan";
+}
+
+function placeLabelOverride(local){
+  const select=document.getElementById("threeLabelTarget");
+  let target=select.value;
+  if(target==="new")target=`custom-label:${Date.now()}`;
+  const record={
+    id:`label-override:${target}`,
+    source_label_id:target,
+    name:document.getElementById("threeLabelName").value.trim(),
+    kind:document.getElementById("threeLabelKind").value,
+    layer:activeEditorLayer(),
+    position:{x:+local.x.toFixed(4),y:+(local.y+2).toFixed(4),z:+local.z.toFixed(4)},
+    approved:false
+  };
+  const index=labelOverrides.findIndex(item=>item.source_label_id===target);
+  if(index>=0)labelOverrides[index]=record; else labelOverrides.push(record);
+  labelPlacementActive=false;
+  controls.enabled=true;
+  frame.classList.remove("label-editing");
+  document.getElementById("threeLabelPlace").classList.remove("active");
+  renderLabelOverrides();
+  populateLabelTargets(target);
+  persistLabelOverrides();
+  document.getElementById("threeLabelStatus").textContent=`Placed ${record.name} • auto-saved locally`;
+  document.querySelector(".three-hint").textContent="Drag to orbit • Scroll to zoom • Right-drag to pan";
+}
+
+function ensureLabelOverrideGroup(){
+  if(labelOverrideGroup)return;
+  labelOverrideGroup=new THREE.Group();
+  labelOverrideGroup.name="PGS_AUTHORED_LABEL_OVERRIDES";
+  model.add(labelOverrideGroup);
+}
+
+function renderLabelOverrides(){
+  ensureLabelOverrideGroup();
+  while(labelOverrideGroup.children.length){
+    const child=labelOverrideGroup.children.pop();
+    child.element?.remove?.();
+  }
+  sourceLabelObjects.forEach(label=>{label.userData.overridden=false;});
+  labelOverrides.forEach(record=>{
+    const source=sourceLabelObjects.get(record.source_label_id);
+    if(source){source.userData.overridden=true;source.visible=false;}
+    if(!record.position)return;
+    const element=document.createElement("div");
+    element.className="three-label three-authored-label";
+    element.dataset.kind=record.kind;
+    element.textContent=record.name;
+    element.title=`Authored ${record.kind} label • ${record.approved?"approved":"draft"}`;
+    const label=new CSS2DObject(element);
+    label.position.set(record.position.x,record.position.y,record.position.z);
+    label.userData={layer:record.layer||"ground",record};
+    labelOverrideGroup.add(label);
+  });
+  buildingLabels.forEach(label=>{
+    const layerToggle=document.querySelector(`[data-3d-layer="${label.userData.layer}"]`);
+    label.visible=!label.userData.overridden&&Boolean(layerToggle?.checked);
+  });
+  labelOverrideGroup.children.forEach(label=>{
+    const layerToggle=document.querySelector(`[data-3d-layer="${label.userData.layer}"]`);
+    label.visible=Boolean(layerToggle?.checked);
+  });
+  updateSemanticLabelVisibility();
+}
+
+function saveLabelOverrides(){
+  persistLabelOverrides();
+  document.getElementById("threeLabelStatus").textContent=`Saved ${labelOverrides.length} label override${labelOverrides.length===1?"":"s"} locally`;
+}
+
+function persistLabelOverrides(){
+  try{
+    localStorage.setItem(LABEL_STORAGE_KEY,JSON.stringify(labelOverridePayload()));
+  }catch(error){
+    console.warn("Could not auto-save label overrides",error);
+  }
+}
+
+function restoreLabelOverrides(){
+  try{
+    const saved=JSON.parse(localStorage.getItem(LABEL_STORAGE_KEY)||"null");
+    labelOverrides=Array.isArray(saved?.labels)?saved.labels:[];
+  }catch{labelOverrides=[];}
+  renderLabelOverrides();
+  populateLabelTargets();
+}
+
+function removeLabelOverride(){
+  const target=document.getElementById("threeLabelTarget").value;
+  labelOverrides=labelOverrides.filter(item=>item.source_label_id!==target);
+  renderLabelOverrides();
+  populateLabelTargets();
+  persistLabelOverrides();
+  document.getElementById("threeLabelStatus").textContent="Override removed; recovered label restored • auto-saved";
+}
+
+function exportLabelOverrides(){
+  const blob=new Blob([JSON.stringify(labelOverridePayload(),null,2)],{type:"application/json"});
+  const link=document.createElement("a");
+  link.href=URL.createObjectURL(blob);
+  link.download=`label_overrides_draft_${new Date().toISOString().slice(0,10)}.json`;
+  link.click();
+  setTimeout(()=>URL.revokeObjectURL(link.href),1000);
+}
+
+async function importLabelOverrides(event){
+  const file=event.target.files?.[0];
+  event.target.value="";
+  if(!file)return;
+  try{
+    const payload=JSON.parse(await file.text());
+    if(payload.coordinate_system!=="PGS GLB model coordinates"||!Array.isArray(payload.labels))throw new Error("unsupported label override format");
+    labelOverrides=payload.labels;
+    renderLabelOverrides();
+    populateLabelTargets();
+    persistLabelOverrides();
+    document.getElementById("threeLabelStatus").textContent=`Imported ${file.name} • ${labelOverrides.length} labels • auto-saved`;
+  }catch(error){
+    setStatus(`Could not import label overrides: ${error.message}`,{error:true});
+  }
+}
+
+function destinationPayload(){
+  return {
+    schema_version:"0.1.0-draft",
+    coordinate_system:"PGS GLB model coordinates",
+    authoring_mode:"destination_anchor_mapping",
+    review_status:"draft_requires_site_approval",
+    destinations:destinationDrafts
+  };
+}
+
+function populateDestinationSources(selectedValue){
+  const select=document.getElementById("threeDestinationSource");
+  if(!select)return;
+  const current=selectedValue??select.value;
+  const choices=new Map();
+  sourceLabelObjects.forEach((label,id)=>choices.set(id,{
+    id,name:label.userData.displayName||id,kind:label.userData.category||"area"
+  }));
+  labelOverrides.forEach(record=>choices.set(record.source_label_id,{
+    id:record.source_label_id,name:record.name,kind:record.kind||"area"
+  }));
+  select.innerHTML='<option value="">Select a mapped label</option>';
+  [...choices.values()].sort((a,b)=>a.name.localeCompare(b.name)).forEach(item=>{
+    select.appendChild(new Option(`${item.name} (${item.kind})`,item.id));
+  });
+  select.value=[...select.options].some(option=>option.value===current)?current:"";
+  selectDestinationSource();
+}
+
+function selectDestinationSource(){
+  const sourceId=document.getElementById("threeDestinationSource").value;
+  const existing=destinationDrafts.find(item=>item.source_label_id===sourceId);
+  const override=labelOverrides.find(item=>item.source_label_id===sourceId);
+  const source=sourceLabelObjects.get(sourceId);
+  document.getElementById("threeDestinationName").value=existing?.name||override?.name||source?.userData.displayName||"";
+  if(existing){
+    document.getElementById("threeDestinationCategory").value=existing.category||"department";
+    document.getElementById("threeDestinationAccess").value=existing.access_profile||"employee";
+  }
+  document.getElementById("threeDestinationRemove").disabled=!existing;
+  const statusText=existing
+    ?`Anchored to ${existing.network_node_id||"no network node"} • ${existing.connector_distance?.toFixed?.(1)??"--"} units`
+    :sourceId?"Place the pedestrian entrance, not the center of the room":"No destination anchor selected";
+  document.getElementById("threeDestinationStatus").textContent=statusText;
+}
+
+function startDestinationPlacement(){
+  if(destinationPlacementActive){cancelDestinationPlacement();return;}
+  const sourceId=document.getElementById("threeDestinationSource").value;
+  const name=document.getElementById("threeDestinationName").value.trim();
+  if(!sourceId||!name){
+    document.getElementById("threeDestinationStatus").textContent="Choose a mapped label and destination name first";
+    return;
+  }
+  if(editorActive)toggleRouteEditor();
+  if(labelPlacementActive)cancelLabelPlacement();
+  destinationPlacementActive=true;
+  controls.enabled=false;
+  frame.classList.add("label-editing");
+  document.getElementById("threeDestinationPlace").classList.add("active");
+  document.getElementById("threeDestinationStatus").textContent="Click the pedestrian entrance or arrival point";
+  document.querySelector(".three-hint").textContent="Click the exact pedestrian arrival point for this destination";
+}
+
+function cancelDestinationPlacement(){
+  destinationPlacementActive=false;
+  controls.enabled=true;
+  frame.classList.remove("label-editing");
+  document.getElementById("threeDestinationPlace").classList.remove("active");
+  document.getElementById("threeDestinationStatus").textContent="Destination placement cancelled";
+  document.querySelector(".three-hint").textContent="Drag to orbit • Scroll to zoom • Right-drag to pan";
+}
+
+function nearestEditorNode(position){
+  let nearest=null;
+  editorNodes.forEach(node=>{
+    const distance=Math.hypot(
+      position.x-node.position.x,
+      position.y-node.position.y,
+      position.z-node.position.z
+    );
+    if(!nearest||distance<nearest.distance)nearest={node,distance};
+  });
+  return nearest;
+}
+
+function placeDestinationDraft(local){
+  const sourceId=document.getElementById("threeDestinationSource").value;
+  const position={x:+local.x.toFixed(4),y:+(local.y+.5).toFixed(4),z:+local.z.toFixed(4)};
+  const nearest=nearestEditorNode(position);
+  const record={
+    id:`destination-draft:${sourceId}`,
+    source_label_id:sourceId,
+    name:document.getElementById("threeDestinationName").value.trim(),
+    category:document.getElementById("threeDestinationCategory").value,
+    access_profile:document.getElementById("threeDestinationAccess").value,
+    layer:activeEditorLayer(),
+    position,
+    network_node_id:nearest?.node.id||null,
+    connector_distance:nearest?+nearest.distance.toFixed(4):null,
+    approved:false
+  };
+  const index=destinationDrafts.findIndex(item=>item.source_label_id===sourceId);
+  if(index>=0)destinationDrafts[index]=record;else destinationDrafts.push(record);
+  destinationPlacementActive=false;
+  controls.enabled=true;
+  frame.classList.remove("label-editing");
+  document.getElementById("threeDestinationPlace").classList.remove("active");
+  renderDestinationDrafts();
+  persistDestinationDrafts();
+  populateDestinationSources(sourceId);
+  document.getElementById("threeDestinationStatus").textContent=nearest
+    ?`Auto-saved • nearest network node ${nearest.node.id.replace("draft-node-","")} is ${nearest.distance.toFixed(1)} units away`
+    :"Auto-saved • map a nearby pedestrian walkway before approval";
+  document.querySelector(".three-hint").textContent="Drag to orbit • Scroll to zoom • Right-drag to pan";
+}
+
+function ensureDestinationDraftGroup(){
+  if(destinationDraftGroup)return;
+  destinationDraftGroup=new THREE.Group();
+  destinationDraftGroup.name="PGS_DESTINATION_ANCHOR_DRAFTS";
+  model.add(destinationDraftGroup);
+}
+
+function renderDestinationDrafts(){
+  ensureDestinationDraftGroup();
+  while(destinationDraftGroup.children.length){
+    const child=destinationDraftGroup.children.pop();
+    child.traverse(descendant=>descendant.element?.remove?.());
+    disposeObject(child);
+  }
+  const nodes=new Map(editorNodes.map(node=>[node.id,node]));
+  destinationDrafts.forEach(record=>{
+    if(!record.position)return;
+    const position=new THREE.Vector3(record.position.x,record.position.y,record.position.z);
+    const anchor=marker(position,0x38d8ff,2.5);
+    anchor.className="three-destination-marker";
+    const element=document.createElement("div");
+    element.className="three-label three-destination-label";
+    element.textContent=record.name;
+    const label=new CSS2DObject(element);
+    label.position.set(0,5,0);
+    anchor.add(label);
+    destinationDraftGroup.add(anchor);
+    const target=nodes.get(record.network_node_id);
+    if(target){
+      const line=new THREE.Line(
+        new THREE.BufferGeometry().setFromPoints([position,new THREE.Vector3(target.position.x,target.position.y,target.position.z)]),
+        new THREE.LineDashedMaterial({color:0x38d8ff,dashSize:3,gapSize:2})
+      );
+      line.computeLineDistances();
+      destinationDraftGroup.add(line);
+    }
+  });
+  document.getElementById("threeDestinationExport").disabled=destinationDrafts.length===0;
+}
+
+function persistDestinationDrafts(){
+  try{localStorage.setItem(DESTINATION_STORAGE_KEY,JSON.stringify(destinationPayload()));}
+  catch(error){console.warn("Could not auto-save destination anchors",error);}
+}
+
+function restoreDestinationDrafts(){
+  try{
+    const saved=JSON.parse(localStorage.getItem(DESTINATION_STORAGE_KEY)||"null");
+    destinationDrafts=Array.isArray(saved?.destinations)?saved.destinations:[];
+  }catch{destinationDrafts=[];}
+  renderDestinationDrafts();
+  populateDestinationSources();
+}
+
+function removeDestinationDraft(){
+  const sourceId=document.getElementById("threeDestinationSource").value;
+  destinationDrafts=destinationDrafts.filter(item=>item.source_label_id!==sourceId);
+  renderDestinationDrafts();
+  persistDestinationDrafts();
+  populateDestinationSources(sourceId);
+}
+
+function exportDestinationDrafts(){
+  const blob=new Blob([JSON.stringify(destinationPayload(),null,2)],{type:"application/json"});
+  const link=document.createElement("a");
+  link.href=URL.createObjectURL(blob);
+  link.download=`destination_anchors_draft_${new Date().toISOString().slice(0,10)}.json`;
+  link.click();
+  setTimeout(()=>URL.revokeObjectURL(link.href),1000);
+}
+
+async function importDestinationDrafts(event){
+  const file=event.target.files?.[0];
+  event.target.value="";
+  if(!file)return;
+  try{
+    const payload=JSON.parse(await file.text());
+    if(payload.coordinate_system!=="PGS GLB model coordinates"||!Array.isArray(payload.destinations))throw new Error("unsupported destination anchor format");
+    destinationDrafts=payload.destinations;
+    renderDestinationDrafts();
+    persistDestinationDrafts();
+    populateDestinationSources();
+    document.getElementById("threeDestinationStatus").textContent=`Imported ${file.name} • ${destinationDrafts.length} destination anchors • auto-saved`;
+  }catch(error){
+    setStatus(`Could not import destination anchors: ${error.message}`,{error:true});
+  }
 }
 
 function fitModel(){
