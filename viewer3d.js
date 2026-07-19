@@ -444,7 +444,7 @@ function toggleRouteEditor(){
   document.querySelector(".three-hint").textContent=editorActive
     ?"Click the centerline at every walkway turn or intersection"
     :"Drag to orbit • Scroll to zoom • Right-drag to pan";
-  updateEditorControls();
+  rebuildEditorVisuals();
 }
 
 function activeEditorLayer(){
@@ -581,7 +581,7 @@ function rebuildEditorVisuals(){
     line.name=edge.id;
     editorGroup.add(line);
   });
-  editorNodes.forEach((node,index)=>{
+  if(editorActive)editorNodes.forEach((node,index)=>{
     const position=new THREE.Vector3(node.position.x,node.position.y,node.position.z);
     const selected=node.id===editorActiveNodeId;
     const nodeMarker=marker(position,selected?0xffcf3a:0xef3340,selected?2.8:2.1);
@@ -603,7 +603,9 @@ function rebuildEditorVisuals(){
 function updateEditorControls(){
   const count=editorNodes.length;
   const selected=editorActiveNodeId?` • selected ${editorActiveNodeId.replace("draft-node-","")}`:" • next click starts a segment";
-  document.getElementById("threeEditStatus").textContent=`Network: ${count} nodes / ${editorEdges.length} walkways${editorActive?selected:""}`;
+  document.getElementById("threeEditStatus").textContent=editorActive
+    ?`Editing network: ${count} control points / ${editorEdges.length} walkway sections${selected}`
+    :`Walking-path layer: ${editorEdges.length} sections • control points hidden`;
   ["threeEditClear","threeEditSave","threeEditExport"].forEach(id=>{
     document.getElementById(id).disabled=count===0;
   });
