@@ -31,6 +31,15 @@ The selected node is yellow and becomes the origin of the next edge.
 Save the draft locally or export `pedestrian_network_draft_YYYY-MM-DD.json` for
 review. Draft paths are never treated as approved routes automatically.
 
+The **Map Label Editor** creates reversible spatial annotations without editing
+the recovered Unity/XEUS source data. Choose an existing building or key-area
+label to rename/reposition it, or choose **New label**, enter a name and type,
+then click **Place / Move Label** and click the exact model feature. Label drafts
+can be saved locally and imported/exported as
+`label_overrides_draft_YYYY-MM-DD.json`. A newly authored entrance label is not
+automatically a routing destination; destination publication follows spatial
+and pedestrian-network review.
+
 Approximate straight-line 3D routes are intentionally hidden while the local DTTK handoff reports `route_certified: false`. The authored network must be reviewed and compiled before PGS will present a 3D route as approved.
 
 The model and generated spatial JSON are excluded from Git because this repository is public. The existing 2D map remains the default and continues to provide the authoritative routing experience during the v10 alpha.

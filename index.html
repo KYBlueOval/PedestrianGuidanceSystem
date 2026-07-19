@@ -172,6 +172,29 @@
             <button id="threeEditImport" type="button">Import JSON</button>
             <input id="threeEditImportFile" type="file" accept="application/json,.json" hidden/>
           </div>
+          <div class="three-editor-divider"></div>
+          <b>Map Label Editor</b>
+          <select id="threeLabelTarget" aria-label="Existing label to adjust">
+            <option value="new">New label</option>
+          </select>
+          <input id="threeLabelName" type="text" placeholder="Label name" aria-label="Label name"/>
+          <select id="threeLabelKind" aria-label="Label type">
+            <option value="building">Building</option>
+            <option value="entrance">Entrance / Turnstile</option>
+            <option value="area">Department / Key Area</option>
+            <option value="amenity">Amenity</option>
+          </select>
+          <button id="threeLabelPlace" class="three-label-editor-button" type="button">Place / Move Label</button>
+          <small id="threeLabelStatus">Select a label or create a new one</small>
+          <div class="three-editor-actions">
+            <button id="threeLabelRemove" type="button" disabled>Remove Override</button>
+            <button id="threeLabelSave" type="button">Save Labels</button>
+          </div>
+          <div class="three-editor-actions">
+            <button id="threeLabelImport" type="button">Import Labels</button>
+            <button id="threeLabelExport" type="button">Export Labels</button>
+            <input id="threeLabelImportFile" type="file" accept="application/json,.json" hidden/>
+          </div>
         </div>
         <div id="threeStatus" class="three-status" role="status">
           <span class="three-spinner" aria-hidden="true"></span>

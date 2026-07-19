@@ -11,16 +11,19 @@ let initialized=false,loading=false,visible=false;
 const layerObjects={site:[],ground:[],mezzanine:[],roof:[]};
 const buildingLabels=[];
 const semanticLabels=[];
+const sourceLabelObjects=new Map();
 const floorLayerIndex=new Map();
 let spatialOverrides={},routeGroup,routeCurve,tracker;
 let routeProgress=0,trackingPaused=false,routeDuration=24,lastFrameTime=performance.now();
 let editorActive=false,editorGroup;
 let editorNodes=[],editorEdges=[],editorActiveNodeId=null,editorHistory=[];
+let labelOverrides=[],labelOverrideGroup,labelPlacementActive=false;
 let pointerStart=null;
 let animationFrameCount=0;
 const raycaster=new THREE.Raycaster();
 const pointer=new THREE.Vector2();
 const EDITOR_STORAGE_KEY="pgs-v10-pedestrian-network-draft";
+const LABEL_STORAGE_KEY="pgs-v10-label-overrides-draft";
 
 function setStatus(message,{error=false,hidden=false}={}){
   status.classList.toggle("error",error);
@@ -88,6 +91,13 @@ function initialize(){
   document.getElementById("threeEditExport").addEventListener("click",exportEditorDraft);
   document.getElementById("threeEditImport").addEventListener("click",()=>document.getElementById("threeEditImportFile").click());
   document.getElementById("threeEditImportFile").addEventListener("change",importEditorDraft);
+  document.getElementById("threeLabelTarget").addEventListener("change",selectLabelTarget);
+  document.getElementById("threeLabelPlace").addEventListener("click",startLabelPlacement);
+  document.getElementById("threeLabelRemove").addEventListener("click",removeLabelOverride);
+  document.getElementById("threeLabelSave").addEventListener("click",saveLabelOverrides);
+  document.getElementById("threeLabelExport").addEventListener("click",exportLabelOverrides);
+  document.getElementById("threeLabelImport").addEventListener("click",()=>document.getElementById("threeLabelImportFile").click());
+  document.getElementById("threeLabelImportFile").addEventListener("change",importLabelOverrides);
   renderer.domElement.addEventListener("pointerdown",event=>{pointerStart={x:event.clientX,y:event.clientY};});
   renderer.domElement.addEventListener("pointerup",handleEditorPointerUp);
   window.addEventListener("pgs:route",event=>renderRoute(event.detail));
@@ -125,6 +135,7 @@ async function loadModel(){
     indexLayers();
     createBuildingLabels();
     createSemanticLabels(labelsPayload.labels||[]);
+    restoreLabelOverrides();
     restoreEditorDraft();
     applyInitialLayerState();
     if(window.pgsCurrentRoute)renderRoute(window.pgsCurrentRoute);
@@ -152,6 +163,9 @@ function indexLayers(){
 function setLayerVisibility(layer,isVisible){
   (layerObjects[layer]||[]).forEach(object=>object.visible=isVisible);
   buildingLabels.forEach(label=>{
+    if(label.userData.layer===layer)label.visible=isVisible&&!label.userData.overridden;
+  });
+  (labelOverrideGroup?.children||[]).forEach(label=>{
     if(label.userData.layer===layer)label.visible=isVisible;
   });
   updateSemanticLabelVisibility();
@@ -210,9 +224,10 @@ function createBuildingLabels(){
     element.textContent=buildingName(key);
     const label=new CSS2DObject(element);
     label.position.copy(center);
-    label.userData.layer="ground";
+    label.userData={layer:"ground",labelId:`building:${key}`,displayName:buildingName(key),category:"building"};
     anchor.add(label);
     buildingLabels.push(label);
+    sourceLabelObjects.set(label.userData.labelId,label);
   });
 }
 
@@ -246,10 +261,11 @@ function createSemanticLabels(records){
     element.title=`${record.name} • ${record.review_status||"unreviewed"}`;
     const label=new CSS2DObject(element);
     label.position.set(position.x,position.y+1.5,position.z);
-    label.userData={category,layer,record};
+    label.userData={category,layer,record,labelId:record.id,displayName:element.textContent};
     label.visible=false;
     model.add(label);
     semanticLabels.push(label);
+    if(category!=="room")sourceLabelObjects.set(label.userData.labelId,label);
   });
   updateSemanticLabelVisibility();
 }
@@ -273,7 +289,7 @@ function updateSemanticLabelLOD(){
   semanticLabels.forEach(label=>{
     const limit=label.userData.category==="room"||label.userData.category==="corridor"?260:420;
     label.getWorldPosition(world);
-    label.visible=Boolean(label.userData.enabled)&&world.distanceTo(camera.position)<=limit;
+    label.visible=!label.userData.overridden&&Boolean(label.userData.enabled)&&world.distanceTo(camera.position)<=limit;
   });
 }
 
@@ -408,6 +424,7 @@ function toggleWalkPreview(){
 
 function toggleRouteEditor(){
   if(!model)return;
+  if(labelPlacementActive)cancelLabelPlacement();
   editorActive=!editorActive;
   controls.enabled=!editorActive;
   frame.classList.toggle("route-editing",editorActive);
@@ -426,7 +443,7 @@ function activeEditorLayer(){
 }
 
 function handleEditorPointerUp(event){
-  if(!editorActive||event.button!==0||!pointerStart)return;
+  if((!editorActive&&!labelPlacementActive)||event.button!==0||!pointerStart)return;
   const movement=Math.hypot(event.clientX-pointerStart.x,event.clientY-pointerStart.y);
   pointerStart=null;
   if(movement>5)return;
@@ -434,6 +451,14 @@ function handleEditorPointerUp(event){
   pointer.x=((event.clientX-rect.left)/rect.width)*2-1;
   pointer.y=-((event.clientY-rect.top)/rect.height)*2+1;
   raycaster.setFromCamera(pointer,camera);
+  if(labelPlacementActive){
+    const labelHits=raycaster.intersectObject(model,true).filter(hit=>{
+      const object=hit.object;
+      return object.isMesh&&object.visible&&!routeGroup?.getObjectById(object.id)&&!editorGroup?.getObjectById(object.id);
+    });
+    if(labelHits.length)placeLabelOverride(model.worldToLocal(labelHits[0].point.clone()));
+    return;
+  }
   const selectedHit=(editorGroup?raycaster.intersectObject(editorGroup,true):[]).find(hit=>editorNodeId(hit.object));
   if(selectedHit){
     const selectedId=editorNodeId(selectedHit.object);
@@ -648,6 +673,177 @@ function exportEditorDraft(){
   link.download=`pedestrian_network_draft_${new Date().toISOString().slice(0,10)}.json`;
   link.click();
   setTimeout(()=>URL.revokeObjectURL(link.href),1000);
+}
+
+function labelOverridePayload(){
+  return {
+    schema_version:"0.1.0-draft",
+    coordinate_system:"PGS GLB model coordinates",
+    review_status:"draft_requires_site_approval",
+    labels:labelOverrides
+  };
+}
+
+function populateLabelTargets(selectedValue="new"){
+  const select=document.getElementById("threeLabelTarget");
+  const options=[...sourceLabelObjects.entries()].map(([id,label])=>({
+    id,name:label.userData.displayName||id,group:label.userData.category||"building"
+  }));
+  labelOverrides.filter(item=>item.source_label_id?.startsWith("custom-label:")).forEach(item=>{
+    options.push({id:item.source_label_id,name:item.name,group:item.kind||"area"});
+  });
+  select.innerHTML='<option value="new">New label</option>';
+  options.sort((a,b)=>a.name.localeCompare(b.name)).forEach(item=>{
+    const option=new Option(`${item.name} (${item.group})`,item.id);
+    select.appendChild(option);
+  });
+  select.value=[...select.options].some(option=>option.value===selectedValue)?selectedValue:"new";
+  selectLabelTarget();
+}
+
+function selectLabelTarget(){
+  const target=document.getElementById("threeLabelTarget").value;
+  const override=labelOverrides.find(item=>item.source_label_id===target);
+  const source=sourceLabelObjects.get(target);
+  document.getElementById("threeLabelName").value=override?.name||source?.userData.displayName||"";
+  document.getElementById("threeLabelKind").value=override?.kind||source?.userData.category||"building";
+  document.getElementById("threeLabelRemove").disabled=target==="new"||!override;
+}
+
+function startLabelPlacement(){
+  if(labelPlacementActive){cancelLabelPlacement();return;}
+  const name=document.getElementById("threeLabelName").value.trim();
+  if(!name){
+    document.getElementById("threeLabelStatus").textContent="Enter a label name first";
+    return;
+  }
+  if(editorActive)toggleRouteEditor();
+  labelPlacementActive=true;
+  controls.enabled=false;
+  frame.classList.add("label-editing");
+  document.getElementById("threeLabelPlace").classList.add("active");
+  document.getElementById("threeLabelStatus").textContent="Click the exact feature in the 3D model";
+  document.querySelector(".three-hint").textContent="Click the exact label anchor location";
+}
+
+function cancelLabelPlacement(){
+  labelPlacementActive=false;
+  controls.enabled=true;
+  frame.classList.remove("label-editing");
+  document.getElementById("threeLabelPlace").classList.remove("active");
+  document.getElementById("threeLabelStatus").textContent="Label placement cancelled";
+  document.querySelector(".three-hint").textContent="Drag to orbit • Scroll to zoom • Right-drag to pan";
+}
+
+function placeLabelOverride(local){
+  const select=document.getElementById("threeLabelTarget");
+  let target=select.value;
+  if(target==="new")target=`custom-label:${Date.now()}`;
+  const record={
+    id:`label-override:${target}`,
+    source_label_id:target,
+    name:document.getElementById("threeLabelName").value.trim(),
+    kind:document.getElementById("threeLabelKind").value,
+    layer:activeEditorLayer(),
+    position:{x:+local.x.toFixed(4),y:+(local.y+2).toFixed(4),z:+local.z.toFixed(4)},
+    approved:false
+  };
+  const index=labelOverrides.findIndex(item=>item.source_label_id===target);
+  if(index>=0)labelOverrides[index]=record; else labelOverrides.push(record);
+  labelPlacementActive=false;
+  controls.enabled=true;
+  frame.classList.remove("label-editing");
+  document.getElementById("threeLabelPlace").classList.remove("active");
+  renderLabelOverrides();
+  populateLabelTargets(target);
+  document.getElementById("threeLabelStatus").textContent=`Placed ${record.name} • save or export to preserve`;
+  document.querySelector(".three-hint").textContent="Drag to orbit • Scroll to zoom • Right-drag to pan";
+}
+
+function ensureLabelOverrideGroup(){
+  if(labelOverrideGroup)return;
+  labelOverrideGroup=new THREE.Group();
+  labelOverrideGroup.name="PGS_AUTHORED_LABEL_OVERRIDES";
+  model.add(labelOverrideGroup);
+}
+
+function renderLabelOverrides(){
+  ensureLabelOverrideGroup();
+  while(labelOverrideGroup.children.length){
+    const child=labelOverrideGroup.children.pop();
+    child.element?.remove?.();
+  }
+  sourceLabelObjects.forEach(label=>{label.userData.overridden=false;});
+  labelOverrides.forEach(record=>{
+    const source=sourceLabelObjects.get(record.source_label_id);
+    if(source){source.userData.overridden=true;source.visible=false;}
+    if(!record.position)return;
+    const element=document.createElement("div");
+    element.className="three-label three-authored-label";
+    element.dataset.kind=record.kind;
+    element.textContent=record.name;
+    element.title=`Authored ${record.kind} label • ${record.approved?"approved":"draft"}`;
+    const label=new CSS2DObject(element);
+    label.position.set(record.position.x,record.position.y,record.position.z);
+    label.userData={layer:record.layer||"ground",record};
+    labelOverrideGroup.add(label);
+  });
+  buildingLabels.forEach(label=>{
+    const layerToggle=document.querySelector(`[data-3d-layer="${label.userData.layer}"]`);
+    label.visible=!label.userData.overridden&&Boolean(layerToggle?.checked);
+  });
+  labelOverrideGroup.children.forEach(label=>{
+    const layerToggle=document.querySelector(`[data-3d-layer="${label.userData.layer}"]`);
+    label.visible=Boolean(layerToggle?.checked);
+  });
+  updateSemanticLabelVisibility();
+}
+
+function saveLabelOverrides(){
+  localStorage.setItem(LABEL_STORAGE_KEY,JSON.stringify(labelOverridePayload()));
+  document.getElementById("threeLabelStatus").textContent=`Saved ${labelOverrides.length} label override${labelOverrides.length===1?"":"s"} locally`;
+}
+
+function restoreLabelOverrides(){
+  try{
+    const saved=JSON.parse(localStorage.getItem(LABEL_STORAGE_KEY)||"null");
+    labelOverrides=Array.isArray(saved?.labels)?saved.labels:[];
+  }catch{labelOverrides=[];}
+  renderLabelOverrides();
+  populateLabelTargets();
+}
+
+function removeLabelOverride(){
+  const target=document.getElementById("threeLabelTarget").value;
+  labelOverrides=labelOverrides.filter(item=>item.source_label_id!==target);
+  renderLabelOverrides();
+  populateLabelTargets();
+  document.getElementById("threeLabelStatus").textContent="Override removed; recovered label restored";
+}
+
+function exportLabelOverrides(){
+  const blob=new Blob([JSON.stringify(labelOverridePayload(),null,2)],{type:"application/json"});
+  const link=document.createElement("a");
+  link.href=URL.createObjectURL(blob);
+  link.download=`label_overrides_draft_${new Date().toISOString().slice(0,10)}.json`;
+  link.click();
+  setTimeout(()=>URL.revokeObjectURL(link.href),1000);
+}
+
+async function importLabelOverrides(event){
+  const file=event.target.files?.[0];
+  event.target.value="";
+  if(!file)return;
+  try{
+    const payload=JSON.parse(await file.text());
+    if(payload.coordinate_system!=="PGS GLB model coordinates"||!Array.isArray(payload.labels))throw new Error("unsupported label override format");
+    labelOverrides=payload.labels;
+    renderLabelOverrides();
+    populateLabelTargets();
+    document.getElementById("threeLabelStatus").textContent=`Imported ${file.name} • ${labelOverrides.length} labels`;
+  }catch(error){
+    setStatus(`Could not import label overrides: ${error.message}`,{error:true});
+  }
 }
 
 function fitModel(){
