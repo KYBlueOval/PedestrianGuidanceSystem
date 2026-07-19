@@ -122,10 +122,11 @@ async function loadModel(){
       return response.json();
     });
     const modelUrl=config.views?.model||"assets/models/site_mobile.glb";
-    const [destinationsPayload,labelsPayload,floorsPayload]=await Promise.all([
+    const [destinationsPayload,labelsPayload,floorsPayload,baseNetworkPayload]=await Promise.all([
       fetch("data/generated/destination_spatial.json",{cache:"no-store"}).then(response=>response.ok?response.json():{}).catch(()=>({})),
       fetch("data/generated/spatial_labels.json",{cache:"no-store"}).then(response=>response.ok?response.json():{}).catch(()=>({})),
-      fetch("data/generated/floor_layers.json",{cache:"no-store"}).then(response=>response.ok?response.json():{}).catch(()=>({}))
+      fetch("data/generated/floor_layers.json",{cache:"no-store"}).then(response=>response.ok?response.json():{}).catch(()=>({})),
+      fetch(config.views?.basePedestrianNetwork||"data/authored/pedestrian_network_base.json",{cache:"no-store"}).then(response=>response.ok?response.json():{}).catch(()=>({}))
     ]);
     spatialOverrides=destinationsPayload;
     floorLayerIndex.clear();
@@ -144,7 +145,7 @@ async function loadModel(){
     createBuildingLabels();
     createSemanticLabels(labelsPayload.labels||[]);
     restoreLabelOverrides();
-    restoreEditorDraft();
+    restoreEditorDraft(baseNetworkPayload);
     restoreDestinationDrafts();
     applyInitialLayerState();
     if(window.pgsCurrentRoute)renderRoute(window.pgsCurrentRoute);
@@ -671,11 +672,12 @@ function persistEditorDraft(){
   }
 }
 
-function restoreEditorDraft(){
+function restoreEditorDraft(baseNetwork={}){
   try{
     const saved=JSON.parse(localStorage.getItem(EDITOR_STORAGE_KEY)||"null");
-    editorNodes=Array.isArray(saved?.nodes)?saved.nodes:[];
-    editorEdges=(Array.isArray(saved?.edges)?saved.edges:editorNodes.slice(1).map((node,index)=>({
+    const source=Array.isArray(saved?.nodes)&&saved.nodes.length?saved:baseNetwork;
+    editorNodes=Array.isArray(source?.nodes)?source.nodes:[];
+    editorEdges=(Array.isArray(source?.edges)?source.edges:editorNodes.slice(1).map((node,index)=>({
       id:`draft-edge-${index+1}`,from:editorNodes[index].id,to:node.id,bidirectional:true,
       modes:["walking"],access:node.access||["visitor","employee","contractor","emergency"],approved:false
     }))).map(edge=>({kind:"hallway",accessible:true,...edge}));

@@ -13,6 +13,12 @@ When a route is generated, the 3D twin displays the current preview as a blue pa
 
 The 3D Layers panel can also display floor-aware room, corridor, amenity, stair, and elevator labels from the local DTTK `spatial_labels.json` handoff. These labels remain review-only until site approval.
 
+The site-authored ground-floor spine and its major indoor hallway arms are
+stored in `data/authored/pedestrian_network_base.json`. PGS loads this as the
+default pedestrian walking-path layer when the browser does not already have a
+newer local editing draft. It is infrastructure used by later routing; it is
+not itself a predefined start-to-destination route.
+
 Destination choices are grouped by visitor/check-in, entrances/security, production, amenities, and emergency use. Internal junctions and corridor waypoints are no longer presented as end-user destinations.
 
 Use **Start Route Edit** after positioning the 3D camera to trace approved

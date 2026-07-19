@@ -11,6 +11,7 @@
     "threeDEnabled": true,
     "model": "assets/models/site_mobile.glb",
     "modelProfile": "mobile",
-    "routingView": "2d"
+    "routingView": "2d",
+    "basePedestrianNetwork": "data/authored/pedestrian_network_base.json"
   }
 }
