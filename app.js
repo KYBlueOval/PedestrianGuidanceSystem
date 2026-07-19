@@ -1,14 +1,21 @@
 let destinations=[],routes=[],quickRoutes=[],graph={},lastPath=[],mode="visitor";
+let pedestrianNetwork=null,pedestrianGraph={},pedestrianNodes={},destinationNodeCrosswalk={};
 let view={scale:1,x:0,y:0},dragging=false,dragStart=null;
+let workspaceView="2d";
 const MAP_W=1024,MAP_H=768;
 const $=id=>document.getElementById(id);
 const loc=id=>destinations.find(d=>d.id===id);
 
 async function init(){
-  destinations=await fetch("data/destinations.json").then(r=>r.json());
-  routes=await fetch("data/routes.json").then(r=>r.json());
-  quickRoutes=await fetch("data/quick_routes.json").then(r=>r.json()).catch(()=>[]);
-  buildGraph(); populateSelects(); renderQuickRoutes(); drawNetwork(); drawNodes(); wireEvents(); resetView(); setMode("visitor"); updateClock(); setInterval(updateClock,30000);
+  [destinations,routes,quickRoutes,pedestrianNetwork]=await Promise.all([
+    fetch("data/destinations.json").then(r=>r.json()),
+    fetch("data/routes.json").then(r=>r.json()),
+    fetch("data/quick_routes.json").then(r=>r.json()).catch(()=>[]),
+    fetch("data/generated/pedestrian_network.json").then(r=>r.ok?r.json():null).catch(()=>null)
+  ]);
+  const crosswalk=await fetch("data/generated/destination_node_crosswalk.json").then(r=>r.ok?r.json():null).catch(()=>null);
+  destinationNodeCrosswalk=Object.fromEntries((crosswalk?.destinations||[]).map(item=>[item.destination_id,item.node_id]));
+  buildGraph(); buildPedestrianGraph(); populateSelects(); renderQuickRoutes(); drawNetwork(); drawNodes(); wireEvents(); resetView(); setMode("visitor"); updateClock(); setInterval(updateClock,30000);
 }
 
 function buildGraph(){
@@ -16,10 +23,67 @@ function buildGraph(){
   routes.forEach(([a,b,w])=>{graph[a].push({id:b,weight:w});graph[b].push({id:a,weight:w});});
 }
 
-function populateSelects(){
+function destinationGroup(destination){
+  if(destination.zone==="Visitor")return "Visitor / Check-In";
+  if(destination.zone==="Security")return "Entrances / Security";
+  if(destination.zone==="Production")return "Production Areas";
+  if(destination.zone==="Amenities")return "Amenities / Employee Services";
+  if(destination.zone==="Emergency")return "Emergency / Muster";
+  return "Other";
+}
+
+function buildPedestrianGraph(){
+  pedestrianGraph={}; pedestrianNodes={};
+  if(pedestrianNetwork?.review?.route_ready!==true)return;
+  (pedestrianNetwork.nodes||[]).forEach(node=>{pedestrianNodes[node.id]=node;pedestrianGraph[node.id]=[];});
+  (pedestrianNetwork.edges||[]).forEach(edge=>{
+    if(!pedestrianGraph[edge.from]||!pedestrianGraph[edge.to])return;
+    const weight=Number(edge.distance)||distance3d(pedestrianNodes[edge.from].position,pedestrianNodes[edge.to].position);
+    pedestrianGraph[edge.from].push({id:edge.to,weight,edge});
+    if(edge.bidirectional!==false)pedestrianGraph[edge.to].push({id:edge.from,weight,edge});
+  });
+}
+
+function distance3d(a,b){
+  return Math.hypot((a?.x||0)-(b?.x||0),(a?.y||0)-(b?.y||0),(a?.z||0)-(b?.z||0));
+}
+
+function matchesDestinationCategory(destination,category){
+  if(category==="all")return true;
+  if(category==="visitor")return destination.zone==="Visitor"||destination.category.includes("Visitor");
+  if(category==="security")return destination.zone==="Security";
+  if(category==="production")return destination.zone==="Production";
+  if(category==="amenities")return destination.zone==="Amenities";
+  if(category==="emergency")return destination.zone==="Emergency";
+  return true;
+}
+
+function addGroupedOptions(select,items){
+  const groups=new Map();
+  items.forEach(destination=>{
+    const group=destinationGroup(destination);
+    if(!groups.has(group))groups.set(group,[]);
+    groups.get(group).push(destination);
+  });
+  groups.forEach((groupItems,label)=>{
+    const optgroup=document.createElement("optgroup");
+    optgroup.label=label;
+    groupItems.sort((a,b)=>a.name.localeCompare(b.name)).forEach(destination=>{
+      optgroup.appendChild(new Option(destination.name,destination.id));
+    });
+    select.appendChild(optgroup);
+  });
+}
+
+function populateSelects(category=$("destinationCategory")?.value||"all"){
   const s=$("startSelect"), e=$("endSelect");
+  const previousStart=s.value,previousEnd=e.value;
   s.innerHTML=""; e.innerHTML="";
-  destinations.forEach(d=>{s.add(new Option(d.name,d.id)); e.add(new Option(d.name,d.id));});
+  const selectable=destinations.filter(destination=>!["junction","corridor"].includes(destination.type));
+  addGroupedOptions(s,selectable);
+  addGroupedOptions(e,selectable.filter(destination=>matchesDestinationCategory(destination,category)));
+  if([...s.options].some(option=>option.value===previousStart))s.value=previousStart;
+  if([...e.options].some(option=>option.value===previousEnd))e.value=previousEnd;
 }
 
 function renderQuickRoutes(){
@@ -28,18 +92,21 @@ function renderQuickRoutes(){
     const btn=document.createElement("button");
     btn.className="quick-route";
     btn.innerHTML=`<span>${q.label}</span><b>→</b>`;
-    btn.onclick=()=>{$("startSelect").value=q.start;$("endSelect").value=q.end; if(q.mode) setMode(q.mode,false); generateRoute(); fitRoute();};
+    btn.onclick=()=>{if(q.mode)setMode(q.mode,false);$("startSelect").value=q.start;$("endSelect").value=q.end;generateRoute();fitRoute();};
     wrap.appendChild(btn);
   });
 }
 
 function wireEvents(){
   $("routeBtn").onclick=generateRoute;
+  $("destinationCategory").onchange=event=>populateSelects(event.target.value);
   $("zoomIn").onclick=()=>zoom(1.2);
   $("zoomOut").onclick=()=>zoom(.83);
-  $("resetView").onclick=resetView;
+  $("resetView").onclick=()=>workspaceView==="3d"?window.pgs3d?.reset():resetView();
   $("centerView").onclick=resetView;
   $("fitRoute").onclick=fitRoute;
+  $("view2DBtn").onclick=()=>setWorkspaceView("2d");
+  $("view3DBtn").onclick=()=>setWorkspaceView("3d");
   $("searchFocus").onclick=()=>$("searchBox").focus();
   $("fullscreenBtn").onclick=()=>document.documentElement.requestFullscreen?.();
 
@@ -65,20 +132,39 @@ function wireEvents(){
   f.onmousedown=e=>{dragging=true;dragStart={x:e.clientX,y:e.clientY,vx:view.x,vy:view.y};f.classList.add("dragging");};
   window.onmousemove=e=>{if(!dragging)return;view.x=dragStart.vx+e.clientX-dragStart.x;view.y=dragStart.vy+e.clientY-dragStart.y;applyView();};
   window.onmouseup=()=>{dragging=false;f.classList.remove("dragging");};
-  window.onresize=resetView;
+  window.onresize=()=>{if(workspaceView==="2d")resetView();};
+}
+
+function setWorkspaceView(next){
+  workspaceView=next==="3d"?"3d":"2d";
+  const is3d=workspaceView==="3d";
+  document.querySelector(".map-shell").classList.toggle("three-active",is3d);
+  $("mapFrame").hidden=is3d;
+  $("threeFrame").hidden=!is3d;
+  $("view2DBtn").classList.toggle("active",!is3d);
+  $("view3DBtn").classList.toggle("active",is3d);
+  $("view2DBtn").setAttribute("aria-pressed",String(!is3d));
+  $("view3DBtn").setAttribute("aria-pressed",String(is3d));
+  ["zoomIn","zoomOut","centerView","fitRoute"].forEach(id=>$(id).disabled=is3d);
+  if(is3d) window.pgs3d?.show();
+  else { window.pgs3d?.hide(); resetView(); }
 }
 
 function setMode(m, generate=true){
   mode=m;
   document.querySelectorAll(".mode").forEach(b=>b.classList.toggle("active",b.dataset.mode===m));
   if(m==="visitor"){
+    $("destinationCategory").value="visitor"; populateSelects("visitor");
     $("startSelect").value="main_guard_house"; $("endSelect").value="visitor_badging"; $("subtitle").textContent="Visitor-safe guided routing";
   } else if(m==="employee"){
+    $("destinationCategory").value="production"; populateSelects("production");
     $("startSelect").value="main_guard_house"; $("endSelect").value="formation"; $("subtitle").textContent="Employee pedestrian movement";
   } else if(m==="contractor"){
-    $("startSelect").value="sub_guard_house"; $("endSelect").value="west_service_corridor"; $("subtitle").textContent="Contractor / trade access routing";
+    $("destinationCategory").value="production"; populateSelects("production");
+    $("startSelect").value="sub_guard_house"; $("endSelect").value="anode"; $("subtitle").textContent="Contractor / trade access routing";
   } else {
-    $("startSelect").value="center_junction"; $("endSelect").value="muster_center"; $("subtitle").textContent="Emergency reference routing";
+    $("destinationCategory").value="emergency"; populateSelects("emergency");
+    $("startSelect").value="employee_lobby"; $("endSelect").value="muster_center"; $("subtitle").textContent="Emergency reference routing";
   }
   if(generate) generateRoute();
 }
@@ -106,18 +192,19 @@ function drawNodes(){
       <circle class="marker-ring" r="12"></circle>
       <circle class="marker-dot marker-core" r="8"></circle>
       <text x="16" y="-9">${escapeHtml(d.label)}</text>`;
-    g.onclick=()=>{$("endSelect").value=d.id;showDestination(d.id);};
+    g.onclick=()=>{if(!["junction","corridor"].includes(d.type))$("endSelect").value=d.id;showDestination(d.id);};
     l.appendChild(g);
   });
 }
 
-function dijkstra(start,end){
-  const dist={},prev={},q=new Set(Object.keys(graph));
-  Object.keys(graph).forEach(k=>dist[k]=Infinity); dist[start]=0;
+function dijkstra(start,end,sourceGraph=graph){
+  const dist={},prev={},q=new Set(Object.keys(sourceGraph));
+  Object.keys(sourceGraph).forEach(k=>dist[k]=Infinity); dist[start]=0;
   while(q.size){
     let u=[...q].sort((a,b)=>dist[a]-dist[b])[0]; q.delete(u);
     if(u===end) break;
-    for(const n of graph[u]){
+    for(const n of sourceGraph[u]||[]){
+      if(sourceGraph===pedestrianGraph&&!edgeAllowsMode(n.edge,mode))continue;
       const alt=dist[u]+n.weight;
       if(alt<dist[n.id]){dist[n.id]=alt;prev[n.id]=u;}
     }
@@ -130,9 +217,31 @@ function dijkstra(start,end){
 function generateRoute(){
   const start=$("startSelect").value, end=$("endSelect").value;
   if(!start||!end||start===end)return;
+  const startNode=destinationNodeCrosswalk[start],endNode=destinationNodeCrosswalk[end];
+  const approvedNetwork=pedestrianNetwork?.review?.route_ready===true&&startNode&&endNode&&pedestrianGraph[startNode]&&pedestrianGraph[endNode];
+  const spatialResult=approvedNetwork?dijkstra(startNode,endNode,pedestrianGraph):null;
+  const spatialValid=spatialResult&&Number.isFinite(spatialResult.distance)&&spatialResult.path[0]===startNode&&spatialResult.path.at(-1)===endNode;
   const result=dijkstra(start,end);
   lastPath=result.path;
-  drawRoute(result.path); updateRoute(result); showDestination(end);
+  const displayResult=spatialValid?{...result,distance:spatialResult.distance,distanceUnit:"meters",certified:true}:result;
+  drawRoute(result.path); updateRoute(displayResult); showDestination(end);
+  const routeDetail={
+    path:[...result.path],
+    destinations:result.path.map(id=>loc(id)),
+    distance:displayResult.distance,
+    distanceUnit:displayResult.distanceUnit||"map-units",
+    certified:Boolean(spatialValid),
+    spatialNodeIds:spatialValid?[...spatialResult.path]:[],
+    spatialPath:spatialValid?spatialResult.path.map(id=>pedestrianNodes[id].position):[]
+  };
+  window.pgsCurrentRoute=routeDetail;
+  window.dispatchEvent(new CustomEvent("pgs:route",{detail:routeDetail}));
+}
+
+function edgeAllowsMode(edge,currentMode){
+  const allowed=(edge?.access||[]).map(value=>String(value).toLowerCase());
+  if(!allowed.length||currentMode==="emergency")return true;
+  return allowed.includes(currentMode)||allowed.includes("all")||allowed.includes("authorized");
 }
 
 function drawRoute(path){
@@ -146,8 +255,8 @@ function drawRoute(path){
 }
 
 function updateRoute(r){
-  const feet=Math.round(r.distance*1.7), mins=Math.max(1,Math.round(feet/250));
-  $("routeStatus").textContent="AUTHORIZED";
+  const feet=Math.round(r.distance*(r.distanceUnit==="meters"?3.28084:1.7)), mins=Math.max(1,Math.round(feet/250));
+  $("routeStatus").textContent=r.certified?"APPROVED NETWORK":"DRAFT PREVIEW";
   $("distanceMetric").textContent=feet+" ft"; $("timeMetric").textContent=mins+" min";
   $("sumDistance").textContent=feet+" ft"; $("sumTime").textContent=mins+" min";
   $("sumStart").textContent=loc(r.path[0]).name; $("sumEnd").textContent=loc(r.path.at(-1)).name;
@@ -170,7 +279,13 @@ function renderSearch(q){
   q=q.toLowerCase().trim();
   const box=$("searchResults"); box.innerHTML="";
   if(q.length<2){box.classList.remove("show");return;}
-  const matches=destinations.filter(d=>(d.name+" "+d.label+" "+d.category+" "+d.zone).toLowerCase().includes(q)).slice(0,8);
+  const category=$("destinationCategory").value;
+  const matches=destinations
+    .filter(d=>!["junction","corridor"].includes(d.type))
+    .filter(d=>matchesDestinationCategory(d,category))
+    .filter(d=>(d.name+" "+d.label+" "+d.category+" "+d.zone).toLowerCase().includes(q))
+    .sort((a,b)=>destinationGroup(a).localeCompare(destinationGroup(b))||a.name.localeCompare(b.name))
+    .slice(0,10);
   matches.forEach(d=>{
     const btn=document.createElement("button");
     btn.innerHTML=`<b>${escapeHtml(d.name)}</b><br><small>${escapeHtml(d.category)} • ${escapeHtml(d.access)}</small>`;
@@ -191,6 +306,7 @@ function resetView(){ const f=$("mapFrame"); view.scale=Math.min(f.clientWidth/M
 function zoom(f){ view.scale=Math.max(.25,Math.min(5,view.scale*f)); applyView(); }
 function fitRoute(){
   if(!lastPath.length)return;
+  if(workspaceView!=="2d")setWorkspaceView("2d");
   const f=$("mapFrame"), pts=lastPath.map(loc);
   const minX=Math.min(...pts.map(p=>p.x)), maxX=Math.max(...pts.map(p=>p.x)), minY=Math.min(...pts.map(p=>p.y)), maxY=Math.max(...pts.map(p=>p.y));
   const pad=130;

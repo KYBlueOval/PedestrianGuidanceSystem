@@ -1,7 +1,7 @@
 {
   "name": "Ford Energy Pedestrian Guidance System",
   "short_name": "PGS",
-  "description": "Ford Energy SiteNav Command pedestrian guidance system.",
+  "description": "Ford Energy SiteNav Command pedestrian guidance system with optional 3D digital-twin preview.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",

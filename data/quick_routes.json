@@ -25,7 +25,7 @@
   },
   {
     "label": "Nearest Center Muster",
-    "start": "center_junction",
+    "start": "employee_lobby",
     "end": "muster_center",
     "mode": "emergency"
   }
