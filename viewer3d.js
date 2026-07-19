@@ -276,6 +276,11 @@ function destinationPosition(id){
 }
 
 function routePositions(route){
+  if(Array.isArray(route?.spatialPath)&&route.spatialPath.length>1){
+    return route.spatialPath
+      .filter(position=>[position?.x,position?.y,position?.z].every(Number.isFinite))
+      .map(position=>new THREE.Vector3(position.x,Math.max(position.y,1.5),position.z));
+  }
   const destinations=route?.destinations||[];
   if(destinations.length<2)return [];
   const start=destinationPosition(destinations[0].id);
@@ -332,7 +337,7 @@ function marker(position,color,radius){
 function renderRoute(route){
   if(!model)return;
   clearRoute();
-  const certified=spatialOverrides.review?.route_certified===true;
+  const certified=route?.certified===true&&Array.isArray(route.spatialPath)&&route.spatialPath.length>1;
   const routeToggle=document.getElementById("threeRouteToggle");
   const routeStatus=document.getElementById("threeRouteStatus");
   if(!certified){
