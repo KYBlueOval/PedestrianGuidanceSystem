@@ -15,7 +15,21 @@ The 3D Layers panel can also display floor-aware room, corridor, amenity, stair,
 
 Destination choices are grouped by visitor/check-in, entrances/security, production, amenities, and emergency use. Internal junctions and corridor waypoints are no longer presented as end-user destinations.
 
-Use **Start Route Edit** after positioning the 3D camera to trace an approved hallway or sidewalk centerline. Click the model at each turn or intersection, then save the draft locally or export `pedestrian_network_draft_YYYY-MM-DD.json` for review. Draft paths are never treated as approved routes automatically.
+Use **Start Route Edit** after positioning the 3D camera to trace approved
+hallway and sidewalk centerlines. Click the model at each turn or intersection.
+The selected node is yellow and becomes the origin of the next edge.
+
+- **New Segment** ends the current chain; the next model click starts an
+  independent segment without drawing a line across rooms.
+- Click an existing numbered node to select it, then click along another
+  hallway to create a branch from that junction.
+- **Delete Selected** removes a mistaken node and its incident edges.
+- **Import JSON** loads a prior editor export so the campus network can be
+  expanded across multiple sessions.
+- **Undo** restores the graph before the last edit.
+
+Save the draft locally or export `pedestrian_network_draft_YYYY-MM-DD.json` for
+review. Draft paths are never treated as approved routes automatically.
 
 Approximate straight-line 3D routes are intentionally hidden while the local DTTK handoff reports `route_certified: false`. The authored network must be reviewed and compiled before PGS will present a 3D route as approved.
 

@@ -158,11 +158,19 @@
           <small id="threeEditStatus">Draft: 0 nodes</small>
           <div class="three-editor-actions">
             <button id="threeEditUndo" type="button" disabled>Undo</button>
-            <button id="threeEditClear" type="button" disabled>Clear</button>
+            <button id="threeEditSegment" type="button" disabled>New Segment</button>
+          </div>
+          <div class="three-editor-actions">
+            <button id="threeEditDelete" type="button" disabled>Delete Selected</button>
+            <button id="threeEditClear" type="button" disabled>Clear All</button>
           </div>
           <div class="three-editor-actions">
             <button id="threeEditSave" type="button" disabled>Save Draft</button>
             <button id="threeEditExport" type="button" disabled>Export JSON</button>
+          </div>
+          <div class="three-editor-actions">
+            <button id="threeEditImport" type="button">Import JSON</button>
+            <input id="threeEditImportFile" type="file" accept="application/json,.json" hidden/>
           </div>
         </div>
         <div id="threeStatus" class="three-status" role="status">

@@ -14,8 +14,8 @@ const semanticLabels=[];
 const floorLayerIndex=new Map();
 let spatialOverrides={},routeGroup,routeCurve,tracker;
 let routeProgress=0,trackingPaused=false,routeDuration=24,lastFrameTime=performance.now();
-let editorActive=false,editorGroup,editorLine;
-let editorNodes=[];
+let editorActive=false,editorGroup;
+let editorNodes=[],editorEdges=[],editorActiveNodeId=null,editorHistory=[];
 let pointerStart=null;
 let animationFrameCount=0;
 const raycaster=new THREE.Raycaster();
@@ -81,9 +81,13 @@ function initialize(){
   document.getElementById("threeWalkToggle").addEventListener("click",toggleWalkPreview);
   document.getElementById("threeEditToggle").addEventListener("click",toggleRouteEditor);
   document.getElementById("threeEditUndo").addEventListener("click",undoEditorNode);
+  document.getElementById("threeEditSegment").addEventListener("click",startEditorSegment);
+  document.getElementById("threeEditDelete").addEventListener("click",deleteSelectedEditorNode);
   document.getElementById("threeEditClear").addEventListener("click",clearEditorDraft);
   document.getElementById("threeEditSave").addEventListener("click",saveEditorDraft);
   document.getElementById("threeEditExport").addEventListener("click",exportEditorDraft);
+  document.getElementById("threeEditImport").addEventListener("click",()=>document.getElementById("threeEditImportFile").click());
+  document.getElementById("threeEditImportFile").addEventListener("change",importEditorDraft);
   renderer.domElement.addEventListener("pointerdown",event=>{pointerStart={x:event.clientX,y:event.clientY};});
   renderer.domElement.addEventListener("pointerup",handleEditorPointerUp);
   window.addEventListener("pgs:route",event=>renderRoute(event.detail));
@@ -184,6 +188,9 @@ function createBuildingLabels(){
     groups.get(key).push(object);
   });
   groups.forEach((objects,key)=>{
+    // Guard-house positions are authored in XEUS and are more reliable than a
+    // mesh bounding-box center. Their semantic labels are created below.
+    if(["Root_Main_Security_F44","Root_Secondary_Security_F43"].includes(key))return;
     const candidates=objects.filter(object=>object.geometry);
     if(!candidates.length)return;
     candidates.forEach(object=>{
@@ -227,12 +234,15 @@ function createSemanticLabels(records){
   records.forEach(record=>{
     const position=record.model_position;
     if(!position||![position.x,position.y,position.z].every(Number.isFinite))return;
+    const guardHouse=/^(MAIN|SUB) GUARD HOUSE/i.test(record.name||"");
     const layer=semanticLayer(record.floor_id);
-    const category=layer==="site"?"area":semanticKind(record.kind);
+    const category=guardHouse?"area":layer==="site"?"area":semanticKind(record.kind);
     const element=document.createElement("div");
     element.className="three-semantic-label";
     element.dataset.kind=category;
-    element.textContent=record.name;
+    element.textContent=guardHouse
+      ? (/^MAIN/i.test(record.name)?"Main Guard House":"Secondary Guard House")
+      : record.name;
     element.title=`${record.name} • ${record.review_status||"unreviewed"}`;
     const label=new CSS2DObject(element);
     label.position.set(position.x,position.y+1.5,position.z);
@@ -424,6 +434,24 @@ function handleEditorPointerUp(event){
   pointer.x=((event.clientX-rect.left)/rect.width)*2-1;
   pointer.y=-((event.clientY-rect.top)/rect.height)*2+1;
   raycaster.setFromCamera(pointer,camera);
+  const selectedHit=(editorGroup?raycaster.intersectObject(editorGroup,true):[]).find(hit=>editorNodeId(hit.object));
+  if(selectedHit){
+    const selectedId=editorNodeId(selectedHit.object);
+    if(editorActiveNodeId&&selectedId!==editorActiveNodeId&&!editorEdges.some(edge=>
+      (edge.from===editorActiveNodeId&&edge.to===selectedId)||(edge.from===selectedId&&edge.to===editorActiveNodeId)
+    )){
+      pushEditorHistory();
+      const source=editorNodes.find(node=>node.id===editorActiveNodeId);
+      const target=editorNodes.find(node=>node.id===selectedId);
+      editorEdges.push({
+        id:nextEditorId("edge",editorEdges),from:source.id,to:target.id,bidirectional:true,
+        modes:["walking"],access:[...new Set([...source.access,...target.access])],approved:false
+      });
+    }
+    editorActiveNodeId=selectedId;
+    rebuildEditorVisuals();
+    return;
+  }
   const hits=raycaster.intersectObject(model,true).filter(hit=>{
     const object=hit.object;
     return object.isMesh&&object.visible&&!routeGroup?.getObjectById(object.id)&&!editorGroup?.getObjectById(object.id);
@@ -431,14 +459,43 @@ function handleEditorPointerUp(event){
   if(!hits.length)return;
   const local=model.worldToLocal(hits[0].point.clone());
   local.y+=.35;
-  editorNodes.push({
-    id:`draft-node-${editorNodes.length+1}`,
+  pushEditorHistory();
+  const node={
+    id:nextEditorId("node",editorNodes),
     position:{x:+local.x.toFixed(4),y:+local.y.toFixed(4),z:+local.z.toFixed(4)},
     layer:activeEditorLayer(),
     access:["visitor","employee","contractor","emergency"],
     approved:false
-  });
+  };
+  editorNodes.push(node);
+  if(editorActiveNodeId){
+    const source=editorNodes.find(candidate=>candidate.id===editorActiveNodeId);
+    if(source)editorEdges.push({
+      id:nextEditorId("edge",editorEdges),from:source.id,to:node.id,bidirectional:true,
+      modes:["walking"],access:[...new Set([...source.access,...node.access])],approved:false
+    });
+  }
+  editorActiveNodeId=node.id;
   rebuildEditorVisuals();
+}
+
+function editorNodeId(object){
+  let current=object;
+  while(current&&current!==editorGroup){
+    if(current.userData?.editorNodeId)return current.userData.editorNodeId;
+    current=current.parent;
+  }
+  return null;
+}
+
+function nextEditorId(kind,items){
+  const highest=items.reduce((max,item)=>Math.max(max,Number(String(item.id||"").match(/(\d+)$/)?.[1]||0)),0);
+  return `draft-${kind}-${highest+1}`;
+}
+
+function pushEditorHistory(){
+  editorHistory.push(JSON.stringify({nodes:editorNodes,edges:editorEdges,active:editorActiveNodeId}));
+  if(editorHistory.length>100)editorHistory.shift();
 }
 
 function ensureEditorGroup(){
@@ -455,10 +512,26 @@ function rebuildEditorVisuals(){
     child.traverse(descendant=>descendant.element?.remove?.());
     disposeObject(child);
   }
-  const points=editorNodes.map(node=>new THREE.Vector3(node.position.x,node.position.y,node.position.z));
-  points.forEach((position,index)=>{
-    const nodeMarker=marker(position,0xef3340,2.1);
-    nodeMarker.name=editorNodes[index].id;
+  const nodeIndex=new Map(editorNodes.map(node=>[node.id,node]));
+  editorEdges.forEach(edge=>{
+    const source=nodeIndex.get(edge.from),target=nodeIndex.get(edge.to);
+    if(!source||!target)return;
+    const line=new THREE.Line(
+      new THREE.BufferGeometry().setFromPoints([
+        new THREE.Vector3(source.position.x,source.position.y,source.position.z),
+        new THREE.Vector3(target.position.x,target.position.y,target.position.z)
+      ]),
+      new THREE.LineBasicMaterial({color:0xef3340,linewidth:3})
+    );
+    line.name=edge.id;
+    editorGroup.add(line);
+  });
+  editorNodes.forEach((node,index)=>{
+    const position=new THREE.Vector3(node.position.x,node.position.y,node.position.z);
+    const selected=node.id===editorActiveNodeId;
+    const nodeMarker=marker(position,selected?0xffcf3a:0xef3340,selected?2.8:2.1);
+    nodeMarker.name=node.id;
+    nodeMarker.userData.editorNodeId=node.id;
     const element=document.createElement("div");
     element.className="three-semantic-label";
     element.dataset.kind="vertical";
@@ -468,32 +541,50 @@ function rebuildEditorVisuals(){
     nodeMarker.add(numberLabel);
     editorGroup.add(nodeMarker);
   });
-  if(points.length>1){
-    editorLine=new THREE.Line(
-      new THREE.BufferGeometry().setFromPoints(points),
-      new THREE.LineBasicMaterial({color:0xef3340,linewidth:3})
-    );
-    editorLine.name="PGS_DRAFT_CENTERLINE";
-    editorGroup.add(editorLine);
-  }
   updateEditorControls();
 }
 
 function updateEditorControls(){
   const count=editorNodes.length;
-  document.getElementById("threeEditStatus").textContent=`Draft: ${count} node${count===1?"":"s"}${editorActive?" • click model to add":""}`;
-  ["threeEditUndo","threeEditClear","threeEditSave","threeEditExport"].forEach(id=>{
+  const selected=editorActiveNodeId?` • selected ${editorActiveNodeId.replace("draft-node-","")}`:" • next click starts a segment";
+  document.getElementById("threeEditStatus").textContent=`Draft: ${count} nodes / ${editorEdges.length} edges${editorActive?selected:""}`;
+  ["threeEditClear","threeEditSave","threeEditExport"].forEach(id=>{
     document.getElementById(id).disabled=count===0;
   });
+  document.getElementById("threeEditUndo").disabled=editorHistory.length===0;
+  document.getElementById("threeEditSegment").disabled=!editorActiveNodeId;
+  document.getElementById("threeEditDelete").disabled=!editorActiveNodeId;
 }
 
 function undoEditorNode(){
-  editorNodes.pop();
+  const previous=editorHistory.pop();
+  if(!previous)return;
+  const state=JSON.parse(previous);
+  editorNodes=state.nodes||[];
+  editorEdges=state.edges||[];
+  editorActiveNodeId=state.active||null;
+  rebuildEditorVisuals();
+}
+
+function startEditorSegment(){
+  editorActiveNodeId=null;
+  rebuildEditorVisuals();
+}
+
+function deleteSelectedEditorNode(){
+  if(!editorActiveNodeId)return;
+  pushEditorHistory();
+  editorNodes=editorNodes.filter(node=>node.id!==editorActiveNodeId);
+  editorEdges=editorEdges.filter(edge=>edge.from!==editorActiveNodeId&&edge.to!==editorActiveNodeId);
+  editorActiveNodeId=null;
   rebuildEditorVisuals();
 }
 
 function clearEditorDraft(){
+  pushEditorHistory();
   editorNodes=[];
+  editorEdges=[];
+  editorActiveNodeId=null;
   localStorage.removeItem(EDITOR_STORAGE_KEY);
   rebuildEditorVisuals();
 }
@@ -504,15 +595,7 @@ function editorPayload(){
     coordinate_system:"PGS GLB model coordinates",
     review_status:"draft_requires_site_approval",
     nodes:editorNodes,
-    edges:editorNodes.slice(1).map((node,index)=>({
-      id:`draft-edge-${index+1}`,
-      from:editorNodes[index].id,
-      to:node.id,
-      bidirectional:true,
-      modes:["walking"],
-      access:[...new Set([...editorNodes[index].access,...node.access])],
-      approved:false
-    }))
+    edges:editorEdges
   };
 }
 
@@ -525,10 +608,37 @@ function restoreEditorDraft(){
   try{
     const saved=JSON.parse(localStorage.getItem(EDITOR_STORAGE_KEY)||"null");
     editorNodes=Array.isArray(saved?.nodes)?saved.nodes:[];
+    editorEdges=Array.isArray(saved?.edges)?saved.edges:editorNodes.slice(1).map((node,index)=>({
+      id:`draft-edge-${index+1}`,from:editorNodes[index].id,to:node.id,bidirectional:true,
+      modes:["walking"],access:node.access||["visitor","employee","contractor","emergency"],approved:false
+    }));
   }catch{
     editorNodes=[];
+    editorEdges=[];
   }
+  editorActiveNodeId=null;
+  editorHistory=[];
   rebuildEditorVisuals();
+}
+
+async function importEditorDraft(event){
+  const file=event.target.files?.[0];
+  event.target.value="";
+  if(!file)return;
+  try{
+    const payload=JSON.parse(await file.text());
+    if(payload.coordinate_system!=="PGS GLB model coordinates"||!Array.isArray(payload.nodes)||!Array.isArray(payload.edges)){
+      throw new Error("unsupported pedestrian draft format");
+    }
+    pushEditorHistory();
+    editorNodes=payload.nodes;
+    editorEdges=payload.edges;
+    editorActiveNodeId=null;
+    rebuildEditorVisuals();
+    document.getElementById("threeEditStatus").textContent=`Imported ${file.name} • ${editorNodes.length} nodes / ${editorEdges.length} edges`;
+  }catch(error){
+    setStatus(`Could not import route draft: ${error.message}`,{error:true});
+  }
 }
 
 function exportEditorDraft(){
