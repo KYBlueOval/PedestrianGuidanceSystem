@@ -567,6 +567,7 @@ function rebuildEditorVisuals(){
     editorGroup.add(nodeMarker);
   });
   updateEditorControls();
+  persistEditorDraft();
 }
 
 function updateEditorControls(){
@@ -625,8 +626,16 @@ function editorPayload(){
 }
 
 function saveEditorDraft(){
-  localStorage.setItem(EDITOR_STORAGE_KEY,JSON.stringify(editorPayload()));
+  persistEditorDraft();
   document.getElementById("threeEditStatus").textContent=`Draft saved locally • ${editorNodes.length} nodes`;
+}
+
+function persistEditorDraft(){
+  try{
+    localStorage.setItem(EDITOR_STORAGE_KEY,JSON.stringify(editorPayload()));
+  }catch(error){
+    console.warn("Could not auto-save pedestrian network draft",error);
+  }
 }
 
 function restoreEditorDraft(){
@@ -756,7 +765,8 @@ function placeLabelOverride(local){
   document.getElementById("threeLabelPlace").classList.remove("active");
   renderLabelOverrides();
   populateLabelTargets(target);
-  document.getElementById("threeLabelStatus").textContent=`Placed ${record.name} • save or export to preserve`;
+  persistLabelOverrides();
+  document.getElementById("threeLabelStatus").textContent=`Placed ${record.name} • auto-saved locally`;
   document.querySelector(".three-hint").textContent="Drag to orbit • Scroll to zoom • Right-drag to pan";
 }
 
@@ -800,8 +810,16 @@ function renderLabelOverrides(){
 }
 
 function saveLabelOverrides(){
-  localStorage.setItem(LABEL_STORAGE_KEY,JSON.stringify(labelOverridePayload()));
+  persistLabelOverrides();
   document.getElementById("threeLabelStatus").textContent=`Saved ${labelOverrides.length} label override${labelOverrides.length===1?"":"s"} locally`;
+}
+
+function persistLabelOverrides(){
+  try{
+    localStorage.setItem(LABEL_STORAGE_KEY,JSON.stringify(labelOverridePayload()));
+  }catch(error){
+    console.warn("Could not auto-save label overrides",error);
+  }
 }
 
 function restoreLabelOverrides(){
@@ -818,7 +836,8 @@ function removeLabelOverride(){
   labelOverrides=labelOverrides.filter(item=>item.source_label_id!==target);
   renderLabelOverrides();
   populateLabelTargets();
-  document.getElementById("threeLabelStatus").textContent="Override removed; recovered label restored";
+  persistLabelOverrides();
+  document.getElementById("threeLabelStatus").textContent="Override removed; recovered label restored • auto-saved";
 }
 
 function exportLabelOverrides(){
@@ -840,7 +859,8 @@ async function importLabelOverrides(event){
     labelOverrides=payload.labels;
     renderLabelOverrides();
     populateLabelTargets();
-    document.getElementById("threeLabelStatus").textContent=`Imported ${file.name} • ${labelOverrides.length} labels`;
+    persistLabelOverrides();
+    document.getElementById("threeLabelStatus").textContent=`Imported ${file.name} • ${labelOverrides.length} labels • auto-saved`;
   }catch(error){
     setStatus(`Could not import label overrides: ${error.message}`,{error:true});
   }

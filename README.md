@@ -28,14 +28,17 @@ The selected node is yellow and becomes the origin of the next edge.
   expanded across multiple sessions.
 - **Undo** restores the graph before the last edit.
 
-Save the draft locally or export `pedestrian_network_draft_YYYY-MM-DD.json` for
-review. Draft paths are never treated as approved routes automatically.
+Every route-editor change is auto-saved in the current browser. Use **Export
+JSON** to create the durable `pedestrian_network_draft_YYYY-MM-DD.json` file for
+review and compilation. Draft paths are never treated as approved routes
+automatically.
 
 The **Map Label Editor** creates reversible spatial annotations without editing
 the recovered Unity/XEUS source data. Choose an existing building or key-area
 label to rename/reposition it, or choose **New label**, enter a name and type,
 then click **Place / Move Label** and click the exact model feature. Label drafts
-can be saved locally and imported/exported as
+are auto-saved locally after every placement, move, import, or removal and can
+be imported/exported as
 `label_overrides_draft_YYYY-MM-DD.json`. A newly authored entrance label is not
 automatically a routing destination; destination publication follows spatial
 and pedestrian-network review.
