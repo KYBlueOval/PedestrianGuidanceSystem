@@ -18,12 +18,14 @@ let routeProgress=0,trackingPaused=false,routeDuration=24,lastFrameTime=performa
 let editorActive=false,editorGroup;
 let editorNodes=[],editorEdges=[],editorActiveNodeId=null,editorHistory=[];
 let labelOverrides=[],labelOverrideGroup,labelPlacementActive=false;
+let destinationDrafts=[],destinationDraftGroup,destinationPlacementActive=false;
 let pointerStart=null;
 let animationFrameCount=0;
 const raycaster=new THREE.Raycaster();
 const pointer=new THREE.Vector2();
 const EDITOR_STORAGE_KEY="pgs-v10-pedestrian-network-draft";
 const LABEL_STORAGE_KEY="pgs-v10-label-overrides-draft";
+const DESTINATION_STORAGE_KEY="pgs-v10-destination-anchors-draft";
 
 function setStatus(message,{error=false,hidden=false}={}){
   status.classList.toggle("error",error);
@@ -98,6 +100,12 @@ function initialize(){
   document.getElementById("threeLabelExport").addEventListener("click",exportLabelOverrides);
   document.getElementById("threeLabelImport").addEventListener("click",()=>document.getElementById("threeLabelImportFile").click());
   document.getElementById("threeLabelImportFile").addEventListener("change",importLabelOverrides);
+  document.getElementById("threeDestinationSource").addEventListener("change",selectDestinationSource);
+  document.getElementById("threeDestinationPlace").addEventListener("click",startDestinationPlacement);
+  document.getElementById("threeDestinationRemove").addEventListener("click",removeDestinationDraft);
+  document.getElementById("threeDestinationExport").addEventListener("click",exportDestinationDrafts);
+  document.getElementById("threeDestinationImport").addEventListener("click",()=>document.getElementById("threeDestinationImportFile").click());
+  document.getElementById("threeDestinationImportFile").addEventListener("change",importDestinationDrafts);
   renderer.domElement.addEventListener("pointerdown",event=>{pointerStart={x:event.clientX,y:event.clientY};});
   renderer.domElement.addEventListener("pointerup",handleEditorPointerUp);
   window.addEventListener("pgs:route",event=>renderRoute(event.detail));
@@ -137,6 +145,7 @@ async function loadModel(){
     createSemanticLabels(labelsPayload.labels||[]);
     restoreLabelOverrides();
     restoreEditorDraft();
+    restoreDestinationDrafts();
     applyInitialLayerState();
     if(window.pgsCurrentRoute)renderRoute(window.pgsCurrentRoute);
     setStatus("3D twin ready",{hidden:true});
@@ -425,14 +434,15 @@ function toggleWalkPreview(){
 function toggleRouteEditor(){
   if(!model)return;
   if(labelPlacementActive)cancelLabelPlacement();
+  if(destinationPlacementActive)cancelDestinationPlacement();
   editorActive=!editorActive;
   controls.enabled=!editorActive;
   frame.classList.toggle("route-editing",editorActive);
   const button=document.getElementById("threeEditToggle");
   button.classList.toggle("active",editorActive);
-  button.textContent=editorActive?"Finish Route Edit":"Start Route Edit";
+  button.textContent=editorActive?"Finish Mapping":"Start Mapping";
   document.querySelector(".three-hint").textContent=editorActive
-    ?"Click the center of each approved hallway or sidewalk segment"
+    ?"Click the centerline at every walkway turn or intersection"
     :"Drag to orbit • Scroll to zoom • Right-drag to pan";
   updateEditorControls();
 }
@@ -443,7 +453,7 @@ function activeEditorLayer(){
 }
 
 function handleEditorPointerUp(event){
-  if((!editorActive&&!labelPlacementActive)||event.button!==0||!pointerStart)return;
+  if((!editorActive&&!labelPlacementActive&&!destinationPlacementActive)||event.button!==0||!pointerStart)return;
   const movement=Math.hypot(event.clientX-pointerStart.x,event.clientY-pointerStart.y);
   pointerStart=null;
   if(movement>5)return;
@@ -451,6 +461,14 @@ function handleEditorPointerUp(event){
   pointer.x=((event.clientX-rect.left)/rect.width)*2-1;
   pointer.y=-((event.clientY-rect.top)/rect.height)*2+1;
   raycaster.setFromCamera(pointer,camera);
+  if(destinationPlacementActive){
+    const destinationHits=raycaster.intersectObject(model,true).filter(hit=>{
+      const object=hit.object;
+      return object.isMesh&&object.visible&&!routeGroup?.getObjectById(object.id)&&!editorGroup?.getObjectById(object.id);
+    });
+    if(destinationHits.length)placeDestinationDraft(model.worldToLocal(destinationHits[0].point.clone()));
+    return;
+  }
   if(labelPlacementActive){
     const labelHits=raycaster.intersectObject(model,true).filter(hit=>{
       const object=hit.object;
@@ -468,9 +486,10 @@ function handleEditorPointerUp(event){
       pushEditorHistory();
       const source=editorNodes.find(node=>node.id===editorActiveNodeId);
       const target=editorNodes.find(node=>node.id===selectedId);
+      const settings=activeWalkwaySettings();
       editorEdges.push({
         id:nextEditorId("edge",editorEdges),from:source.id,to:target.id,bidirectional:true,
-        modes:["walking"],access:[...new Set([...source.access,...target.access])],approved:false
+        modes:["walking"],kind:settings.kind,access:settings.access,accessible:settings.accessible,approved:false
       });
     }
     editorActiveNodeId=selectedId;
@@ -485,11 +504,13 @@ function handleEditorPointerUp(event){
   const local=model.worldToLocal(hits[0].point.clone());
   local.y+=.35;
   pushEditorHistory();
+  const settings=activeWalkwaySettings();
   const node={
     id:nextEditorId("node",editorNodes),
     position:{x:+local.x.toFixed(4),y:+local.y.toFixed(4),z:+local.z.toFixed(4)},
     layer:activeEditorLayer(),
-    access:["visitor","employee","contractor","emergency"],
+    access:settings.access,
+    accessible:settings.accessible,
     approved:false
   };
   editorNodes.push(node);
@@ -497,11 +518,20 @@ function handleEditorPointerUp(event){
     const source=editorNodes.find(candidate=>candidate.id===editorActiveNodeId);
     if(source)editorEdges.push({
       id:nextEditorId("edge",editorEdges),from:source.id,to:node.id,bidirectional:true,
-      modes:["walking"],access:[...new Set([...source.access,...node.access])],approved:false
+      modes:["walking"],kind:settings.kind,access:settings.access,accessible:settings.accessible,approved:false
     });
   }
   editorActiveNodeId=node.id;
   rebuildEditorVisuals();
+}
+
+function activeWalkwaySettings(){
+  const accessProfile=document.getElementById("threeWalkwayAccess").value;
+  return {
+    kind:document.getElementById("threeWalkwayKind").value,
+    access:accessProfile==="all"?["visitor","employee","contractor","emergency"]:[accessProfile],
+    accessible:document.getElementById("threeWalkwayAccessible").checked
+  };
 }
 
 function editorNodeId(object){
@@ -573,7 +603,7 @@ function rebuildEditorVisuals(){
 function updateEditorControls(){
   const count=editorNodes.length;
   const selected=editorActiveNodeId?` • selected ${editorActiveNodeId.replace("draft-node-","")}`:" • next click starts a segment";
-  document.getElementById("threeEditStatus").textContent=`Draft: ${count} nodes / ${editorEdges.length} edges${editorActive?selected:""}`;
+  document.getElementById("threeEditStatus").textContent=`Network: ${count} nodes / ${editorEdges.length} walkways${editorActive?selected:""}`;
   ["threeEditClear","threeEditSave","threeEditExport"].forEach(id=>{
     document.getElementById(id).disabled=count===0;
   });
@@ -617,8 +647,9 @@ function clearEditorDraft(){
 
 function editorPayload(){
   return {
-    schema_version:"0.1.0-draft",
+    schema_version:"0.2.0-draft",
     coordinate_system:"PGS GLB model coordinates",
+    authoring_mode:"pedestrian_network_mapping",
     review_status:"draft_requires_site_approval",
     nodes:editorNodes,
     edges:editorEdges
@@ -627,7 +658,7 @@ function editorPayload(){
 
 function saveEditorDraft(){
   persistEditorDraft();
-  document.getElementById("threeEditStatus").textContent=`Draft saved locally • ${editorNodes.length} nodes`;
+  document.getElementById("threeEditStatus").textContent=`Network saved locally • ${editorNodes.length} nodes / ${editorEdges.length} walkways`;
 }
 
 function persistEditorDraft(){
@@ -642,10 +673,10 @@ function restoreEditorDraft(){
   try{
     const saved=JSON.parse(localStorage.getItem(EDITOR_STORAGE_KEY)||"null");
     editorNodes=Array.isArray(saved?.nodes)?saved.nodes:[];
-    editorEdges=Array.isArray(saved?.edges)?saved.edges:editorNodes.slice(1).map((node,index)=>({
+    editorEdges=(Array.isArray(saved?.edges)?saved.edges:editorNodes.slice(1).map((node,index)=>({
       id:`draft-edge-${index+1}`,from:editorNodes[index].id,to:node.id,bidirectional:true,
       modes:["walking"],access:node.access||["visitor","employee","contractor","emergency"],approved:false
-    }));
+    }))).map(edge=>({kind:"hallway",accessible:true,...edge}));
   }catch{
     editorNodes=[];
     editorEdges=[];
@@ -666,10 +697,10 @@ async function importEditorDraft(event){
     }
     pushEditorHistory();
     editorNodes=payload.nodes;
-    editorEdges=payload.edges;
+    editorEdges=payload.edges.map(edge=>({kind:"hallway",accessible:true,...edge}));
     editorActiveNodeId=null;
     rebuildEditorVisuals();
-    document.getElementById("threeEditStatus").textContent=`Imported ${file.name} • ${editorNodes.length} nodes / ${editorEdges.length} edges`;
+    document.getElementById("threeEditStatus").textContent=`Imported ${file.name} • ${editorNodes.length} nodes / ${editorEdges.length} walkways`;
   }catch(error){
     setStatus(`Could not import route draft: ${error.message}`,{error:true});
   }
@@ -679,7 +710,7 @@ function exportEditorDraft(){
   const blob=new Blob([JSON.stringify(editorPayload(),null,2)],{type:"application/json"});
   const link=document.createElement("a");
   link.href=URL.createObjectURL(blob);
-  link.download=`pedestrian_network_draft_${new Date().toISOString().slice(0,10)}.json`;
+  link.download=`pedestrian_network_map_${new Date().toISOString().slice(0,10)}.json`;
   link.click();
   setTimeout(()=>URL.revokeObjectURL(link.href),1000);
 }
@@ -708,6 +739,7 @@ function populateLabelTargets(selectedValue="new"){
   });
   select.value=[...select.options].some(option=>option.value===selectedValue)?selectedValue:"new";
   selectLabelTarget();
+  populateDestinationSources();
 }
 
 function selectLabelTarget(){
@@ -863,6 +895,211 @@ async function importLabelOverrides(event){
     document.getElementById("threeLabelStatus").textContent=`Imported ${file.name} • ${labelOverrides.length} labels • auto-saved`;
   }catch(error){
     setStatus(`Could not import label overrides: ${error.message}`,{error:true});
+  }
+}
+
+function destinationPayload(){
+  return {
+    schema_version:"0.1.0-draft",
+    coordinate_system:"PGS GLB model coordinates",
+    authoring_mode:"destination_anchor_mapping",
+    review_status:"draft_requires_site_approval",
+    destinations:destinationDrafts
+  };
+}
+
+function populateDestinationSources(selectedValue){
+  const select=document.getElementById("threeDestinationSource");
+  if(!select)return;
+  const current=selectedValue??select.value;
+  const choices=new Map();
+  sourceLabelObjects.forEach((label,id)=>choices.set(id,{
+    id,name:label.userData.displayName||id,kind:label.userData.category||"area"
+  }));
+  labelOverrides.forEach(record=>choices.set(record.source_label_id,{
+    id:record.source_label_id,name:record.name,kind:record.kind||"area"
+  }));
+  select.innerHTML='<option value="">Select a mapped label</option>';
+  [...choices.values()].sort((a,b)=>a.name.localeCompare(b.name)).forEach(item=>{
+    select.appendChild(new Option(`${item.name} (${item.kind})`,item.id));
+  });
+  select.value=[...select.options].some(option=>option.value===current)?current:"";
+  selectDestinationSource();
+}
+
+function selectDestinationSource(){
+  const sourceId=document.getElementById("threeDestinationSource").value;
+  const existing=destinationDrafts.find(item=>item.source_label_id===sourceId);
+  const override=labelOverrides.find(item=>item.source_label_id===sourceId);
+  const source=sourceLabelObjects.get(sourceId);
+  document.getElementById("threeDestinationName").value=existing?.name||override?.name||source?.userData.displayName||"";
+  if(existing){
+    document.getElementById("threeDestinationCategory").value=existing.category||"department";
+    document.getElementById("threeDestinationAccess").value=existing.access_profile||"employee";
+  }
+  document.getElementById("threeDestinationRemove").disabled=!existing;
+  const statusText=existing
+    ?`Anchored to ${existing.network_node_id||"no network node"} • ${existing.connector_distance?.toFixed?.(1)??"--"} units`
+    :sourceId?"Place the pedestrian entrance, not the center of the room":"No destination anchor selected";
+  document.getElementById("threeDestinationStatus").textContent=statusText;
+}
+
+function startDestinationPlacement(){
+  if(destinationPlacementActive){cancelDestinationPlacement();return;}
+  const sourceId=document.getElementById("threeDestinationSource").value;
+  const name=document.getElementById("threeDestinationName").value.trim();
+  if(!sourceId||!name){
+    document.getElementById("threeDestinationStatus").textContent="Choose a mapped label and destination name first";
+    return;
+  }
+  if(editorActive)toggleRouteEditor();
+  if(labelPlacementActive)cancelLabelPlacement();
+  destinationPlacementActive=true;
+  controls.enabled=false;
+  frame.classList.add("label-editing");
+  document.getElementById("threeDestinationPlace").classList.add("active");
+  document.getElementById("threeDestinationStatus").textContent="Click the pedestrian entrance or arrival point";
+  document.querySelector(".three-hint").textContent="Click the exact pedestrian arrival point for this destination";
+}
+
+function cancelDestinationPlacement(){
+  destinationPlacementActive=false;
+  controls.enabled=true;
+  frame.classList.remove("label-editing");
+  document.getElementById("threeDestinationPlace").classList.remove("active");
+  document.getElementById("threeDestinationStatus").textContent="Destination placement cancelled";
+  document.querySelector(".three-hint").textContent="Drag to orbit • Scroll to zoom • Right-drag to pan";
+}
+
+function nearestEditorNode(position){
+  let nearest=null;
+  editorNodes.forEach(node=>{
+    const distance=Math.hypot(
+      position.x-node.position.x,
+      position.y-node.position.y,
+      position.z-node.position.z
+    );
+    if(!nearest||distance<nearest.distance)nearest={node,distance};
+  });
+  return nearest;
+}
+
+function placeDestinationDraft(local){
+  const sourceId=document.getElementById("threeDestinationSource").value;
+  const position={x:+local.x.toFixed(4),y:+(local.y+.5).toFixed(4),z:+local.z.toFixed(4)};
+  const nearest=nearestEditorNode(position);
+  const record={
+    id:`destination-draft:${sourceId}`,
+    source_label_id:sourceId,
+    name:document.getElementById("threeDestinationName").value.trim(),
+    category:document.getElementById("threeDestinationCategory").value,
+    access_profile:document.getElementById("threeDestinationAccess").value,
+    layer:activeEditorLayer(),
+    position,
+    network_node_id:nearest?.node.id||null,
+    connector_distance:nearest?+nearest.distance.toFixed(4):null,
+    approved:false
+  };
+  const index=destinationDrafts.findIndex(item=>item.source_label_id===sourceId);
+  if(index>=0)destinationDrafts[index]=record;else destinationDrafts.push(record);
+  destinationPlacementActive=false;
+  controls.enabled=true;
+  frame.classList.remove("label-editing");
+  document.getElementById("threeDestinationPlace").classList.remove("active");
+  renderDestinationDrafts();
+  persistDestinationDrafts();
+  populateDestinationSources(sourceId);
+  document.getElementById("threeDestinationStatus").textContent=nearest
+    ?`Auto-saved • nearest network node ${nearest.node.id.replace("draft-node-","")} is ${nearest.distance.toFixed(1)} units away`
+    :"Auto-saved • map a nearby pedestrian walkway before approval";
+  document.querySelector(".three-hint").textContent="Drag to orbit • Scroll to zoom • Right-drag to pan";
+}
+
+function ensureDestinationDraftGroup(){
+  if(destinationDraftGroup)return;
+  destinationDraftGroup=new THREE.Group();
+  destinationDraftGroup.name="PGS_DESTINATION_ANCHOR_DRAFTS";
+  model.add(destinationDraftGroup);
+}
+
+function renderDestinationDrafts(){
+  ensureDestinationDraftGroup();
+  while(destinationDraftGroup.children.length){
+    const child=destinationDraftGroup.children.pop();
+    child.traverse(descendant=>descendant.element?.remove?.());
+    disposeObject(child);
+  }
+  const nodes=new Map(editorNodes.map(node=>[node.id,node]));
+  destinationDrafts.forEach(record=>{
+    if(!record.position)return;
+    const position=new THREE.Vector3(record.position.x,record.position.y,record.position.z);
+    const anchor=marker(position,0x38d8ff,2.5);
+    anchor.className="three-destination-marker";
+    const element=document.createElement("div");
+    element.className="three-label three-destination-label";
+    element.textContent=record.name;
+    const label=new CSS2DObject(element);
+    label.position.set(0,5,0);
+    anchor.add(label);
+    destinationDraftGroup.add(anchor);
+    const target=nodes.get(record.network_node_id);
+    if(target){
+      const line=new THREE.Line(
+        new THREE.BufferGeometry().setFromPoints([position,new THREE.Vector3(target.position.x,target.position.y,target.position.z)]),
+        new THREE.LineDashedMaterial({color:0x38d8ff,dashSize:3,gapSize:2})
+      );
+      line.computeLineDistances();
+      destinationDraftGroup.add(line);
+    }
+  });
+  document.getElementById("threeDestinationExport").disabled=destinationDrafts.length===0;
+}
+
+function persistDestinationDrafts(){
+  try{localStorage.setItem(DESTINATION_STORAGE_KEY,JSON.stringify(destinationPayload()));}
+  catch(error){console.warn("Could not auto-save destination anchors",error);}
+}
+
+function restoreDestinationDrafts(){
+  try{
+    const saved=JSON.parse(localStorage.getItem(DESTINATION_STORAGE_KEY)||"null");
+    destinationDrafts=Array.isArray(saved?.destinations)?saved.destinations:[];
+  }catch{destinationDrafts=[];}
+  renderDestinationDrafts();
+  populateDestinationSources();
+}
+
+function removeDestinationDraft(){
+  const sourceId=document.getElementById("threeDestinationSource").value;
+  destinationDrafts=destinationDrafts.filter(item=>item.source_label_id!==sourceId);
+  renderDestinationDrafts();
+  persistDestinationDrafts();
+  populateDestinationSources(sourceId);
+}
+
+function exportDestinationDrafts(){
+  const blob=new Blob([JSON.stringify(destinationPayload(),null,2)],{type:"application/json"});
+  const link=document.createElement("a");
+  link.href=URL.createObjectURL(blob);
+  link.download=`destination_anchors_draft_${new Date().toISOString().slice(0,10)}.json`;
+  link.click();
+  setTimeout(()=>URL.revokeObjectURL(link.href),1000);
+}
+
+async function importDestinationDrafts(event){
+  const file=event.target.files?.[0];
+  event.target.value="";
+  if(!file)return;
+  try{
+    const payload=JSON.parse(await file.text());
+    if(payload.coordinate_system!=="PGS GLB model coordinates"||!Array.isArray(payload.destinations))throw new Error("unsupported destination anchor format");
+    destinationDrafts=payload.destinations;
+    renderDestinationDrafts();
+    persistDestinationDrafts();
+    populateDestinationSources();
+    document.getElementById("threeDestinationStatus").textContent=`Imported ${file.name} • ${destinationDrafts.length} destination anchors • auto-saved`;
+  }catch(error){
+    setStatus(`Could not import destination anchors: ${error.message}`,{error:true});
   }
 }
 

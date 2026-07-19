@@ -10,7 +10,7 @@
 <link rel="icon" type="image/png" sizes="192x192" href="assets/icons/pgs-icon-192.png"/>
 <link rel="apple-touch-icon" sizes="180x180" href="assets/icons/pgs-icon-180.png"/>
 <meta name="theme-color" content="#061a33"/>
-<link rel="stylesheet" href="style.css?v=10.4.2"/>
+<link rel="stylesheet" href="style.css?v=10.5.0"/>
 </head>
 <body>
 <div class="app-shell">
@@ -153,23 +153,41 @@
           <small id="threeRouteStatus">Awaiting approved pedestrian network</small>
           <button id="threeWalkToggle" class="three-walk-button" type="button">Pause Walk Preview</button>
           <div class="three-editor-divider"></div>
-          <b>Pedestrian Path Editor</b>
-          <button id="threeEditToggle" class="three-editor-button" type="button">Start Route Edit</button>
-          <small id="threeEditStatus">Draft: 0 nodes</small>
+          <b>Pedestrian Network Mapper</b>
+          <small>Map hallway, sidewalk, and crossing centerlines before adding destinations.</small>
+          <select id="threeWalkwayKind" aria-label="Walkway type">
+            <option value="hallway">Indoor Hallway</option>
+            <option value="sidewalk">Outdoor Sidewalk</option>
+            <option value="crosswalk">Pedestrian Crossing</option>
+            <option value="entrance">Entrance Connector</option>
+            <option value="ramp">Accessible Ramp</option>
+            <option value="stairs">Stairs</option>
+            <option value="elevator">Elevator Transition</option>
+          </select>
+          <select id="threeWalkwayAccess" aria-label="Walkway access profile">
+            <option value="all">All Authorized Pedestrians</option>
+            <option value="visitor">Visitors / Escorted</option>
+            <option value="employee">Employees</option>
+            <option value="contractor">Contractors / Trades</option>
+            <option value="emergency">Emergency Use</option>
+          </select>
+          <label class="three-editor-option"><input id="threeWalkwayAccessible" type="checkbox" checked/> Wheelchair accessible</label>
+          <button id="threeEditToggle" class="three-editor-button" type="button">Start Mapping</button>
+          <small id="threeEditStatus">Network: 0 nodes / 0 walkways</small>
           <div class="three-editor-actions">
             <button id="threeEditUndo" type="button" disabled>Undo</button>
-            <button id="threeEditSegment" type="button" disabled>New Segment</button>
+            <button id="threeEditSegment" type="button" disabled>New Walkway</button>
           </div>
           <div class="three-editor-actions">
             <button id="threeEditDelete" type="button" disabled>Delete Selected</button>
             <button id="threeEditClear" type="button" disabled>Clear All</button>
           </div>
           <div class="three-editor-actions">
-            <button id="threeEditSave" type="button" disabled>Save Draft</button>
-            <button id="threeEditExport" type="button" disabled>Export JSON</button>
+            <button id="threeEditSave" type="button" disabled>Save Network</button>
+            <button id="threeEditExport" type="button" disabled>Export Network</button>
           </div>
           <div class="three-editor-actions">
-            <button id="threeEditImport" type="button">Import JSON</button>
+            <button id="threeEditImport" type="button">Import Network</button>
             <input id="threeEditImportFile" type="file" accept="application/json,.json" hidden/>
           </div>
           <div class="three-editor-divider"></div>
@@ -194,6 +212,38 @@
             <button id="threeLabelImport" type="button">Import Labels</button>
             <button id="threeLabelExport" type="button">Export Labels</button>
             <input id="threeLabelImportFile" type="file" accept="application/json,.json" hidden/>
+          </div>
+          <div class="three-editor-divider"></div>
+          <b>Destination Anchor Editor</b>
+          <small>Choose a mapped label, then place its pedestrian entrance point.</small>
+          <select id="threeDestinationSource" aria-label="Destination source label">
+            <option value="">Select a mapped label</option>
+          </select>
+          <input id="threeDestinationName" type="text" placeholder="Destination name" aria-label="Destination name"/>
+          <select id="threeDestinationCategory" aria-label="Destination category">
+            <option value="visitor">Visitor / Check-In</option>
+            <option value="security">Entrance / Security</option>
+            <option value="department">Department / Key Area</option>
+            <option value="amenity">Amenity / Employee Service</option>
+            <option value="production">Production Area</option>
+            <option value="emergency">Emergency / Muster</option>
+          </select>
+          <select id="threeDestinationAccess" aria-label="Destination access profile">
+            <option value="visitor">Visitor / Escorted</option>
+            <option value="employee">Employees</option>
+            <option value="contractor">Contractors / Trades</option>
+            <option value="all">All Authorized Pedestrians</option>
+            <option value="emergency">Emergency Use</option>
+          </select>
+          <button id="threeDestinationPlace" class="three-label-editor-button" type="button">Place Entrance Anchor</button>
+          <small id="threeDestinationStatus">No destination anchor selected</small>
+          <div class="three-editor-actions">
+            <button id="threeDestinationRemove" type="button" disabled>Remove Anchor</button>
+            <button id="threeDestinationExport" type="button" disabled>Export Anchors</button>
+          </div>
+          <div class="three-editor-actions">
+            <button id="threeDestinationImport" type="button">Import Anchors</button>
+            <input id="threeDestinationImportFile" type="file" accept="application/json,.json" hidden/>
           </div>
         </div>
         <div id="threeStatus" class="three-status" role="status">
@@ -273,7 +323,7 @@
 <script type="importmap">
 {"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.185.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.185.0/examples/jsm/"}}
 </script>
-<script src="app.js?v=10.4.2"></script>
-<script type="module" src="viewer3d.js?v=10.4.2"></script>
+<script src="app.js?v=10.5.0"></script>
+<script type="module" src="viewer3d.js?v=10.5.0"></script>
 </body>
 </html>
