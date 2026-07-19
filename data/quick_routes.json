@@ -18,7 +18,7 @@
     "mode": "employee"
   },
   {
-    "label": "Module GH to Module",
+    "label": "North Third Turnstile to Module",
     "start": "module_guard_house",
     "end": "module_area",
     "mode": "employee"
