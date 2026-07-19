@@ -278,7 +278,11 @@ function createSemanticLabels(records){
     label.visible=false;
     model.add(label);
     semanticLabels.push(label);
-    if(category!=="room")sourceLabelObjects.set(label.userData.labelId,label);
+    // Every recovered semantic label can be promoted to a pedestrian
+    // destination.  Room labels used to be excluded here, which made labels
+    // such as "HR SUITE M-116" visible in the Individual Rooms layer but
+    // impossible to select in the Destination Anchor Editor.
+    sourceLabelObjects.set(label.userData.labelId,label);
   });
   updateSemanticLabelVisibility();
 }
