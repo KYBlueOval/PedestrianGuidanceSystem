@@ -80,6 +80,9 @@ function initialize(){
   document.querySelectorAll("[data-semantic-label]").forEach(input=>{
     input.addEventListener("change",updateSemanticLabelVisibility);
   });
+  document.getElementById("threeWalkwaysToggle").addEventListener("change",event=>{
+    if(editorGroup)editorGroup.visible=event.target.checked;
+  });
   document.getElementById("threeRouteToggle").addEventListener("change",event=>{
     if(routeGroup)routeGroup.visible=event.target.checked;
   });
@@ -437,6 +440,10 @@ function toggleRouteEditor(){
   if(labelPlacementActive)cancelLabelPlacement();
   if(destinationPlacementActive)cancelDestinationPlacement();
   editorActive=!editorActive;
+  if(editorActive){
+    document.getElementById("threeWalkwaysToggle").checked=true;
+    if(editorGroup)editorGroup.visible=true;
+  }
   controls.enabled=!editorActive;
   frame.classList.toggle("route-editing",editorActive);
   const button=document.getElementById("threeEditToggle");
@@ -558,6 +565,7 @@ function ensureEditorGroup(){
   if(editorGroup)return;
   editorGroup=new THREE.Group();
   editorGroup.name="PGS_PEDESTRIAN_NETWORK_DRAFT";
+  editorGroup.visible=document.getElementById("threeWalkwaysToggle").checked;
   model.add(editorGroup);
 }
 
