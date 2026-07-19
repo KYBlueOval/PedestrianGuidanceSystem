@@ -109,15 +109,15 @@ async function loadModel(){
   loading=true;
   setStatus("Preparing 3D twin…");
   try{
-    const config=await fetch("data/config.json").then(response=>{
+    const config=await fetch("data/config.json",{cache:"no-store"}).then(response=>{
       if(!response.ok)throw new Error(`Configuration unavailable (${response.status})`);
       return response.json();
     });
     const modelUrl=config.views?.model||"assets/models/site_mobile.glb";
     const [destinationsPayload,labelsPayload,floorsPayload]=await Promise.all([
-      fetch("data/generated/destination_spatial.json").then(response=>response.ok?response.json():{}).catch(()=>({})),
-      fetch("data/generated/spatial_labels.json").then(response=>response.ok?response.json():{}).catch(()=>({})),
-      fetch("data/generated/floor_layers.json").then(response=>response.ok?response.json():{}).catch(()=>({}))
+      fetch("data/generated/destination_spatial.json",{cache:"no-store"}).then(response=>response.ok?response.json():{}).catch(()=>({})),
+      fetch("data/generated/spatial_labels.json",{cache:"no-store"}).then(response=>response.ok?response.json():{}).catch(()=>({})),
+      fetch("data/generated/floor_layers.json",{cache:"no-store"}).then(response=>response.ok?response.json():{}).catch(()=>({}))
     ]);
     spatialOverrides=destinationsPayload;
     floorLayerIndex.clear();

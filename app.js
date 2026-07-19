@@ -5,15 +5,16 @@ let workspaceView="2d";
 const MAP_W=1024,MAP_H=768;
 const $=id=>document.getElementById(id);
 const loc=id=>destinations.find(d=>d.id===id);
+const fetchJson=url=>fetch(url,{cache:"no-store"});
 
 async function init(){
   [destinations,routes,quickRoutes,pedestrianNetwork]=await Promise.all([
-    fetch("data/destinations.json").then(r=>r.json()),
-    fetch("data/routes.json").then(r=>r.json()),
-    fetch("data/quick_routes.json").then(r=>r.json()).catch(()=>[]),
-    fetch("data/generated/pedestrian_network.json").then(r=>r.ok?r.json():null).catch(()=>null)
+    fetchJson("data/destinations.json").then(r=>r.json()),
+    fetchJson("data/routes.json").then(r=>r.json()),
+    fetchJson("data/quick_routes.json").then(r=>r.json()).catch(()=>[]),
+    fetchJson("data/generated/pedestrian_network.json").then(r=>r.ok?r.json():null).catch(()=>null)
   ]);
-  const crosswalk=await fetch("data/generated/destination_node_crosswalk.json").then(r=>r.ok?r.json():null).catch(()=>null);
+  const crosswalk=await fetchJson("data/generated/destination_node_crosswalk.json").then(r=>r.ok?r.json():null).catch(()=>null);
   destinationNodeCrosswalk=Object.fromEntries((crosswalk?.destinations||[]).map(item=>[item.destination_id,item.node_id]));
   buildGraph(); buildPedestrianGraph(); populateSelects(); renderQuickRoutes(); drawNetwork(); drawNodes(); wireEvents(); resetView(); setMode("visitor"); updateClock(); setInterval(updateClock,30000);
 }
