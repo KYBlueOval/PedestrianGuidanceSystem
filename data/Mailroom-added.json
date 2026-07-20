@@ -1,0 +1,20 @@
+{
+  "schema_version": "0.1.0-draft",
+  "coordinate_system": "PGS GLB model coordinates",
+  "review_status": "draft_requires_site_approval",
+  "labels": [
+    {
+      "id": "label-override:custom-label:1784492891372",
+      "source_label_id": "custom-label:1784492891372",
+      "name": "Mail Room",
+      "kind": "area",
+      "layer": "ground",
+      "position": {
+        "x": -154.9316,
+        "y": 2.3,
+        "z": 88.4587
+      },
+      "approved": false
+    }
+  ]
+}
