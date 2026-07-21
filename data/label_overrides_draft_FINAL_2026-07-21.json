@@ -1,7 +1,8 @@
 {
   "schema_version": "0.1.0-draft",
   "coordinate_system": "PGS GLB model coordinates",
-  "review_status": "draft_requires_site_approval",
+  "review_status": "approved",
+  "approved": true,
   "labels": [
     {
       "id": "label-override:custom-label:1784492891372",

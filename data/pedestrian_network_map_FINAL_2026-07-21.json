@@ -3,8 +3,10 @@
   "coordinate_system": "PGS GLB model coordinates",
   "authoring_mode": "pedestrian_network_mapping",
   "review_status": "approved",
+  "approved": true,
   "review": {
-    "route_ready": true
+    "route_ready": true,
+    "approved": true
   },
   "nodes": [
     {

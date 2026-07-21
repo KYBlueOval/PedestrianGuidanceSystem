@@ -6,6 +6,7 @@
   "brand": "Ford Energy",
   "appName": "SiteNav Command",
   "systemName": "Pedestrian Guidance System",
+  "editorMode": false,
   "views": {
     "default": "3d",
     "threeDEnabled": true,
