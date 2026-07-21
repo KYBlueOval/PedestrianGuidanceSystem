@@ -1,0 +1,605 @@
+{
+  "schema_version": "0.1.0-draft",
+  "coordinate_system": "PGS GLB model coordinates",
+  "review_status": "draft_requires_site_approval",
+  "labels": [
+    {
+      "id": "label-override:custom-label:1784492891372",
+      "source_label_id": "custom-label:1784492891372",
+      "name": "Mail Room",
+      "kind": "area",
+      "layer": "ground",
+      "position": {
+        "x": -154.9316,
+        "y": 2.3,
+        "z": 88.4587
+      },
+      "approved": true
+    },
+    {
+      "id": "label-override:label:1e16b752-b261-58dd-9fa6-af5b735f63b9",
+      "source_label_id": "label:1e16b752-b261-58dd-9fa6-af5b735f63b9",
+      "name": "Cell Assembly Office",
+      "kind": "area",
+      "layer": "ground",
+      "position": {
+        "x": -263.9407,
+        "y": 2.3,
+        "z": 246.2749
+      },
+      "approved": true
+    },
+    {
+      "id": "label-override:label:457a37b0-ec18-5755-bea0-cc2aa4a24283",
+      "source_label_id": "label:457a37b0-ec18-5755-bea0-cc2aa4a24283",
+      "name": "Cell Assembly Office",
+      "kind": "area",
+      "layer": "ground",
+      "position": {
+        "x": -264.4532,
+        "y": 2.3,
+        "z": 270.6487
+      },
+      "approved": true
+    },
+    {
+      "id": "label-override:label:93258d24-2fcb-5be5-8edb-ed9624bb295b",
+      "source_label_id": "label:93258d24-2fcb-5be5-8edb-ed9624bb295b",
+      "name": "DT/IT Office",
+      "kind": "area",
+      "layer": "ground",
+      "position": {
+        "x": -281.6378,
+        "y": 2.3,
+        "z": 235.1725
+      },
+      "approved": true
+    },
+    {
+      "id": "label-override:label:b3939306-fb35-5aeb-bc34-34dff1a634de",
+      "source_label_id": "label:b3939306-fb35-5aeb-bc34-34dff1a634de",
+      "name": "L&D Office",
+      "kind": "area",
+      "layer": "ground",
+      "position": {
+        "x": -282.0993,
+        "y": 2.3,
+        "z": 219.9816
+      },
+      "approved": true
+    },
+    {
+      "id": "label-override:label:1c8c6489-4a29-5893-93b2-d5b82b78fbfa",
+      "source_label_id": "label:1c8c6489-4a29-5893-93b2-d5b82b78fbfa",
+      "name": "HR Office",
+      "kind": "area",
+      "layer": "ground",
+      "position": {
+        "x": -283.677,
+        "y": 2.3,
+        "z": 200.1057
+      },
+      "approved": true
+    },
+    {
+      "id": "label-override:label:f3ff17c7-be95-5ad5-88e4-dc32659f1803",
+      "source_label_id": "label:f3ff17c7-be95-5ad5-88e4-dc32659f1803",
+      "name": "HR Lobby Room M-117",
+      "kind": "area",
+      "layer": "ground",
+      "position": {
+        "x": -277.1663,
+        "y": 2.3,
+        "z": 198.8894
+      },
+      "approved": true
+    },
+    {
+      "id": "label-override:label:6d9dd094-d72f-58df-81ef-7bc67229be14",
+      "source_label_id": "label:6d9dd094-d72f-58df-81ef-7bc67229be14",
+      "name": "Cell Assembly Locker Rooms East (M-136)",
+      "kind": "area",
+      "layer": "ground",
+      "position": {
+        "x": -285.911,
+        "y": 2.3,
+        "z": 167.8609
+      },
+      "approved": true
+    },
+    {
+      "id": "label-override:custom-label:1784652620358",
+      "source_label_id": "custom-label:1784652620358",
+      "name": "Cell Assembly Locker Rooms West",
+      "kind": "building",
+      "layer": "ground",
+      "position": {
+        "x": -260.8601,
+        "y": 2.3,
+        "z": 166.913
+      },
+      "approved": true
+    },
+    {
+      "id": "label-override:label:56da8869-2f90-56df-b602-b0aff105eb24",
+      "source_label_id": "label:56da8869-2f90-56df-b602-b0aff105eb24",
+      "name": "BCC ROOM (M-143)",
+      "kind": "area",
+      "layer": "ground",
+      "position": {
+        "x": -267.8828,
+        "y": 2.3,
+        "z": 131.016
+      },
+      "approved": true
+    },
+    {
+      "id": "label-override:label:ee0ddca8-ee56-543c-bef6-6f9991ee2a5a",
+      "source_label_id": "label:ee0ddca8-ee56-543c-bef6-6f9991ee2a5a",
+      "name": "PCC ROOM (M-142)",
+      "kind": "area",
+      "layer": "ground",
+      "position": {
+        "x": -281.1776,
+        "y": 2.3,
+        "z": 130.7024
+      },
+      "approved": true
+    },
+    {
+      "id": "label-override:label:dc5e7d5f-f71b-5616-b520-fe5d656d6c57",
+      "source_label_id": "label:dc5e7d5f-f71b-5616-b520-fe5d656d6c57",
+      "name": "Formation Locker Room East (P-125)",
+      "kind": "area",
+      "layer": "ground",
+      "position": {
+        "x": -257.3303,
+        "y": 2.3,
+        "z": -77.6364
+      },
+      "approved": true
+    },
+    {
+      "id": "label-override:label:290fe78a-f753-5a58-974f-5f52f151b7b0",
+      "source_label_id": "label:290fe78a-f753-5a58-974f-5f52f151b7b0",
+      "name": "Formation Locker Room West (P-126)",
+      "kind": "area",
+      "layer": "ground",
+      "position": {
+        "x": -285.9909,
+        "y": 2.3,
+        "z": -85.5676
+      },
+      "approved": true
+    },
+    {
+      "id": "label-override:label:1e822a23-df79-527b-83b8-44be24c677c6",
+      "source_label_id": "label:1e822a23-df79-527b-83b8-44be24c677c6",
+      "name": "Formation Break Area (P-107)",
+      "kind": "area",
+      "layer": "ground",
+      "position": {
+        "x": -282.2227,
+        "y": 2.3,
+        "z": -37.8009
+      },
+      "approved": true
+    },
+    {
+      "id": "label-override:label:97d45caa-c39f-52a3-86b9-511c8332d5c5",
+      "source_label_id": "label:97d45caa-c39f-52a3-86b9-511c8332d5c5",
+      "name": "MP&L Office West (R-110)",
+      "kind": "area",
+      "layer": "ground",
+      "position": {
+        "x": -279.5195,
+        "y": 2.3,
+        "z": -344.415
+      },
+      "approved": true
+    },
+    {
+      "id": "label-override:label:ccd7fba7-9cc5-5d4b-bf58-2cd117131533",
+      "source_label_id": "label:ccd7fba7-9cc5-5d4b-bf58-2cd117131533",
+      "name": "Module Office (R-105)",
+      "kind": "area",
+      "layer": "ground",
+      "position": {
+        "x": -267.5205,
+        "y": 2.3,
+        "z": -344.2325
+      },
+      "approved": true
+    },
+    {
+      "id": "label-override:label:4a687577-d2eb-50e2-b127-73cebf051031",
+      "source_label_id": "label:4a687577-d2eb-50e2-b127-73cebf051031",
+      "name": "Electrode Break Area (K-133)",
+      "kind": "area",
+      "layer": "ground",
+      "position": {
+        "x": -271.1176,
+        "y": 5.1113,
+        "z": 419.6894
+      },
+      "approved": true
+    },
+    {
+      "id": "label-override:custom-label:1784653737769",
+      "source_label_id": "custom-label:1784653737769",
+      "name": "Maint. Rebuild Room",
+      "kind": "area",
+      "layer": "ground",
+      "position": {
+        "x": -289.111,
+        "y": 2.2999,
+        "z": 373.1994
+      },
+      "approved": true
+    },
+    {
+      "id": "label-override:custom-label:1784653871212",
+      "source_label_id": "custom-label:1784653871212",
+      "name": "Mallory Safety Supply Office",
+      "kind": "area",
+      "layer": "ground",
+      "position": {
+        "x": -289.4172,
+        "y": 2.3,
+        "z": 334.2394
+      },
+      "approved": true
+    },
+    {
+      "id": "label-override:building:Root_Main_Building_F38",
+      "source_label_id": "building:Root_Main_Building_F38",
+      "name": "Kentucky 1-Main Production Building",
+      "kind": "building",
+      "layer": "ground",
+      "position": {
+        "x": -383.6788,
+        "y": 2.3,
+        "z": 136.785
+      },
+      "approved": true
+    },
+    {
+      "id": "label-override:custom-label:1784654416109",
+      "source_label_id": "custom-label:1784654416109",
+      "name": "Truck Gate",
+      "kind": "entrance",
+      "layer": "ground",
+      "position": {
+        "x": -299.0133,
+        "y": 2.0001,
+        "z": -679.5153
+      },
+      "approved": true
+    },
+    {
+      "id": "label-override:custom-label:1784654556850",
+      "source_label_id": "custom-label:1784654556850",
+      "name": "North End Exterior Building Access Doors",
+      "kind": "entrance",
+      "layer": "ground",
+      "position": {
+        "x": -275.4214,
+        "y": 3.068,
+        "z": -373.9718
+      },
+      "approved": true
+    },
+    {
+      "id": "label-override:custom-label:1784654700049",
+      "source_label_id": "custom-label:1784654700049",
+      "name": "South End Exterior Building Access Doors",
+      "kind": "entrance",
+      "layer": "ground",
+      "position": {
+        "x": -273.7043,
+        "y": 1.9999,
+        "z": 626.3218
+      },
+      "approved": true
+    },
+    {
+      "id": "label-override:custom-label:1784655876364",
+      "source_label_id": "custom-label:1784655876364",
+      "name": "Module East Restroom",
+      "kind": "amenity",
+      "layer": "ground",
+      "position": {
+        "x": -268.3656,
+        "y": 4.8638,
+        "z": -243.9576
+      },
+      "approved": true
+    },
+    {
+      "id": "label-override:custom-label:1784655898900",
+      "source_label_id": "custom-label:1784655898900",
+      "name": "Module West Restroom",
+      "kind": "amenity",
+      "layer": "ground",
+      "position": {
+        "x": -280.3387,
+        "y": 5.2194,
+        "z": -243.9576
+      },
+      "approved": true
+    },
+    {
+      "id": "label-override:custom-label:1784655950792",
+      "source_label_id": "custom-label:1784655950792",
+      "name": "Module Locker Room East",
+      "kind": "area",
+      "layer": "ground",
+      "position": {
+        "x": -266.8545,
+        "y": 2.3,
+        "z": -255.7803
+      },
+      "approved": true
+    },
+    {
+      "id": "label-override:custom-label:1784655973350",
+      "source_label_id": "custom-label:1784655973350",
+      "name": "Module Locker Room West",
+      "kind": "area",
+      "layer": "ground",
+      "position": {
+        "x": -280.8921,
+        "y": 2.3,
+        "z": -255.0203
+      },
+      "approved": true
+    },
+    {
+      "id": "label-override:label:bc7c19bd-a263-5667-b009-2b3658e4dfa8",
+      "source_label_id": "label:bc7c19bd-a263-5667-b009-2b3658e4dfa8",
+      "name": "North Contractor Entrance (Third Turnstile)",
+      "kind": "area",
+      "layer": "ground",
+      "position": {
+        "x": -470.804,
+        "y": 2,
+        "z": -154.6352
+      },
+      "approved": true
+    },
+    {
+      "id": "label-override:label:22cc2184-5f3e-59d8-a436-e8e24a8a0745",
+      "source_label_id": "label:22cc2184-5f3e-59d8-a436-e8e24a8a0745",
+      "name": "Security Front Desk",
+      "kind": "area",
+      "layer": "ground",
+      "position": {
+        "x": -483.0735,
+        "y": 2.3,
+        "z": 91.1767
+      },
+      "approved": true
+    },
+    {
+      "id": "label-override:label:685e5912-af2e-535b-a37b-9fcc36a3e747",
+      "source_label_id": "label:685e5912-af2e-535b-a37b-9fcc36a3e747",
+      "name": "Main Guard House Building Exterior Door",
+      "kind": "entrance",
+      "layer": "ground",
+      "position": {
+        "x": -405.4068,
+        "y": 2.3,
+        "z": 80.3194
+      },
+      "approved": true
+    },
+    {
+      "id": "label-override:custom-label:1784660777177",
+      "source_label_id": "custom-label:1784660777177",
+      "name": "Southern Contractor Parking Lot",
+      "kind": "area",
+      "layer": "ground",
+      "position": {
+        "x": -571.3572,
+        "y": 2.2999,
+        "z": 447.3129
+      },
+      "approved": true
+    },
+    {
+      "id": "label-override:custom-label:1784660812367",
+      "source_label_id": "custom-label:1784660812367",
+      "name": "Ford Energy Employee & Visitor Parking",
+      "kind": "area",
+      "layer": "ground",
+      "position": {
+        "x": -577.6113,
+        "y": 2.3,
+        "z": 80.9738
+      },
+      "approved": true
+    },
+    {
+      "id": "label-override:custom-label:1784660868193",
+      "source_label_id": "custom-label:1784660868193",
+      "name": "Main Guard House EV Charging Bank",
+      "kind": "amenity",
+      "layer": "ground",
+      "position": {
+        "x": -534.1836,
+        "y": 2,
+        "z": 124.4882
+      },
+      "approved": true
+    },
+    {
+      "id": "label-override:custom-label:1784660902926",
+      "source_label_id": "custom-label:1784660902926",
+      "name": "Secondary Security EV Charging Bank",
+      "kind": "amenity",
+      "layer": "ground",
+      "position": {
+        "x": -526.5836,
+        "y": 1.9999,
+        "z": 471.685
+      },
+      "approved": true
+    },
+    {
+      "id": "label-override:custom-label:1784661182460",
+      "source_label_id": "custom-label:1784661182460",
+      "name": "Northern Contractor Parking Lot",
+      "kind": "area",
+      "layer": "ground",
+      "position": {
+        "x": -579.1755,
+        "y": 2,
+        "z": -113.9195
+      },
+      "approved": true
+    },
+    {
+      "id": "label-override:label:da0e8da7-2b54-5716-822a-7493624938f3",
+      "source_label_id": "label:da0e8da7-2b54-5716-822a-7493624938f3",
+      "name": "IT Asset Warehouse",
+      "kind": "area",
+      "layer": "ground",
+      "position": {
+        "x": -278.7105,
+        "y": 2.3,
+        "z": 293.3895
+      },
+      "approved": true
+    },
+    {
+      "id": "label-override:label:328c0d1d-c5f6-5019-bc65-1525b3fab4eb",
+      "source_label_id": "label:328c0d1d-c5f6-5019-bc65-1525b3fab4eb",
+      "name": "D-DAY CONF ROOM (RM L-122)",
+      "kind": "area",
+      "layer": "ground",
+      "position": {
+        "x": -284.6755,
+        "y": 2.3,
+        "z": 293.8292
+      },
+      "approved": true
+    },
+    {
+      "id": "label-override:label:fa655e3d-b879-543d-b66f-c1c397d02648",
+      "source_label_id": "label:fa655e3d-b879-543d-b66f-c1c397d02648",
+      "name": "Mail Room Exterior Building Access Door (VESTIBULE 146)",
+      "kind": "entrance",
+      "layer": "ground",
+      "position": {
+        "x": -138.6908,
+        "y": 5.2561,
+        "z": 79.4202
+      },
+      "approved": true
+    },
+    {
+      "id": "label-override:custom-label:1784663210587",
+      "source_label_id": "custom-label:1784663210587",
+      "name": "Mail Room - Receiving Overhead Door",
+      "kind": "entrance",
+      "layer": "ground",
+      "position": {
+        "x": -138.8517,
+        "y": 3.1456,
+        "z": 100.0237
+      },
+      "approved": true
+    },
+    {
+      "id": "label-override:building:Root_F34-Hazardous_Waste_Storage_F34",
+      "source_label_id": "building:Root_F34-Hazardous_Waste_Storage_F34",
+      "name": "Waste Storage",
+      "kind": "building",
+      "layer": "ground",
+      "position": {
+        "x": -1.7244,
+        "y": 2.3,
+        "z": 345.9419
+      },
+      "approved": true
+    },
+    {
+      "id": "label-override:building:Root_F32-Discharge-Testing_F32",
+      "source_label_id": "building:Root_F32-Discharge-Testing_F32",
+      "name": "Cell Discharge Testing",
+      "kind": "building",
+      "layer": "ground",
+      "position": {
+        "x": 6.7259,
+        "y": 2.3,
+        "z": -60.0699
+      },
+      "approved": true
+    },
+    {
+      "id": "label-override:building:Root_F41-Storage_F41",
+      "source_label_id": "building:Root_F41-Storage_F41",
+      "name": "Safety Building",
+      "kind": "building",
+      "layer": "ground",
+      "position": {
+        "x": -7.5407,
+        "y": 5.3,
+        "z": -151.7806
+      },
+      "approved": true
+    },
+    {
+      "id": "label-override:building:Root_F80-Ext_Building_between_1-2_F80",
+      "source_label_id": "building:Root_F80-Ext_Building_between_1-2_F80",
+      "name": "F80",
+      "kind": "building",
+      "layer": "ground",
+      "position": {
+        "x": 12.5404,
+        "y": 3.9491,
+        "z": -130.2832
+      },
+      "approved": true
+    },
+    {
+      "id": "label-override:building:Root_F106-Utility-PowerStation_F106",
+      "source_label_id": "building:Root_F106-Utility-PowerStation_F106",
+      "name": "Utility Power Station",
+      "kind": "building",
+      "layer": "ground",
+      "position": {
+        "x": -335.3355,
+        "y": 1.9999,
+        "z": 755.3076
+      },
+      "approved": true
+    },
+    {
+      "id": "label-override:building:Root_F105-Utility-PowerStation-2_F105",
+      "source_label_id": "building:Root_F105-Utility-PowerStation-2_F105",
+      "name": "Utility Power Station 2",
+      "kind": "building",
+      "layer": "ground",
+      "position": {
+        "x": 10.9931,
+        "y": 1.9999,
+        "z": 485.0646
+      },
+      "approved": true
+    },
+    {
+      "id": "label-override:custom-label:1784667109259",
+      "source_label_id": "custom-label:1784667109259",
+      "name": "MP&L Bullpen",
+      "kind": "area",
+      "layer": "ground",
+      "position": {
+        "x": -256.5521,
+        "y": 2.0001,
+        "z": -403.7591
+      },
+      "approved": true
+    }
+  ]
+}
