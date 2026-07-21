@@ -1,0 +1,17 @@
+{
+  "version": "10.0.0-alpha.1",
+  "mapWidth": 1024,
+  "mapHeight": 768,
+  "mapImage": "assets/map-full.png",
+  "brand": "Ford Energy",
+  "appName": "SiteNav Command",
+  "systemName": "Pedestrian Guidance System",
+  "views": {
+    "default": "2d",
+    "threeDEnabled": true,
+    "model": "assets/models/site_mobile.glb",
+    "modelProfile": "mobile",
+    "routingView": "2d",
+    "basePedestrianNetwork": "data/authored/pedestrian_network_base.json"
+  }
+}

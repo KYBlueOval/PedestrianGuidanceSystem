@@ -1,0 +1,1791 @@
+{
+  "schema_version": "0.2.0-draft",
+  "coordinate_system": "PGS GLB model coordinates",
+  "authoring_mode": "pedestrian_network_mapping",
+  "review_status": "draft_requires_site_approval",
+  "nodes": [
+    {
+      "id": "draft-node-1",
+      "position": {
+        "x": -490.9645,
+        "y": 0.71,
+        "z": 80.4429
+      },
+      "layer": "ground",
+      "access": [
+        "visitor",
+        "employee",
+        "contractor",
+        "emergency"
+      ],
+      "accessible": true,
+      "approved": false
+    },
+    {
+      "id": "draft-node-2",
+      "position": {
+        "x": -468.9227,
+        "y": 2.8932,
+        "z": 81.1383
+      },
+      "layer": "ground",
+      "access": [
+        "visitor",
+        "employee",
+        "contractor",
+        "emergency"
+      ],
+      "accessible": true,
+      "approved": false
+    },
+    {
+      "id": "draft-node-3",
+      "position": {
+        "x": -408.7907,
+        "y": 2.6501,
+        "z": 79.4213
+      },
+      "layer": "ground",
+      "access": [
+        "visitor",
+        "employee",
+        "contractor",
+        "emergency"
+      ],
+      "accessible": true,
+      "approved": false
+    },
+    {
+      "id": "draft-node-4",
+      "position": {
+        "x": -490.9587,
+        "y": 1.2907,
+        "z": 73.6854
+      },
+      "layer": "ground",
+      "access": [
+        "visitor",
+        "employee",
+        "contractor",
+        "emergency"
+      ],
+      "accessible": true,
+      "approved": false
+    },
+    {
+      "id": "draft-node-5",
+      "position": {
+        "x": -459.1262,
+        "y": 0.35,
+        "z": 72.2651
+      },
+      "layer": "ground",
+      "access": [
+        "visitor",
+        "employee",
+        "contractor",
+        "emergency"
+      ],
+      "accessible": true,
+      "approved": false
+    },
+    {
+      "id": "draft-node-6",
+      "position": {
+        "x": -484.4025,
+        "y": 0.65,
+        "z": 85.4487
+      },
+      "layer": "ground",
+      "access": [
+        "visitor",
+        "employee",
+        "contractor",
+        "emergency"
+      ],
+      "accessible": true,
+      "approved": false
+    },
+    {
+      "id": "draft-node-7",
+      "position": {
+        "x": -483.9866,
+        "y": 0.65,
+        "z": 90.725
+      },
+      "layer": "ground",
+      "access": [
+        "visitor",
+        "employee",
+        "contractor",
+        "emergency"
+      ],
+      "accessible": true,
+      "approved": false
+    },
+    {
+      "id": "draft-node-8",
+      "position": {
+        "x": -404.2095,
+        "y": 3.5537,
+        "z": 79.7527
+      },
+      "layer": "ground",
+      "access": [
+        "visitor",
+        "employee",
+        "contractor",
+        "emergency"
+      ],
+      "accessible": true,
+      "approved": false
+    },
+    {
+      "id": "draft-node-9",
+      "position": {
+        "x": -117.3153,
+        "y": 0.35,
+        "z": 78.0809
+      },
+      "layer": "ground",
+      "access": [
+        "visitor",
+        "employee",
+        "contractor",
+        "emergency"
+      ],
+      "accessible": true,
+      "approved": false
+    },
+    {
+      "id": "draft-node-10",
+      "position": {
+        "x": -273.3143,
+        "y": 0.65,
+        "z": 78.7663
+      },
+      "layer": "ground",
+      "access": [
+        "visitor",
+        "employee",
+        "contractor",
+        "emergency"
+      ],
+      "accessible": true,
+      "approved": false
+    },
+    {
+      "id": "draft-node-11",
+      "position": {
+        "x": -272.7734,
+        "y": 0.65,
+        "z": 350.1536
+      },
+      "layer": "ground",
+      "access": [
+        "visitor",
+        "employee",
+        "contractor",
+        "emergency"
+      ],
+      "accessible": true,
+      "approved": false
+    },
+    {
+      "id": "draft-node-12",
+      "position": {
+        "x": -272.4082,
+        "y": 0.65,
+        "z": -8.6192
+      },
+      "layer": "ground",
+      "access": [
+        "visitor",
+        "employee",
+        "contractor",
+        "emergency"
+      ],
+      "accessible": true,
+      "approved": false
+    },
+    {
+      "id": "draft-node-13",
+      "position": {
+        "x": -273.0228,
+        "y": 0.65,
+        "z": -106.9548
+      },
+      "layer": "ground",
+      "access": [
+        "visitor",
+        "employee",
+        "contractor",
+        "emergency"
+      ],
+      "accessible": true,
+      "approved": false
+    },
+    {
+      "id": "draft-node-14",
+      "position": {
+        "x": -272.5755,
+        "y": 0.6501,
+        "z": -372.7743
+      },
+      "layer": "ground",
+      "access": [
+        "visitor",
+        "employee",
+        "contractor",
+        "emergency"
+      ],
+      "accessible": true,
+      "approved": false
+    },
+    {
+      "id": "draft-node-15",
+      "position": {
+        "x": -396.5029,
+        "y": 0.65,
+        "z": -162.21
+      },
+      "layer": "ground",
+      "access": [
+        "visitor",
+        "employee",
+        "contractor",
+        "emergency"
+      ],
+      "accessible": true,
+      "approved": false
+    },
+    {
+      "id": "draft-node-16",
+      "position": {
+        "x": -154.0059,
+        "y": 0.35,
+        "z": -161.7711
+      },
+      "layer": "ground",
+      "access": [
+        "visitor",
+        "employee",
+        "contractor",
+        "emergency"
+      ],
+      "accessible": true,
+      "approved": false
+    },
+    {
+      "id": "draft-node-17",
+      "position": {
+        "x": -133.9883,
+        "y": 0.3499,
+        "z": 466.219
+      },
+      "layer": "ground",
+      "access": [
+        "visitor",
+        "employee",
+        "contractor",
+        "emergency"
+      ],
+      "accessible": true,
+      "approved": false
+    },
+    {
+      "id": "draft-node-18",
+      "position": {
+        "x": -412.6374,
+        "y": 0.3499,
+        "z": 466.9808
+      },
+      "layer": "ground",
+      "access": [
+        "visitor",
+        "employee",
+        "contractor",
+        "emergency"
+      ],
+      "accessible": true,
+      "approved": false
+    },
+    {
+      "id": "draft-node-19",
+      "position": {
+        "x": -496.2368,
+        "y": 0.3499,
+        "z": 452.0173
+      },
+      "layer": "ground",
+      "access": [
+        "visitor",
+        "employee",
+        "contractor",
+        "emergency"
+      ],
+      "accessible": true,
+      "approved": false
+    },
+    {
+      "id": "draft-node-20",
+      "position": {
+        "x": -466.0871,
+        "y": 0.3499,
+        "z": 452.2538
+      },
+      "layer": "ground",
+      "access": [
+        "visitor",
+        "employee",
+        "contractor",
+        "emergency"
+      ],
+      "accessible": true,
+      "approved": false
+    },
+    {
+      "id": "draft-node-21",
+      "position": {
+        "x": -490.4164,
+        "y": 0.6499,
+        "z": 450.6181
+      },
+      "layer": "ground",
+      "access": [
+        "visitor",
+        "employee",
+        "contractor",
+        "emergency"
+      ],
+      "accessible": true,
+      "approved": false
+    },
+    {
+      "id": "draft-node-22",
+      "position": {
+        "x": -469.9198,
+        "y": 0.7099,
+        "z": 450.759
+      },
+      "layer": "ground",
+      "access": [
+        "visitor",
+        "employee",
+        "contractor",
+        "emergency"
+      ],
+      "accessible": true,
+      "approved": false
+    },
+    {
+      "id": "draft-node-23",
+      "position": {
+        "x": -408.9743,
+        "y": 2.1443,
+        "z": 465.0985
+      },
+      "layer": "ground",
+      "access": [
+        "visitor",
+        "employee",
+        "contractor",
+        "emergency"
+      ],
+      "accessible": true,
+      "approved": false
+    },
+    {
+      "id": "draft-node-24",
+      "position": {
+        "x": -273.3646,
+        "y": 0.3499,
+        "z": 633.3351
+      },
+      "layer": "ground",
+      "access": [
+        "visitor",
+        "employee",
+        "contractor",
+        "emergency"
+      ],
+      "accessible": true,
+      "approved": false
+    },
+    {
+      "id": "draft-node-25",
+      "position": {
+        "x": -477.1363,
+        "y": 0.6501,
+        "z": -159.1865
+      },
+      "layer": "ground",
+      "access": [
+        "visitor",
+        "employee",
+        "contractor",
+        "emergency"
+      ],
+      "accessible": true,
+      "approved": false
+    },
+    {
+      "id": "draft-node-26",
+      "position": {
+        "x": -477.9991,
+        "y": 0.6501,
+        "z": -161.0143
+      },
+      "layer": "ground",
+      "access": [
+        "visitor",
+        "employee",
+        "contractor",
+        "emergency"
+      ],
+      "accessible": true,
+      "approved": false
+    },
+    {
+      "id": "draft-node-27",
+      "position": {
+        "x": -272.9828,
+        "y": 0.6499,
+        "z": 400.5229
+      },
+      "layer": "ground",
+      "access": [
+        "visitor",
+        "employee",
+        "contractor",
+        "emergency"
+      ],
+      "accessible": true,
+      "approved": false
+    },
+    {
+      "id": "draft-node-28",
+      "position": {
+        "x": -277.2892,
+        "y": 2.6991,
+        "z": 401.532
+      },
+      "layer": "ground",
+      "access": [
+        "visitor",
+        "employee",
+        "contractor",
+        "emergency"
+      ],
+      "accessible": true,
+      "approved": false
+    },
+    {
+      "id": "draft-node-29",
+      "position": {
+        "x": -282.4183,
+        "y": 0.6499,
+        "z": 426.0139
+      },
+      "layer": "ground",
+      "access": [
+        "visitor",
+        "employee",
+        "contractor",
+        "emergency"
+      ],
+      "accessible": true,
+      "approved": false
+    },
+    {
+      "id": "draft-node-30",
+      "position": {
+        "x": -272.925,
+        "y": 0.6499,
+        "z": 389.1299
+      },
+      "layer": "ground",
+      "access": [
+        "visitor",
+        "employee",
+        "contractor",
+        "emergency"
+      ],
+      "accessible": true,
+      "approved": false
+    },
+    {
+      "id": "draft-node-31",
+      "position": {
+        "x": -266.862,
+        "y": 0.6499,
+        "z": 396.1543
+      },
+      "layer": "ground",
+      "access": [
+        "visitor",
+        "employee",
+        "contractor",
+        "emergency"
+      ],
+      "accessible": true,
+      "approved": false
+    },
+    {
+      "id": "draft-node-32",
+      "position": {
+        "x": -264.8222,
+        "y": 0.6499,
+        "z": 432.7633
+      },
+      "layer": "ground",
+      "access": [
+        "visitor",
+        "employee",
+        "contractor",
+        "emergency"
+      ],
+      "accessible": true,
+      "approved": false
+    },
+    {
+      "id": "draft-node-33",
+      "position": {
+        "x": -259.7125,
+        "y": 0.6499,
+        "z": 438.4933
+      },
+      "layer": "ground",
+      "access": [
+        "visitor",
+        "employee",
+        "contractor",
+        "emergency"
+      ],
+      "accessible": true,
+      "approved": false
+    },
+    {
+      "id": "draft-node-34",
+      "position": {
+        "x": -273.0954,
+        "y": 0.65,
+        "z": 242.3036
+      },
+      "layer": "ground",
+      "access": [
+        "visitor",
+        "employee",
+        "contractor",
+        "emergency"
+      ],
+      "accessible": true,
+      "approved": false
+    },
+    {
+      "id": "draft-node-35",
+      "position": {
+        "x": -290.0395,
+        "y": 0.65,
+        "z": 242.2846
+      },
+      "layer": "ground",
+      "access": [
+        "visitor",
+        "employee",
+        "contractor",
+        "emergency"
+      ],
+      "accessible": true,
+      "approved": false
+    },
+    {
+      "id": "draft-node-36",
+      "position": {
+        "x": -290.2681,
+        "y": 0.65,
+        "z": 213.5364
+      },
+      "layer": "ground",
+      "access": [
+        "visitor",
+        "employee",
+        "contractor",
+        "emergency"
+      ],
+      "accessible": true,
+      "approved": false
+    },
+    {
+      "id": "draft-node-37",
+      "position": {
+        "x": -290.3689,
+        "y": 0.65,
+        "z": 192.208
+      },
+      "layer": "ground",
+      "access": [
+        "visitor",
+        "employee",
+        "contractor",
+        "emergency"
+      ],
+      "accessible": true,
+      "approved": false
+    },
+    {
+      "id": "draft-node-38",
+      "position": {
+        "x": -273.1272,
+        "y": 0.65,
+        "z": 192.6412
+      },
+      "layer": "ground",
+      "access": [
+        "visitor",
+        "employee",
+        "contractor",
+        "emergency"
+      ],
+      "accessible": true,
+      "approved": false
+    },
+    {
+      "id": "draft-node-39",
+      "position": {
+        "x": -273.311,
+        "y": 0.65,
+        "z": 134.3883
+      },
+      "layer": "ground",
+      "access": [
+        "visitor",
+        "employee",
+        "contractor",
+        "emergency"
+      ],
+      "accessible": true,
+      "approved": false
+    },
+    {
+      "id": "draft-node-40",
+      "position": {
+        "x": -281.1717,
+        "y": 0.65,
+        "z": 130.0616
+      },
+      "layer": "ground",
+      "access": [
+        "visitor",
+        "employee",
+        "contractor",
+        "emergency"
+      ],
+      "accessible": true,
+      "approved": false
+    },
+    {
+      "id": "draft-node-41",
+      "position": {
+        "x": -268.2032,
+        "y": 0.65,
+        "z": 133.2557
+      },
+      "layer": "ground",
+      "access": [
+        "visitor",
+        "employee",
+        "contractor",
+        "emergency"
+      ],
+      "accessible": true,
+      "approved": false
+    },
+    {
+      "id": "draft-node-42",
+      "position": {
+        "x": -268.27,
+        "y": 0.65,
+        "z": 191.8553
+      },
+      "layer": "ground",
+      "access": [
+        "visitor",
+        "employee",
+        "contractor",
+        "emergency"
+      ],
+      "accessible": true,
+      "approved": false
+    },
+    {
+      "id": "draft-node-43",
+      "position": {
+        "x": -268.3427,
+        "y": 0.65,
+        "z": 196.5241
+      },
+      "layer": "ground",
+      "access": [
+        "visitor",
+        "employee",
+        "contractor",
+        "emergency"
+      ],
+      "accessible": true,
+      "approved": false
+    },
+    {
+      "id": "draft-node-44",
+      "position": {
+        "x": -261.9246,
+        "y": 0.65,
+        "z": 198.1098
+      },
+      "layer": "ground",
+      "access": [
+        "visitor",
+        "employee",
+        "contractor",
+        "emergency"
+      ],
+      "accessible": true,
+      "approved": false
+    },
+    {
+      "id": "draft-node-45",
+      "position": {
+        "x": -285.0482,
+        "y": 0.6499,
+        "z": 434.5697
+      },
+      "layer": "ground",
+      "access": [
+        "visitor",
+        "employee",
+        "contractor",
+        "emergency"
+      ],
+      "accessible": true,
+      "approved": false
+    },
+    {
+      "id": "draft-node-46",
+      "position": {
+        "x": -284.3872,
+        "y": 0.6499,
+        "z": 445.2164
+      },
+      "layer": "ground",
+      "access": [
+        "visitor",
+        "employee",
+        "contractor",
+        "emergency"
+      ],
+      "accessible": true,
+      "approved": false
+    },
+    {
+      "id": "draft-node-47",
+      "position": {
+        "x": -272.8375,
+        "y": 0.6499,
+        "z": 444.0812
+      },
+      "layer": "ground",
+      "access": [
+        "visitor",
+        "employee",
+        "contractor",
+        "emergency"
+      ],
+      "accessible": true,
+      "approved": false
+    },
+    {
+      "id": "draft-node-48",
+      "position": {
+        "x": -289.5212,
+        "y": 0.6499,
+        "z": 447.4468
+      },
+      "layer": "ground",
+      "access": [
+        "visitor",
+        "employee",
+        "contractor",
+        "emergency"
+      ],
+      "accessible": true,
+      "approved": false
+    },
+    {
+      "id": "draft-node-49",
+      "position": {
+        "x": -289.7504,
+        "y": 0.6499,
+        "z": 467.2472
+      },
+      "layer": "ground",
+      "access": [
+        "visitor",
+        "employee",
+        "contractor",
+        "emergency"
+      ],
+      "accessible": true,
+      "approved": false
+    },
+    {
+      "id": "draft-node-50",
+      "position": {
+        "x": -266.8725,
+        "y": 0.6499,
+        "z": 445.4896
+      },
+      "layer": "ground",
+      "access": [
+        "visitor",
+        "employee",
+        "contractor",
+        "emergency"
+      ],
+      "accessible": true,
+      "approved": false
+    },
+    {
+      "id": "draft-node-51",
+      "position": {
+        "x": -267.0725,
+        "y": 0.6499,
+        "z": 466.8122
+      },
+      "layer": "ground",
+      "access": [
+        "visitor",
+        "employee",
+        "contractor",
+        "emergency"
+      ],
+      "accessible": true,
+      "approved": false
+    },
+    {
+      "id": "draft-node-52",
+      "position": {
+        "x": -269.8281,
+        "y": 0.6499,
+        "z": 434.2778
+      },
+      "layer": "ground",
+      "access": [
+        "visitor",
+        "employee",
+        "contractor",
+        "emergency"
+      ],
+      "accessible": true,
+      "approved": false
+    },
+    {
+      "id": "draft-node-53",
+      "position": {
+        "x": -258.1028,
+        "y": 0.6499,
+        "z": 434.3575
+      },
+      "layer": "ground",
+      "access": [
+        "visitor",
+        "employee",
+        "contractor",
+        "emergency"
+      ],
+      "accessible": true,
+      "approved": false
+    },
+    {
+      "id": "draft-node-54",
+      "position": {
+        "x": -257.3074,
+        "y": 0.6499,
+        "z": 388.5068
+      },
+      "layer": "ground",
+      "access": [
+        "visitor",
+        "employee",
+        "contractor",
+        "emergency"
+      ],
+      "accessible": true,
+      "approved": false
+    },
+    {
+      "id": "draft-node-55",
+      "position": {
+        "x": -269.3313,
+        "y": 0.6499,
+        "z": 388.7374
+      },
+      "layer": "ground",
+      "access": [
+        "visitor",
+        "employee",
+        "contractor",
+        "emergency"
+      ],
+      "accessible": true,
+      "approved": false
+    }
+  ],
+  "edges": [
+    {
+      "kind": "hallway",
+      "accessible": true,
+      "id": "draft-edge-1",
+      "from": "draft-node-1",
+      "to": "draft-node-2",
+      "bidirectional": true,
+      "modes": [
+        "walking"
+      ],
+      "access": [
+        "visitor",
+        "employee",
+        "contractor",
+        "emergency"
+      ],
+      "approved": false
+    },
+    {
+      "kind": "hallway",
+      "accessible": true,
+      "id": "draft-edge-2",
+      "from": "draft-node-2",
+      "to": "draft-node-3",
+      "bidirectional": true,
+      "modes": [
+        "walking"
+      ],
+      "access": [
+        "visitor",
+        "employee",
+        "contractor",
+        "emergency"
+      ],
+      "approved": false
+    },
+    {
+      "kind": "hallway",
+      "accessible": true,
+      "id": "draft-edge-3",
+      "from": "draft-node-4",
+      "to": "draft-node-5",
+      "bidirectional": true,
+      "modes": [
+        "walking"
+      ],
+      "access": [
+        "visitor",
+        "employee",
+        "contractor",
+        "emergency"
+      ],
+      "approved": false
+    },
+    {
+      "kind": "hallway",
+      "accessible": true,
+      "id": "draft-edge-4",
+      "from": "draft-node-5",
+      "to": "draft-node-3",
+      "bidirectional": true,
+      "modes": [
+        "walking"
+      ],
+      "access": [
+        "visitor",
+        "employee",
+        "contractor",
+        "emergency"
+      ],
+      "approved": false
+    },
+    {
+      "kind": "hallway",
+      "accessible": true,
+      "id": "draft-edge-5",
+      "from": "draft-node-1",
+      "to": "draft-node-6",
+      "bidirectional": true,
+      "modes": [
+        "walking"
+      ],
+      "access": [
+        "visitor",
+        "employee",
+        "contractor",
+        "emergency"
+      ],
+      "approved": false
+    },
+    {
+      "kind": "hallway",
+      "accessible": true,
+      "id": "draft-edge-6",
+      "from": "draft-node-6",
+      "to": "draft-node-7",
+      "bidirectional": true,
+      "modes": [
+        "walking"
+      ],
+      "access": [
+        "visitor",
+        "employee",
+        "contractor",
+        "emergency"
+      ],
+      "approved": false
+    },
+    {
+      "kind": "hallway",
+      "accessible": true,
+      "id": "draft-edge-7",
+      "from": "draft-node-7",
+      "to": "draft-node-8",
+      "bidirectional": true,
+      "modes": [
+        "walking"
+      ],
+      "access": [
+        "visitor",
+        "employee",
+        "contractor",
+        "emergency"
+      ],
+      "approved": false
+    },
+    {
+      "kind": "hallway",
+      "accessible": true,
+      "id": "draft-edge-8",
+      "from": "draft-node-8",
+      "to": "draft-node-9",
+      "bidirectional": true,
+      "modes": [
+        "walking"
+      ],
+      "access": [
+        "visitor",
+        "employee",
+        "contractor",
+        "emergency"
+      ],
+      "approved": false
+    },
+    {
+      "kind": "hallway",
+      "accessible": true,
+      "id": "draft-edge-9",
+      "from": "draft-node-10",
+      "to": "draft-node-11",
+      "bidirectional": true,
+      "modes": [
+        "walking"
+      ],
+      "access": [
+        "visitor",
+        "employee",
+        "contractor",
+        "emergency"
+      ],
+      "approved": false
+    },
+    {
+      "kind": "hallway",
+      "accessible": true,
+      "id": "draft-edge-10",
+      "from": "draft-node-10",
+      "to": "draft-node-12",
+      "bidirectional": true,
+      "modes": [
+        "walking"
+      ],
+      "access": [
+        "visitor",
+        "employee",
+        "contractor",
+        "emergency"
+      ],
+      "approved": false
+    },
+    {
+      "kind": "hallway",
+      "accessible": true,
+      "id": "draft-edge-11",
+      "from": "draft-node-12",
+      "to": "draft-node-13",
+      "bidirectional": true,
+      "modes": [
+        "walking"
+      ],
+      "access": [
+        "visitor",
+        "employee",
+        "contractor",
+        "emergency"
+      ],
+      "approved": false
+    },
+    {
+      "kind": "hallway",
+      "accessible": true,
+      "id": "draft-edge-12",
+      "from": "draft-node-13",
+      "to": "draft-node-14",
+      "bidirectional": true,
+      "modes": [
+        "walking"
+      ],
+      "access": [
+        "visitor",
+        "employee",
+        "contractor",
+        "emergency"
+      ],
+      "approved": false
+    },
+    {
+      "kind": "hallway",
+      "accessible": true,
+      "id": "draft-edge-13",
+      "from": "draft-node-15",
+      "to": "draft-node-16",
+      "bidirectional": true,
+      "modes": [
+        "walking"
+      ],
+      "access": [
+        "visitor",
+        "employee",
+        "contractor",
+        "emergency"
+      ],
+      "approved": false
+    },
+    {
+      "kind": "hallway",
+      "accessible": true,
+      "id": "draft-edge-14",
+      "from": "draft-node-17",
+      "to": "draft-node-18",
+      "bidirectional": true,
+      "modes": [
+        "walking"
+      ],
+      "access": [
+        "visitor",
+        "employee",
+        "contractor",
+        "emergency"
+      ],
+      "approved": false
+    },
+    {
+      "kind": "hallway",
+      "accessible": true,
+      "id": "draft-edge-15",
+      "from": "draft-node-19",
+      "to": "draft-node-20",
+      "bidirectional": true,
+      "modes": [
+        "walking"
+      ],
+      "access": [
+        "visitor",
+        "employee",
+        "contractor",
+        "emergency"
+      ],
+      "approved": false
+    },
+    {
+      "kind": "hallway",
+      "accessible": true,
+      "id": "draft-edge-16",
+      "from": "draft-node-20",
+      "to": "draft-node-18",
+      "bidirectional": true,
+      "modes": [
+        "walking"
+      ],
+      "access": [
+        "visitor",
+        "employee",
+        "contractor",
+        "emergency"
+      ],
+      "approved": false
+    },
+    {
+      "kind": "hallway",
+      "accessible": true,
+      "id": "draft-edge-17",
+      "from": "draft-node-21",
+      "to": "draft-node-22",
+      "bidirectional": true,
+      "modes": [
+        "walking"
+      ],
+      "access": [
+        "visitor",
+        "employee",
+        "contractor",
+        "emergency"
+      ],
+      "approved": false
+    },
+    {
+      "kind": "hallway",
+      "accessible": true,
+      "id": "draft-edge-18",
+      "from": "draft-node-22",
+      "to": "draft-node-23",
+      "bidirectional": true,
+      "modes": [
+        "walking"
+      ],
+      "access": [
+        "visitor",
+        "employee",
+        "contractor",
+        "emergency"
+      ],
+      "approved": false
+    },
+    {
+      "kind": "hallway",
+      "accessible": true,
+      "id": "draft-edge-19",
+      "from": "draft-node-11",
+      "to": "draft-node-24",
+      "bidirectional": true,
+      "modes": [
+        "walking"
+      ],
+      "access": [
+        "visitor",
+        "employee",
+        "contractor",
+        "emergency"
+      ],
+      "approved": false
+    },
+    {
+      "kind": "hallway",
+      "accessible": true,
+      "id": "draft-edge-20",
+      "from": "draft-node-25",
+      "to": "draft-node-15",
+      "bidirectional": true,
+      "modes": [
+        "walking"
+      ],
+      "access": [
+        "visitor",
+        "employee",
+        "contractor",
+        "emergency"
+      ],
+      "approved": false
+    },
+    {
+      "kind": "hallway",
+      "accessible": true,
+      "id": "draft-edge-21",
+      "from": "draft-node-26",
+      "to": "draft-node-15",
+      "bidirectional": true,
+      "modes": [
+        "walking"
+      ],
+      "access": [
+        "visitor",
+        "employee",
+        "contractor",
+        "emergency"
+      ],
+      "approved": false
+    },
+    {
+      "kind": "hallway",
+      "accessible": true,
+      "id": "draft-edge-22",
+      "from": "draft-node-27",
+      "to": "draft-node-28",
+      "bidirectional": true,
+      "modes": [
+        "walking"
+      ],
+      "access": [
+        "visitor",
+        "employee",
+        "contractor",
+        "emergency"
+      ],
+      "approved": false
+    },
+    {
+      "kind": "hallway",
+      "accessible": true,
+      "id": "draft-edge-23",
+      "from": "draft-node-28",
+      "to": "draft-node-29",
+      "bidirectional": true,
+      "modes": [
+        "walking"
+      ],
+      "access": [
+        "visitor",
+        "employee",
+        "contractor",
+        "emergency"
+      ],
+      "approved": false
+    },
+    {
+      "kind": "hallway",
+      "accessible": true,
+      "id": "draft-edge-24",
+      "from": "draft-node-30",
+      "to": "draft-node-31",
+      "bidirectional": true,
+      "modes": [
+        "walking"
+      ],
+      "access": [
+        "visitor",
+        "employee",
+        "contractor",
+        "emergency"
+      ],
+      "approved": false
+    },
+    {
+      "kind": "hallway",
+      "accessible": true,
+      "id": "draft-edge-25",
+      "from": "draft-node-31",
+      "to": "draft-node-32",
+      "bidirectional": true,
+      "modes": [
+        "walking"
+      ],
+      "access": [
+        "visitor",
+        "employee",
+        "contractor",
+        "emergency"
+      ],
+      "approved": false
+    },
+    {
+      "kind": "hallway",
+      "accessible": true,
+      "id": "draft-edge-26",
+      "from": "draft-node-32",
+      "to": "draft-node-33",
+      "bidirectional": true,
+      "modes": [
+        "walking"
+      ],
+      "access": [
+        "visitor",
+        "employee",
+        "contractor",
+        "emergency"
+      ],
+      "approved": false
+    },
+    {
+      "kind": "hallway",
+      "accessible": true,
+      "id": "draft-edge-27",
+      "from": "draft-node-34",
+      "to": "draft-node-35",
+      "bidirectional": true,
+      "modes": [
+        "walking"
+      ],
+      "access": [
+        "visitor",
+        "employee",
+        "contractor",
+        "emergency"
+      ],
+      "approved": false
+    },
+    {
+      "kind": "hallway",
+      "accessible": true,
+      "id": "draft-edge-28",
+      "from": "draft-node-35",
+      "to": "draft-node-36",
+      "bidirectional": true,
+      "modes": [
+        "walking"
+      ],
+      "access": [
+        "visitor",
+        "employee",
+        "contractor",
+        "emergency"
+      ],
+      "approved": false
+    },
+    {
+      "kind": "hallway",
+      "accessible": true,
+      "id": "draft-edge-29",
+      "from": "draft-node-36",
+      "to": "draft-node-37",
+      "bidirectional": true,
+      "modes": [
+        "walking"
+      ],
+      "access": [
+        "visitor",
+        "employee",
+        "contractor",
+        "emergency"
+      ],
+      "approved": false
+    },
+    {
+      "kind": "hallway",
+      "accessible": true,
+      "id": "draft-edge-30",
+      "from": "draft-node-37",
+      "to": "draft-node-38",
+      "bidirectional": true,
+      "modes": [
+        "walking"
+      ],
+      "access": [
+        "visitor",
+        "employee",
+        "contractor",
+        "emergency"
+      ],
+      "approved": false
+    },
+    {
+      "kind": "hallway",
+      "accessible": true,
+      "id": "draft-edge-31",
+      "from": "draft-node-39",
+      "to": "draft-node-40",
+      "bidirectional": true,
+      "modes": [
+        "walking"
+      ],
+      "access": [
+        "visitor",
+        "employee",
+        "contractor",
+        "emergency"
+      ],
+      "approved": false
+    },
+    {
+      "kind": "hallway",
+      "accessible": true,
+      "id": "draft-edge-32",
+      "from": "draft-node-39",
+      "to": "draft-node-41",
+      "bidirectional": true,
+      "modes": [
+        "walking"
+      ],
+      "access": [
+        "visitor",
+        "employee",
+        "contractor",
+        "emergency"
+      ],
+      "approved": false
+    },
+    {
+      "kind": "hallway",
+      "accessible": true,
+      "id": "draft-edge-33",
+      "from": "draft-node-38",
+      "to": "draft-node-42",
+      "bidirectional": true,
+      "modes": [
+        "walking"
+      ],
+      "access": [
+        "visitor",
+        "employee",
+        "contractor",
+        "emergency"
+      ],
+      "approved": false
+    },
+    {
+      "kind": "hallway",
+      "accessible": true,
+      "id": "draft-edge-34",
+      "from": "draft-node-42",
+      "to": "draft-node-43",
+      "bidirectional": true,
+      "modes": [
+        "walking"
+      ],
+      "access": [
+        "visitor",
+        "employee",
+        "contractor",
+        "emergency"
+      ],
+      "approved": false
+    },
+    {
+      "kind": "hallway",
+      "accessible": true,
+      "id": "draft-edge-35",
+      "from": "draft-node-43",
+      "to": "draft-node-44",
+      "bidirectional": true,
+      "modes": [
+        "walking"
+      ],
+      "access": [
+        "visitor",
+        "employee",
+        "contractor",
+        "emergency"
+      ],
+      "approved": false
+    },
+    {
+      "id": "draft-edge-36",
+      "from": "draft-node-29",
+      "to": "draft-node-45",
+      "bidirectional": true,
+      "modes": [
+        "walking"
+      ],
+      "kind": "hallway",
+      "access": [
+        "visitor",
+        "employee",
+        "contractor",
+        "emergency"
+      ],
+      "accessible": true,
+      "approved": false
+    },
+    {
+      "id": "draft-edge-37",
+      "from": "draft-node-45",
+      "to": "draft-node-46",
+      "bidirectional": true,
+      "modes": [
+        "walking"
+      ],
+      "kind": "hallway",
+      "access": [
+        "visitor",
+        "employee",
+        "contractor",
+        "emergency"
+      ],
+      "accessible": true,
+      "approved": false
+    },
+    {
+      "id": "draft-edge-38",
+      "from": "draft-node-46",
+      "to": "draft-node-47",
+      "bidirectional": true,
+      "modes": [
+        "walking"
+      ],
+      "kind": "hallway",
+      "access": [
+        "visitor",
+        "employee",
+        "contractor",
+        "emergency"
+      ],
+      "accessible": true,
+      "approved": false
+    },
+    {
+      "id": "draft-edge-39",
+      "from": "draft-node-46",
+      "to": "draft-node-48",
+      "bidirectional": true,
+      "modes": [
+        "walking"
+      ],
+      "kind": "hallway",
+      "access": [
+        "visitor",
+        "employee",
+        "contractor",
+        "emergency"
+      ],
+      "accessible": true,
+      "approved": false
+    },
+    {
+      "id": "draft-edge-40",
+      "from": "draft-node-48",
+      "to": "draft-node-49",
+      "bidirectional": true,
+      "modes": [
+        "walking"
+      ],
+      "kind": "hallway",
+      "access": [
+        "visitor",
+        "employee",
+        "contractor",
+        "emergency"
+      ],
+      "accessible": true,
+      "approved": false
+    },
+    {
+      "id": "draft-edge-41",
+      "from": "draft-node-47",
+      "to": "draft-node-50",
+      "bidirectional": true,
+      "modes": [
+        "walking"
+      ],
+      "kind": "hallway",
+      "access": [
+        "visitor",
+        "employee",
+        "contractor",
+        "emergency"
+      ],
+      "accessible": true,
+      "approved": false
+    },
+    {
+      "id": "draft-edge-42",
+      "from": "draft-node-50",
+      "to": "draft-node-51",
+      "bidirectional": true,
+      "modes": [
+        "walking"
+      ],
+      "kind": "hallway",
+      "access": [
+        "visitor",
+        "employee",
+        "contractor",
+        "emergency"
+      ],
+      "accessible": true,
+      "approved": false
+    },
+    {
+      "id": "draft-edge-43",
+      "from": "draft-node-50",
+      "to": "draft-node-52",
+      "bidirectional": true,
+      "modes": [
+        "walking"
+      ],
+      "kind": "hallway",
+      "access": [
+        "visitor",
+        "employee",
+        "contractor",
+        "emergency"
+      ],
+      "accessible": true,
+      "approved": false
+    },
+    {
+      "id": "draft-edge-44",
+      "from": "draft-node-52",
+      "to": "draft-node-53",
+      "bidirectional": true,
+      "modes": [
+        "walking"
+      ],
+      "kind": "hallway",
+      "access": [
+        "visitor",
+        "employee",
+        "contractor",
+        "emergency"
+      ],
+      "accessible": true,
+      "approved": false
+    },
+    {
+      "id": "draft-edge-45",
+      "from": "draft-node-53",
+      "to": "draft-node-54",
+      "bidirectional": true,
+      "modes": [
+        "walking"
+      ],
+      "kind": "hallway",
+      "access": [
+        "visitor",
+        "employee",
+        "contractor",
+        "emergency"
+      ],
+      "accessible": true,
+      "approved": false
+    },
+    {
+      "id": "draft-edge-46",
+      "from": "draft-node-54",
+      "to": "draft-node-55",
+      "bidirectional": true,
+      "modes": [
+        "walking"
+      ],
+      "kind": "hallway",
+      "access": [
+        "visitor",
+        "employee",
+        "contractor",
+        "emergency"
+      ],
+      "accessible": true,
+      "approved": false
+    },
+    {
+      "id": "draft-edge-47",
+      "from": "draft-node-55",
+      "to": "draft-node-30",
+      "bidirectional": true,
+      "modes": [
+        "walking"
+      ],
+      "kind": "hallway",
+      "access": [
+        "visitor",
+        "employee",
+        "contractor",
+        "emergency"
+      ],
+      "accessible": true,
+      "approved": false
+    }
+  ]
+}

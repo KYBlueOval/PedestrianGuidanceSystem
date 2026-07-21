@@ -1,0 +1,280 @@
+{
+  "schema_version": "0.1.0-draft",
+  "coordinate_system": "PGS GLB model coordinates",
+  "authoring_mode": "destination_anchor_mapping",
+  "review_status": "draft_requires_site_approval",
+  "destinations": [
+    {
+      "id": "destination-draft:label:bc7c19bd-a263-5667-b009-2b3658e4dfa8",
+      "source_label_id": "label:bc7c19bd-a263-5667-b009-2b3658e4dfa8",
+      "name": "North Contractor Entrance (Third Turnstile)",
+      "category": "security",
+      "access_profile": "contractor",
+      "layer": "ground",
+      "position": {
+        "x": -475.4507,
+        "y": 0.8001,
+        "z": -160.8733
+      },
+      "network_node_id": "draft-node-25",
+      "connector_distance": 2.3894,
+      "approved": true
+    },
+    {
+      "id": "destination-draft:label:22cc2184-5f3e-59d8-a436-e8e24a8a0745",
+      "source_label_id": "label:22cc2184-5f3e-59d8-a436-e8e24a8a0745",
+      "name": "Security Front Desk",
+      "category": "visitor",
+      "access_profile": "all",
+      "layer": "ground",
+      "position": {
+        "x": -483.8873,
+        "y": 0.8,
+        "z": 89.5192
+      },
+      "network_node_id": "draft-node-7",
+      "connector_distance": 1.2191,
+      "approved": true
+    },
+    {
+      "id": "destination-draft:label:685e5912-af2e-535b-a37b-9fcc36a3e747",
+      "source_label_id": "label:685e5912-af2e-535b-a37b-9fcc36a3e747",
+      "name": "Main Guard House Building Exterior Door",
+      "category": "security",
+      "access_profile": "employee",
+      "layer": "ground",
+      "position": {
+        "x": -408.792,
+        "y": 2.4233,
+        "z": 79.5487
+      },
+      "network_node_id": "draft-node-3",
+      "connector_distance": 0.2601,
+      "approved": true
+    },
+    {
+      "id": "destination-draft:custom-label:1784654700049",
+      "source_label_id": "custom-label:1784654700049",
+      "name": "South End Exterior Building Access Doors",
+      "category": "security",
+      "access_profile": "all",
+      "layer": "ground",
+      "position": {
+        "x": -273.2146,
+        "y": 0.7999,
+        "z": 625.959
+      },
+      "network_node_id": "draft-node-174",
+      "connector_distance": 1.5646,
+      "approved": true
+    },
+    {
+      "id": "destination-draft:label:222b9d09-9051-570c-b576-07087068fc90",
+      "source_label_id": "label:222b9d09-9051-570c-b576-07087068fc90",
+      "name": "ELECTRODE OFFICE K-134",
+      "category": "security",
+      "access_profile": "all",
+      "layer": "ground",
+      "position": {
+        "x": -277.071,
+        "y": 6.5845,
+        "z": 404.0182
+      },
+      "network_node_id": "draft-node-28",
+      "connector_distance": 4.6179,
+      "approved": true
+    },
+    {
+      "id": "destination-draft:custom-label:1784653871212",
+      "source_label_id": "custom-label:1784653871212",
+      "name": "Mallory Safety Supply Office",
+      "category": "amenity",
+      "access_profile": "all",
+      "layer": "ground",
+      "position": {
+        "x": -285.5718,
+        "y": 3.8,
+        "z": 331.5404
+      },
+      "network_node_id": "draft-node-162",
+      "connector_distance": 0.155,
+      "approved": true
+    },
+    {
+      "id": "destination-draft:custom-label:1784653737769",
+      "source_label_id": "custom-label:1784653737769",
+      "name": "Maint. Rebuild Room",
+      "category": "amenity",
+      "access_profile": "all",
+      "layer": "ground",
+      "position": {
+        "x": -277.2688,
+        "y": 3.8,
+        "z": 339.4435
+      },
+      "network_node_id": "draft-node-228",
+      "connector_distance": 3.3494,
+      "approved": true
+    },
+    {
+      "id": "destination-draft:label:1e16b752-b261-58dd-9fa6-af5b735f63b9",
+      "source_label_id": "label:1e16b752-b261-58dd-9fa6-af5b735f63b9",
+      "name": "Cell Assembly Office",
+      "category": "department",
+      "access_profile": "all",
+      "layer": "ground",
+      "position": {
+        "x": -270.2711,
+        "y": 1.7076,
+        "z": 233.948
+      },
+      "network_node_id": "draft-node-230",
+      "connector_distance": 2.4487,
+      "approved": true
+    },
+    {
+      "id": "destination-draft:label:93258d24-2fcb-5be5-8edb-ed9624bb295b",
+      "source_label_id": "label:93258d24-2fcb-5be5-8edb-ed9624bb295b",
+      "name": "DT/IT Office",
+      "category": "department",
+      "access_profile": "all",
+      "layer": "ground",
+      "position": {
+        "x": -277.6694,
+        "y": 2.1142,
+        "z": 241.742
+      },
+      "network_node_id": "draft-node-233",
+      "connector_distance": 1.7074,
+      "approved": true
+    },
+    {
+      "id": "destination-draft:label:b3939306-fb35-5aeb-bc34-34dff1a634de",
+      "source_label_id": "label:b3939306-fb35-5aeb-bc34-34dff1a634de",
+      "name": "L&D Office",
+      "category": "department",
+      "access_profile": "all",
+      "layer": "ground",
+      "position": {
+        "x": -277.5562,
+        "y": 0.9737,
+        "z": 212.5711
+      },
+      "network_node_id": "draft-node-236",
+      "connector_distance": 1.6445,
+      "approved": true
+    },
+    {
+      "id": "destination-draft:label:a87e2d6f-b906-528c-b57e-0bcfba84bfde",
+      "source_label_id": "label:a87e2d6f-b906-528c-b57e-0bcfba84bfde",
+      "name": "SERVER ROOM L-124",
+      "category": "department",
+      "access_profile": "employee",
+      "layer": "ground",
+      "position": {
+        "x": -289.3069,
+        "y": 1.7337,
+        "z": 247.7834
+      },
+      "network_node_id": "draft-node-245",
+      "connector_distance": 5.626,
+      "approved": true
+    },
+    {
+      "id": "destination-draft:custom-label:1784492891372",
+      "source_label_id": "custom-label:1784492891372",
+      "name": "Mail Room",
+      "category": "department",
+      "access_profile": "all",
+      "layer": "ground",
+      "position": {
+        "x": -148.1613,
+        "y": 1.2512,
+        "z": 82.3188
+      },
+      "network_node_id": "draft-node-166",
+      "connector_distance": 2.7778,
+      "approved": true
+    },
+    {
+      "id": "destination-draft:building:Root_F34-Hazardous_Waste_Storage_F34",
+      "source_label_id": "building:Root_F34-Hazardous_Waste_Storage_F34",
+      "name": "Waste Storage",
+      "category": "department",
+      "access_profile": "all",
+      "layer": "ground",
+      "position": {
+        "x": -50.0786,
+        "y": 0.5,
+        "z": 323.6213
+      },
+      "network_node_id": "draft-node-289",
+      "connector_distance": 1.3478,
+      "approved": true
+    },
+    {
+      "id": "destination-draft:label:fb6dcc9b-ae2c-5ce5-8e3a-289ad4306f75",
+      "source_label_id": "label:fb6dcc9b-ae2c-5ce5-8e3a-289ad4306f75",
+      "name": "HAZARDOUS STORAGE 101",
+      "category": "department",
+      "access_profile": "all",
+      "layer": "ground",
+      "position": {
+        "x": -12.2943,
+        "y": 0.5,
+        "z": 248.5438
+      },
+      "network_node_id": "draft-node-281",
+      "connector_distance": 1.6676,
+      "approved": true
+    },
+    {
+      "id": "destination-draft:building:Root_F32-Discharge-Testing_F32",
+      "source_label_id": "building:Root_F32-Discharge-Testing_F32",
+      "name": "Cell Discharge Testing",
+      "category": "department",
+      "access_profile": "all",
+      "layer": "ground",
+      "position": {
+        "x": -49.2889,
+        "y": 1.052,
+        "z": -47.9714
+      },
+      "network_node_id": "draft-node-343",
+      "connector_distance": 2.8942,
+      "approved": true
+    },
+    {
+      "id": "destination-draft:building:Root_F41-Storage_F41",
+      "source_label_id": "building:Root_F41-Storage_F41",
+      "name": "Safety Building",
+      "category": "department",
+      "access_profile": "all",
+      "layer": "ground",
+      "position": {
+        "x": -25.9937,
+        "y": 0.8687,
+        "z": -123.6993
+      },
+      "network_node_id": "draft-node-359",
+      "connector_distance": 2.0419,
+      "approved": true
+    },
+    {
+      "id": "destination-draft:custom-label:1784654556850",
+      "source_label_id": "custom-label:1784654556850",
+      "name": "North End Exterior Building Access Doors",
+      "category": "department",
+      "access_profile": "all",
+      "layer": "ground",
+      "position": {
+        "x": -273.7476,
+        "y": 0.5001,
+        "z": -374.1444
+      },
+      "network_node_id": "draft-node-14",
+      "connector_distance": 1.8093,
+      "approved": true
+    }
+  ]
+}
