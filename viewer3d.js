@@ -71,7 +71,6 @@ function initialize() {
     resizeObserver = new ResizeObserver(resize);
     resizeObserver.observe(frame);
 
-    // Wire UI Elements safely
     const listeners = [
         { id: "threeWalkwaysToggle", event: "change", fn: (e) => { if (editorGroup) editorGroup.visible = e.target.checked; } },
         { id: "threeRouteToggle", event: "change", fn: (e) => { if (routeGroup) routeGroup.visible = e.target.checked; } },
@@ -111,4 +110,88 @@ function initialize() {
     animate();
 }
 
-// ... (Rest of your existing viewer3d.js functions)
+async function loadModel() {
+    if (model) { console.log("PGS 3D: Model already exists."); return; }
+    if (loading) return;
+    loading = true;
+    console.log("PGS 3D: Starting loadModel()...");
+    setStatus("Preparing 3D twin…");
+    try {
+        const config = await fetch("data/config.json", { cache: "no-store" }).then(r => r.json());
+        const modelUrl = config.views?.model || "assets/models/site_mobile.glb";
+        console.log("PGS 3D: Target:", modelUrl);
+
+        const [destPayload, labelPayload, floorPayload, netPayload] = await Promise.all([
+            fetch("data/generated/destination_spatial.json").then(r => r.json()).catch(() => ({})),
+            fetch("data/generated/spatial_labels.json").then(r => r.json()).catch(() => ({})),
+            fetch("data/generated/floor_layers.json").then(r => r.json()).catch(() => ({})),
+            fetch("data/generated/pedestrian_network.json").then(r => r.json()).catch(() => ({}))
+        ]);
+
+        spatialOverrides = destPayload;
+        const loader = new GLTFLoader();
+        const gltf = await loader.loadAsync(modelUrl);
+        model = gltf.scene;
+        scene.add(model);
+        fitModel();
+        console.log("PGS 3D: Model added to scene.");
+        setStatus("3D twin ready", { hidden: true });
+    } catch (e) {
+        console.error("PGS 3D Critical Load Error:", e);
+        setStatus("Load Error: " + e.message, { error: true });
+    } finally {
+        loading = false;
+    }
+}
+
+function fitModel() {
+    if (!model) return;
+    const box = new THREE.Box3().setFromObject(model);
+    if (box.isEmpty()) return;
+    const size = box.getSize(new THREE.Vector3());
+    const center = box.getCenter(new THREE.Vector3());
+    model.position.sub(center);
+    model.position.y += size.y / 2;
+    const radius = Math.max(size.x, size.y, size.z) * .72 || 100;
+    camera.near = Math.max(radius / 10000, .1);
+    camera.far = Math.max(radius * 20, 5000);
+    camera.position.set(radius * .82, radius * .62, radius * .82);
+    camera.updateProjectionMatrix();
+    controls.target.set(0, Math.max(size.y * .12, 0), 0);
+    controls.minDistance = Math.max(radius * .08, 1);
+    controls.maxDistance = radius * 5;
+    controls.update();
+    controls.saveState();
+}
+
+function resize() {
+    if (!renderer || frame.hidden) return;
+    const width = Math.max(host.clientWidth, 1), height = Math.max(host.clientHeight, 1);
+    camera.aspect = width / height;
+    camera.updateProjectionMatrix();
+    renderer.setSize(width, height, false);
+    labelRenderer.setSize(width, height);
+}
+
+function animate() {
+    requestAnimationFrame(animate);
+    if (!visible || !renderer) return;
+    controls.update();
+    renderer.render(scene, camera);
+    labelRenderer.render(scene, camera);
+}
+
+async function show() {
+    visible = true;
+    initialize();
+    resize();
+    await loadModel();
+}
+
+function hide() { visible = false; }
+function reset() { if (controls) { controls.reset(); resize(); } }
+
+window.pgs3d = { show, hide, reset };
+
+// Include helper functions: classifyLayer, indexLayers, setLayerVisibility, etc.
+// (These are the rest of your original functions that were in your file)
