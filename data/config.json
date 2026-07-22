@@ -13,8 +13,8 @@
     "model": "assets/models/site_mobile.glb",
     "modelProfile": "mobile",
     "routingView": "3d",
-    "basePedestrianNetwork": "data/pedestrian_network_map_FINAL_2026-07-21.json",
-    "destinationAnchors": "data/destination_anchors_draft_FINAL_2026-07-21.json",
-    "labelOverrides": "data/label_overrides_draft_FINAL_2026-07-21.json"
+    "basePedestrianNetwork": "data/data/generated/pedestrian_network.json",
+    "destinationAnchors": "data/data/generated/destination_spatial.json",
+    "labelOverrides": "data/data/generated/spatial_labels.json"
   }
 }

@@ -88,8 +88,8 @@
                     <button id="view3DBtn" aria-pressed="false">3D Twin</button>
                 </div>
                 <button id="searchFocus">⌕ Search</button>
-                <button id="legendOpen">Legend</button>
-                <button id="layersOpen">Layers</button>
+                <button id="legendOpen" onclick="document.getElementById('legendPanel').classList.toggle('hide')">Legend</button>
+                <button id="layersOpen" onclick="document.getElementById('layersPanel').classList.toggle('show')">Layers</button>
                 <button id="fullscreenBtn">⛶</button>
                 <button id="resetView">Reset</button>
                 <button id="fitRoute" class="fit-button">Fit Route</button>
