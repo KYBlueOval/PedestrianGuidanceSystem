@@ -12,7 +12,6 @@
     <meta name="theme-color" content="#061a33"/>
     <link rel="stylesheet" href="style.css?v=10.5.4"/>
 
-    <!-- Import map to resolve 'three' module -->
     <script type="importmap">
     {
       "imports": {
@@ -23,17 +22,20 @@
     </script>
 
     <style>
-        /* Force hide editors in production */
         #pedestrianNetworkMapperPanel, #mapLabelEditorPanel, #destinationAnchorEditorPanel { display: none !important; }
         body.editor-active #pedestrianNetworkMapperPanel, body.editor-active #mapLabelEditorPanel, body.editor-active #destinationAnchorEditorPanel { display: block !important; }
         
-        /* FAIL-SAFE PANEL CSS: Guarantees panels open regardless of style.css */
-        .layers-panel { display: none; position: absolute; top: 60px; right: 20px; background: #061a33; border: 1px solid #1a3a5f; z-index: 9999; padding: 15px; border-radius: 8px; color: white; box-shadow: 0 10px 30px rgba(0,0,0,0.7); }
-        .layers-panel.show { display: block; }
-        .legend-panel { display: block; position: absolute; top: 60px; right: 90px; background: #061a33; border: 1px solid #1a3a5f; z-index: 9999; padding: 15px; border-radius: 8px; color: white; box-shadow: 0 10px 30px rgba(0,0,0,0.7); }
-        .legend-panel.hide { display: none !important; }
+        /* Forced Panel Styles */
+        .layers-panel, .legend-panel { display: none; position: absolute; top: 60px; right: 20px; background: #061a33; border: 1px solid #1a3a5f; z-index: 99999 !important; padding: 15px; border-radius: 8px; color: white; box-shadow: 0 10px 30px rgba(0,0,0,0.7); pointer-events: auto !important; }
+        .legend-panel { right: 90px; }
+        .layers-panel.show, .legend-panel.show { display: block !important; }
         .panel-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #1a3a5f; margin-bottom: 10px; padding-bottom: 5px; }
         .panel-header h3 { margin: 0; font-size: 14px; }
+        .panel-header button { background: none; border: none; color: white; cursor: pointer; font-size: 18px; }
+        
+        /* Map Layer Prioritization */
+        .top-actions button { position: relative; z-index: 100000; pointer-events: auto !important; }
+        #threeFrame { z-index: 100 !important; pointer-events: auto !important; }
     </style>
 </head>
 <body>
@@ -87,12 +89,14 @@
             <div><h2>BlueOval Glendale • Ground Floor</h2><p id="subtitle">Visitor-safe guided routing</p></div>
             <nav class="top-actions">
                 <div class="view-switch" aria-label="Map view">
-                    <button id="view2DBtn" class="active" aria-pressed="true">2D Map</button>
-                    <button id="view3DBtn" aria-pressed="false">3D Twin</button>
+                    <!-- INLINE ONCLICK COMMANDS -->
+                    <button id="view2DBtn" class="active" aria-pressed="true" onclick="window.switchTo2D()">2D Map</button>
+                    <button id="view3DBtn" aria-pressed="false" onclick="window.switchTo3D()">3D Twin</button>
                 </div>
                 <button id="searchFocus">⌕ Search</button>
-                <button id="legendOpen">Legend</button>
-                <button id="layersOpen">Layers</button>
+                <!-- INLINE ONCLICK COMMANDS -->
+                <button id="legendOpen" onclick="window.togglePanel('legendPanel')">Legend</button>
+                <button id="layersOpen" onclick="window.togglePanel('layersPanel')">Layers</button>
                 <button id="fullscreenBtn">⛶</button>
                 <button id="resetView">Reset</button>
                 <button id="fitRoute" class="fit-button">Fit Route</button>
@@ -103,7 +107,7 @@
         <section class="map-shell">
             <!-- Layers Panel -->
             <div id="layersPanel" class="layers-panel">
-                <div class="panel-header"><h3>Map Layers</h3><button id="layersClose" style="background:none;border:none;color:white;cursor:pointer;font-size:18px;">×</button></div>
+                <div class="panel-header"><h3>Map Layers</h3><button onclick="window.closePanel('layersPanel')">×</button></div>
                 <div>
                     <h4 style="margin-top:0; border-bottom:1px solid #333; padding-bottom:5px;">3D Architecture</h4>
                     <label style="display:block; margin-bottom:8px;"><input type="checkbox" data-3d-layer="roof"> Roof Level</label>
@@ -118,42 +122,16 @@
             </div>
 
             <!-- Legend Panel -->
-            <div id="legendPanel" class="legend-panel hide">
-                <div class="panel-header"><h3>Legend</h3><button id="legendClose" style="background:none;border:none;color:white;cursor:pointer;font-size:18px;">×</button></div>
+            <div id="legendPanel" class="legend-panel">
+                <div class="panel-header"><h3>Legend</h3><button onclick="window.closePanel('legendPanel')">×</button></div>
                 <div>
                     <p style="margin-bottom:10px;"><span style="color:#0f6cff;">━</span> Primary Route</p>
                     <p style="margin-bottom:10px;"><span style="color:#35f59a;">●</span> Start Point</p>
                     <p style="margin-bottom:10px;"><span style="color:#1687ff;">●</span> Destination</p>
                     <p style="margin-bottom:10px;"><span style="color:#ffcf3a;">●</span> Tracked Position</p>
-                </div>
-            </div>
-			
-			<!-- Layers Panel -->
-            <div id="layersPanel" class="layers-panel">
-                <div class="panel-header"><h3>Map Layers</h3><button id="layersClose" style="background:none;border:none;color:white;cursor:pointer;font-size:18px;">×</button></div>
-                <div>
-                    <h4 style="margin-top:0; border-bottom:1px solid #333; padding-bottom:5px;">3D Architecture</h4>
-                    <label style="display:block; margin-bottom:8px;"><input type="checkbox" data-3d-layer="roof"> Roof Level</label>
-                    <label style="display:block; margin-bottom:8px;"><input type="checkbox" data-3d-layer="mezzanine"> Mezzanine Level</label>
-                    <label style="display:block; margin-bottom:8px;"><input type="checkbox" data-3d-layer="ground" checked> Ground Floor</label>
-                    <label style="display:block; margin-bottom:15px;"><input type="checkbox" data-3d-layer="site" checked> Site & Exterior</label>
-                    <h4 style="border-bottom:1px solid #333; padding-bottom:5px;">3D Labels</h4>
-                    <label style="display:block; margin-bottom:8px;"><input type="checkbox" data-semantic-label="area" checked> Key Areas</label>
-                    <label style="display:block; margin-bottom:8px;"><input type="checkbox" data-semantic-label="room"> Rooms & Offices</label>
-                    <label style="display:block; margin-bottom:8px;"><input type="checkbox" data-semantic-label="vertical"> Stairs & Elevators</label>
                 </div>
             </div>
 
-            <!-- Legend Panel -->
-            <div id="legendPanel" class="legend-panel hide">
-                <div class="panel-header"><h3>Legend</h3><button id="legendClose" style="background:none;border:none;color:white;cursor:pointer;font-size:18px;">×</button></div>
-                <div>
-                    <p style="margin-bottom:10px;"><span style="color:#0f6cff;">━</span> Primary Route</p>
-                    <p style="margin-bottom:10px;"><span style="color:#35f59a;">●</span> Start Point</p>
-                    <p style="margin-bottom:10px;"><span style="color:#1687ff;">●</span> Destination</p>
-                    <p style="margin-bottom:10px;"><span style="color:#ffcf3a;">●</span> Tracked Position</p>
-                </div>
-            </div>
             <div class="map-toolbar">
                 <span>Mouse wheel = zoom</span><span>Drag = pan</span>
                 <label><input type="checkbox" id="labelsToggle" checked/> Labels</label>
@@ -162,7 +140,7 @@
             </div>
 
             <div id="mapFrame" class="map-frame">
-                <div id="mapStage" class="map-stage">
+                <div id="mapStage">
                     <img id="plantMap" src="assets/map-full.png" alt="Facility pedestrian access map"/>
                     <svg id="overlay" viewBox="0 0 1024 768" preserveAspectRatio="none">
                         <defs>
@@ -184,24 +162,34 @@
     </main>
 </div>
 <div id="toast" class="toast">Route copied</div>
+
 <script src="app.js?v=10.5.4"></script>
 <script type="module" src="viewer3d.js?v=10.5.4"></script>
-<!-- Paste this right above the closing </body> tag in index.html -->
+
+<!-- Global Script to Ensure Button Commands Cannot Be Blocked -->
 <script>
-    // Force UI Panels to open and close
-    document.getElementById('layersOpen')?.addEventListener('click', () => {
-        document.getElementById('layersPanel')?.classList.toggle('show');
-    });
-    document.getElementById('layersClose')?.addEventListener('click', () => {
-        document.getElementById('layersPanel')?.classList.remove('show');
-    });
-    
-    document.getElementById('legendOpen')?.addEventListener('click', () => {
-        document.getElementById('legendPanel')?.classList.toggle('hide');
-    });
-    document.getElementById('legendClose')?.addEventListener('click', () => {
-        document.getElementById('legendPanel')?.classList.add('hide');
-    });
+    window.togglePanel = function(id) {
+        document.getElementById(id).classList.toggle('show');
+    };
+    window.closePanel = function(id) {
+        document.getElementById(id).classList.remove('show');
+    };
+    window.switchTo3D = function() {
+        document.getElementById('mapFrame').style.display = 'none';
+        const tf = document.getElementById('threeFrame');
+        tf.removeAttribute('hidden');
+        tf.style.display = 'block';
+        document.getElementById('view3DBtn').classList.add('active');
+        document.getElementById('view2DBtn').classList.remove('active');
+        if(window.pgs3d && typeof window.pgs3d.show === 'function') window.pgs3d.show();
+    };
+    window.switchTo2D = function() {
+        document.getElementById('threeFrame').style.display = 'none';
+        document.getElementById('mapFrame').style.display = 'block';
+        document.getElementById('view2DBtn').classList.add('active');
+        document.getElementById('view3DBtn').classList.remove('active');
+        if(window.pgs3d && typeof window.pgs3d.hide === 'function') window.pgs3d.hide();
+    };
 </script>
 </body>
 </html>
