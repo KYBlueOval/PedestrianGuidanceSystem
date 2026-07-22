@@ -257,11 +257,23 @@ function edgeAllowsMode(edge, currentMode) {
 }
 
 function drawRoute(path) {
-    const l = $("routeLayer"); if (!l) return; l.innerHTML = "";
-    const points = path.map(id => loc(id)).filter(Boolean).map(d => `${d.x},${d.y}`).join(" ");
+    const l = $("routeLayer");
+    if (!l) return;
+    l.innerHTML = "";
+
+    // SAFE VERSION: Filter out undefined points to prevent console crash
+    const points = path
+        .map(id => loc(id))
+        .filter(d => d && typeof d.x !== 'undefined' && typeof d.y !== 'undefined')
+        .map(d => `${d.x},${d.y}`)
+        .join(" ");
+
     if (!points) return;
+
     const pl = document.createElementNS("http://www.w3.org/2000/svg", "polyline");
-    pl.setAttribute("points", points); pl.setAttribute("class", "route"); pl.setAttribute("marker-end", "url(#arrow)");
+    pl.setAttribute("points", points);
+    pl.setAttribute("class", "route");
+    pl.setAttribute("marker-end", "url(#arrow)");
     l.appendChild(pl);
     document.querySelectorAll(".node").forEach(n => n.classList.remove("selected"));
     path.forEach(id => document.querySelector(`.node[data-id="${id}"]`)?.classList.add("selected"));
