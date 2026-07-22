@@ -3,10 +3,9 @@
 <head>
     <meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
-    <title>Ford Energy SiteNav Command v10</title>
-    <link rel="manifest" href="manifest.json"/>
-    <link rel="icon" href="assets/icons/favicon.ico" sizes="any"/>
+    <title>Ford Energy SiteNav Command v10 - 3D Core</title>
     <link rel="stylesheet" href="style.css?v=10.5.4"/>
+
     <script type="importmap">
     {
       "imports": {
@@ -15,62 +14,55 @@
       }
     }
     </script>
+
     <style>
-        /* Panel Styles */
-        .layers-panel, .legend-panel { display: none; position: absolute; top: 70px; right: 20px; background: #061a33; border: 1px solid #1a3a5f; z-index: 99999 !important; padding: 15px; border-radius: 8px; color: white; box-shadow: 0 10px 30px rgba(0,0,0,0.7); }
-        .legend-panel { right: 90px; }
-        .layers-panel.show, .legend-panel.show { display: block !important; }
-        .panel-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #1a3a5f; margin-bottom: 10px; }
-        
-        /* 3D Core Enforcement */
+        /* DECOMMISSION 2D MAP & SWITCHER */
+        .view-switch { display: none !important; }
         #mapFrame { display: none !important; }
         #threeFrame { display: block !important; position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 10; }
+        
+        /* Panel Styles */
+        .layers-panel, .legend-panel { display: none; position: absolute; top: 60px; right: 20px; background: #061a33; border: 1px solid #1a3a5f; z-index: 99999 !important; padding: 15px; border-radius: 8px; color: white; box-shadow: 0 10px 30px rgba(0,0,0,0.7); }
+        .legend-panel { right: 90px; }
+        .layers-panel.show, .legend-panel.show { display: block !important; }
+        .panel-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #1a3a5f; margin-bottom: 10px; padding-bottom: 5px; }
+        .panel-header h3 { margin: 0; font-size: 14px; }
+        .panel-header button { background: none; border: none; color: white; cursor: pointer; font-size: 18px; }
     </style>
 </head>
 <body>
 <div class="app-shell">
     <aside class="sidebar">
+        <!-- Sidebar content same as original -->
         <section class="brand-panel">
-            <img class="brand-logo" src="assets/logos/ford-energy-white.png" alt="Ford Energy" onerror="this.src='assets/ford_energy_logo_white.png'"/>
             <div class="app-title"><h1>SiteNav Command</h1><p>Pedestrian Guidance System</p></div>
-            <div class="system-status"><span class="online-dot"></span><div><b>Navigation Core Online</b><small>Ground Floor • v10 digital-twin</small></div></div>
         </section>
-
         <section class="control-section">
             <label>Navigation Mode</label>
             <div class="mode-grid">
-                <button class="mode active" data-mode="visitor"><span>👥</span>Visitor</button>
-                <button class="mode" data-mode="employee"><span>🏭</span>Employee</button>
-                <button class="mode" data-mode="contractor"><span>🦺</span>Contractor</button>
-                <button class="mode emergency" data-mode="emergency"><span>🚨</span>Emergency</button>
+                <button class="mode active" data-mode="visitor">Visitor</button>
+                <button class="mode" data-mode="employee">Employee</button>
+                <button class="mode" data-mode="contractor">Contractor</button>
+                <button class="mode emergency" data-mode="emergency">Emergency</button>
             </div>
-            <label for="searchBox">Destination Search</label>
-            <input id="searchBox" placeholder="Search..."/>
-            <label for="destinationCategory">Destination Category</label>
-            <select id="destinationCategory"></select>
-            <label for="startSelect">Start</label><select id="startSelect"></select>
-            <label for="endSelect">Destination</label><select id="endSelect"></select>
+            <label>Start</label><select id="startSelect"></select>
+            <label>Destination</label><select id="endSelect"></select>
             <button id="routeBtn" class="primary-action">Generate Route</button>
         </section>
-
-        <section class="quick-routes"><div class="section-heading">Quick Routes</div><div id="quickRoutes"></div></section>
-        <section class="route-status"><div class="route-title"><span>Route Status</span><b id="routeStatus">3D ROUTE</b></div></section>
         <footer class="version-footer">PGS v10.0.0 Alpha</footer>
     </aside>
 
     <main class="workspace">
         <header class="topbar">
-            <h2>BlueOval Glendale • Ground Floor</h2>
             <nav class="top-actions">
                 <button id="searchFocus">⌕ Search</button>
                 <button id="legendOpen" onclick="document.getElementById('legendPanel').classList.toggle('show')">Legend</button>
                 <button id="layersOpen" onclick="document.getElementById('layersPanel').classList.toggle('show')">Layers</button>
-                <button id="resetView">Reset</button>
-                <button id="fitRoute" class="fit-button">Fit Route</button>
             </nav>
         </header>
 
         <section class="map-shell">
+            <!-- Layers Panel -->
             <div id="layersPanel" class="layers-panel">
                 <div class="panel-header"><h3>Map Layers</h3><button onclick="document.getElementById('layersPanel').classList.remove('show')">×</button></div>
                 <div>
@@ -83,11 +75,11 @@
 
             <div id="legendPanel" class="legend-panel">
                 <div class="panel-header"><h3>Legend</h3><button onclick="document.getElementById('legendPanel').classList.remove('show')">×</button></div>
-                <div id="legendContent"><p>━ Primary Route</p></div>
+                <p>━ Primary Route</p>
             </div>
 
             <div id="threeFrame" class="three-frame">
-                <div id="threeCanvas" class="three-canvas"></div>
+                <div id="threeCanvas" style="width:100%; height:100%;"></div>
             </div>
         </section>
     </main>
@@ -95,5 +87,15 @@
 
 <script src="app.js?v=10.5.4"></script>
 <script type="module" src="viewer3d.js?v=10.5.4"></script>
+<script>
+    // ONLY auto-boot 3D; NO redundant listeners here
+    window.addEventListener("load", () => {
+        setTimeout(() => {
+            if (window.pgs3d && typeof window.pgs3d.show === 'function') {
+                window.pgs3d.show();
+            }
+        }, 300);
+    });
+</script>
 </body>
 </html>
