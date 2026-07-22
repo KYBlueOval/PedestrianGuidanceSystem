@@ -1,59 +1,177 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>Ford Energy SiteNav Command v10</title>
-<link rel="stylesheet" href="style.css?v=10.5.4"/>
-<script type="importmap">
-{
-  "imports": {
-    "three": "https://cdn.jsdelivr.net/npm/three@0.185.0/build/three.module.js",
-    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.185.0/examples/jsm/"
-  }
-}
-</script>
-<style>
-    #pedestrianNetworkMapperPanel, #mapLabelEditorPanel, #destinationAnchorEditorPanel { display: none !important; }
-    body.editor-active #pedestrianNetworkMapperPanel, 
-    body.editor-active #mapLabelEditorPanel, 
-    body.editor-active #destinationAnchorEditorPanel { display: block !important; }
-</style>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width,initial-scale=1"/>
+    <title>Ford Energy SiteNav Command v10</title>
+    <link rel="manifest" href="manifest.json"/>
+    <link rel="icon" href="assets/icons/favicon.ico" sizes="any"/>
+    <link rel="icon" type="image/png" sizes="32x32" href="assets/icons/pgs-icon-32.png"/>
+    <link rel="icon" type="image/png" sizes="192x192" href="assets/icons/pgs-icon-192.png"/>
+    <link rel="apple-touch-icon" sizes="180x180" href="assets/icons/pgs-icon-180.png"/>
+    <meta name="theme-color" content="#061a33"/>
+    <link rel="stylesheet" href="style.css?v=10.5.4"/>
+
+    <!-- Fix: Import map to resolve 'three' module -->
+    <script type="importmap">
+    {
+      "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.185.0/build/three.module.js",
+        "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.185.0/examples/jsm/"
+      }
+    }
+    </script>
+
+    <style>
+        /* Force hide editors in production unless 'editor-active' class is present */
+        #pedestrianNetworkMapperPanel, #mapLabelEditorPanel, #destinationAnchorEditorPanel {
+            display: none !important;
+        }
+        body.editor-active #pedestrianNetworkMapperPanel, 
+        body.editor-active #mapLabelEditorPanel, 
+        body.editor-active #destinationAnchorEditorPanel {
+            display: block !important;
+        }
+    </style>
 </head>
 <body>
 <div class="app-shell">
-  <aside class="sidebar">
-    <section class="brand-panel">
-      <h1>SiteNav Command</h1>
-      <p>Pedestrian Guidance System</p>
-      <div class="system-status"><span class="online-dot"></span><b>Navigation Core Online</b></div>
-    </section>
-    <section class="control-section">
-      <div class="mode-grid">
-        <button class="mode active" data-mode="visitor"><span>👥</span>Visitor</button>
-        <button class="mode" data-mode="employee"><span>🏭</span>Employee</button>
-        <button class="mode" data-mode="contractor"><span>🦺</span>Contractor</button>
-      </div>
-      <label>Destination Search</label>
-      <input id="searchBox" placeholder="Search..."/>
-      <select id="startSelect"></select>
-      <select id="endSelect"></select>
-      <button id="routeBtn" class="primary-action">Generate Route</button>
-    </section>
-  </aside>
-  <main class="workspace">
-    <section class="map-shell">
-      <div id="mapFrame" class="map-frame"><div id="mapStage"></div></div>
-      <div id="threeFrame" class="three-frame" hidden>
-        <div id="threeCanvas" class="three-canvas"></div>
-        <div id="threeStatus" class="three-status"><span></span><span>Initializing...</span></div>
-        <div id="pedestrianNetworkMapperPanel"></div>
-        <div id="mapLabelEditorPanel"></div>
-        <div id="destinationAnchorEditorPanel"></div>
-      </div>
-    </section>
-  </main>
+    <aside class="sidebar">
+        <section class="brand-panel">
+            <img class="brand-logo" src="assets/logos/ford-energy-white.png" alt="Ford Energy" onerror="this.src='assets/ford_energy_logo_white.png'"/>
+            <div class="app-title">
+                <img src="assets/icons/pgs-icon-96.png" alt="PGS"/>
+                <div>
+                    <h1>SiteNav Command</h1>
+                    <p>Pedestrian Guidance System</p>
+                </div>
+            </div>
+            <div class="system-status">
+                <span class="online-dot"></span>
+                <div>
+                    <b>Navigation Core Online</b>
+                    <small>Ground Floor • v10 digital-twin preview</small>
+                </div>
+            </div>
+        </section>
+
+        <section class="control-section">
+            <label>Navigation Mode</label>
+            <div class="mode-grid">
+                <button class="mode active" data-mode="visitor"><span>👥</span>Visitor</button>
+                <button class="mode" data-mode="employee"><span>🏭</span>Employee</button>
+                <button class="mode" data-mode="contractor"><span>🦺</span>Contractor</button>
+                <button class="mode emergency" data-mode="emergency"><span>🚨</span>Emergency</button>
+            </div>
+
+            <label for="searchBox">Destination Search</label>
+            <div class="search-box">
+                <input id="searchBox" placeholder="Search guardhouse, formation, training..."/>
+                <button id="searchClear">×</button>
+            </div>
+            <div id="searchResults" class="search-results"></div>
+
+            <label for="destinationCategory">Destination Category</label>
+            <select id="destinationCategory">
+                <option value="all">All Approved Destinations</option>
+                <option value="visitor">Visitor / Check-In</option>
+                <option value="security">Entrances / Security</option>
+                <option value="production">Production Areas</option>
+                <option value="amenities">Amenities / Employee Services</option>
+                <option value="emergency">Emergency / Muster</option>
+            </select>
+
+            <label for="startSelect">Start</label>
+            <select id="startSelect"></select>
+
+            <label for="endSelect">Destination</label>
+            <select id="endSelect"></select>
+
+            <button id="routeBtn" class="primary-action">Generate Route Preview</button>
+        </section>
+
+        <section class="quick-routes">
+            <div class="section-heading">Quick Routes</div>
+            <div id="quickRoutes"></div>
+        </section>
+
+        <section class="route-status">
+            <div class="route-title"><span>Route Status</span><b id="routeStatus">DRAFT PREVIEW</b></div>
+            <div class="metric-grid">
+                <div><strong id="distanceMetric">--</strong><small>Distance</small></div>
+                <div><strong id="timeMetric">--</strong><small>Est. Walk</small></div>
+            </div>
+        </section>
+
+        <section class="steps-panel">
+            <div class="section-heading">Turn-by-Turn</div>
+            <div id="steps"></div>
+        </section>
+
+        <footer class="version-footer"><span></span> PGS v10.0.0 Alpha</footer>
+    </aside>
+
+    <main class="workspace">
+        <header class="topbar">
+            <div>
+                <h2>BlueOval Glendale • Ground Floor</h2>
+                <p id="subtitle">Visitor-safe guided routing</p>
+            </div>
+            <nav class="top-actions">
+                <div class="view-switch" aria-label="Map view">
+                    <button id="view2DBtn" class="active" aria-pressed="true">2D Map</button>
+                    <button id="view3DBtn" aria-pressed="false">3D Twin</button>
+                </div>
+                <button id="searchFocus">⌕ Search</button>
+                <button id="legendOpen">Legend</button>
+                <button id="layersOpen">Layers</button>
+                <button id="fullscreenBtn">⛶</button>
+                <button id="resetView">Reset</button>
+                <button id="fitRoute" class="fit-button">Fit Route</button>
+            </nav>
+            <div class="clock-block"><b id="clock">--:--</b><small>System Online</small></div>
+        </header>
+
+        <section class="map-shell">
+            <div class="map-toolbar">
+                <span>Mouse wheel = zoom</span>
+                <span>Drag = pan</span>
+                <label><input type="checkbox" id="labelsToggle" checked/> Labels</label>
+                <label><input type="checkbox" id="networkToggle" checked/> Network</label>
+                <label><input type="checkbox" id="pulseToggle" checked/> Pulse</label>
+            </div>
+
+            <div id="mapFrame" class="map-frame">
+                <div id="mapStage" class="map-stage">
+                    <img id="plantMap" src="assets/map-full.png" alt="Facility pedestrian access map"/>
+                    <svg id="overlay" viewBox="0 0 1024 768" preserveAspectRatio="none">
+                        <defs>
+                            <filter id="glow"><feGaussianBlur stdDeviation="3" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+                            <filter id="labelShadow"><feDropShadow dx="0" dy="1" stdDeviation="1.2" flood-color="#ffffff" flood-opacity="1"/></filter>
+                            <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth"><path d="M0,0 L0,6 L9,3 z" fill="#0f6cff"/></marker>
+                        </defs>
+                        <g id="networkLayer"></g>
+                        <g id="routeLayer"></g>
+                        <g id="nodeLayer"></g>
+                    </svg>
+                </div>
+            </div>
+
+            <div id="threeFrame" class="three-frame" hidden>
+                <div id="threeCanvas" class="three-canvas"></div>
+                <div id="threeStatus" class="three-status">
+                    <span class="three-spinner" aria-hidden="true"></span>
+                    <span>Initializing...</span>
+                </div>
+                <div id="pedestrianNetworkMapperPanel"></div>
+                <div id="mapLabelEditorPanel"></div>
+                <div id="destinationAnchorEditorPanel"></div>
+            </div>
+        </section>
+    </main>
 </div>
+
+<div id="toast" class="toast">Route copied</div>
 <script src="app.js?v=10.5.4"></script>
 <script type="module" src="viewer3d.js?v=10.5.4"></script>
 </body>
