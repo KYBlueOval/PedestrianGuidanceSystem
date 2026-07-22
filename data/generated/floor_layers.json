@@ -1,0 +1,148 @@
+{
+  "schema_version": "0.2.0",
+  "layers": [
+    {
+      "floor_id": "d8030bbb-664e-540a-97de-d4e677d255ab",
+      "name": "Campus Exterior — OUTDOOR",
+      "code": "OUTDOOR",
+      "glb_node_token": null,
+      "default_visible": true
+    },
+    {
+      "floor_id": "f59029c1-c61e-5ca3-a940-c6be0b41ac7f",
+      "name": "Cell Discharge Testing — 1F",
+      "code": "1F",
+      "glb_node_token": "_1F_",
+      "default_visible": true
+    },
+    {
+      "floor_id": "ee5ad204-9ae9-5fdf-ac0f-60fb840ede72",
+      "name": "Cell Discharge Testing — RF",
+      "code": "RF",
+      "glb_node_token": "_RF_",
+      "default_visible": false
+    },
+    {
+      "floor_id": "e3214d5f-8877-5ac8-b378-e339e1d8dd29",
+      "name": "Hazardous Storage — 1F",
+      "code": "1F",
+      "glb_node_token": "_1F_",
+      "default_visible": true
+    },
+    {
+      "floor_id": "ce749bc4-435a-5212-9b32-b427628dd4a5",
+      "name": "Hazardous Storage — RF",
+      "code": "RF",
+      "glb_node_token": "_RF_",
+      "default_visible": false
+    },
+    {
+      "floor_id": "4fd8803c-3771-564d-bedc-825a250595d8",
+      "name": "Main Production Building — 1F",
+      "code": "1F",
+      "glb_node_token": "_1F_",
+      "default_visible": true
+    },
+    {
+      "floor_id": "d7013557-abdd-56f3-ab8f-a0ea0e34c443",
+      "name": "Main Production Building — MF",
+      "code": "MF",
+      "glb_node_token": "_MF_",
+      "default_visible": false
+    },
+    {
+      "floor_id": "3a3c61a0-417e-51bf-b44d-6cbc6ebc2097",
+      "name": "Main Production Building — RF",
+      "code": "RF",
+      "glb_node_token": "_RF_",
+      "default_visible": false
+    },
+    {
+      "floor_id": "8cb49a67-69cc-5be1-bbe0-89c19a6799aa",
+      "name": "Main Security / Main Guard House — 1F",
+      "code": "1F",
+      "glb_node_token": "_1F_",
+      "default_visible": true
+    },
+    {
+      "floor_id": "9a749a7f-4586-5a5e-adfd-1124fbc2b615",
+      "name": "Main Security / Main Guard House — RF",
+      "code": "RF",
+      "glb_node_token": "_RF_",
+      "default_visible": false
+    },
+    {
+      "floor_id": "0ae469af-52c7-506f-b371-156bb331d81c",
+      "name": "Safety Building — 1F",
+      "code": "1F",
+      "glb_node_token": "_1F_",
+      "default_visible": true
+    },
+    {
+      "floor_id": "46af1103-5824-5589-8d2a-d31c366e7b6c",
+      "name": "Safety Building — RF",
+      "code": "RF",
+      "glb_node_token": "_RF_",
+      "default_visible": false
+    },
+    {
+      "floor_id": "cc8d8bce-110b-5add-bd76-1bc2a65440f7",
+      "name": "Secondary Security / Sub Guard House — 1F",
+      "code": "1F",
+      "glb_node_token": "_1F_",
+      "default_visible": true
+    },
+    {
+      "floor_id": "bf412e7b-4f17-5709-b543-5a0ab23f0ddc",
+      "name": "Secondary Security / Sub Guard House — RF",
+      "code": "RF",
+      "glb_node_token": "_RF_",
+      "default_visible": false
+    },
+    {
+      "floor_id": "aee9ca04-c5f9-5504-9ae9-93610e90ab36",
+      "name": "Switch House / Utility Power Station — 1F",
+      "code": "1F",
+      "glb_node_token": "_1F_",
+      "default_visible": true
+    },
+    {
+      "floor_id": "45895fd7-66e8-51fc-bcf8-ec4ee6750ef2",
+      "name": "Switch House / Utility Power Station — RF",
+      "code": "RF",
+      "glb_node_token": "_RF_",
+      "default_visible": false
+    },
+    {
+      "floor_id": "203cb8e8-b312-5fcd-962e-c7bc18db910b",
+      "name": "Third Module Entrance — 1F",
+      "code": "1F",
+      "glb_node_token": "_1F_",
+      "default_visible": true
+    },
+    {
+      "floor_id": "dc724cf5-edbd-5fac-a498-e15d7e8123ef",
+      "name": "Third Module Entrance — RF",
+      "code": "RF",
+      "glb_node_token": "_RF_",
+      "default_visible": false
+    },
+    {
+      "floor_id": "79369914-efa3-5343-83b1-d661d16d5bac",
+      "name": "Waste Storage — 1F",
+      "code": "1F",
+      "glb_node_token": "_1F_",
+      "default_visible": true
+    },
+    {
+      "floor_id": "a094e04e-ce0a-5aba-9c22-2feb9e7dad23",
+      "name": "Waste Storage — RF",
+      "code": "RF",
+      "glb_node_token": "_RF_",
+      "default_visible": false
+    }
+  ],
+  "summary": {
+    "layer_count": 20
+  }
+}

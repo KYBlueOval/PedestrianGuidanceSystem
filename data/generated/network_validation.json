@@ -1,0 +1,25 @@
+{
+  "schema_version": "0.2.0",
+  "valid": true,
+  "mapping_valid": true,
+  "route_ready": false,
+  "error_count": 0,
+  "warning_count": 2,
+  "issues": [
+    {
+      "level": "warning",
+      "code": "NETWORK_ISLANDS",
+      "message": "The mapped pedestrian infrastructure contains 3 disconnected components. This is acceptable while mapping is in progress; connect components only where a real pedestrian transition exists."
+    },
+    {
+      "level": "warning",
+      "code": "NETWORK_UNAPPROVED",
+      "message": "The compiled network remains a draft and cannot be used for certified routing."
+    }
+  ],
+  "component_sizes": [
+    12,
+    6,
+    3
+  ]
+}

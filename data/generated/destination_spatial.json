@@ -1,0 +1,23 @@
+{
+  "schema_version": "0.1.0-local-review",
+  "coordinate_system": "PGS GLB model coordinates",
+  "destinations": {
+    "main_guard_house": {"x": -479.582, "y": 1.5, "z": 82.02718},
+    "visitor_badging": {"x": -471.0088, "y": 1.5, "z": 91.17528},
+    "sub_guard_house": {"x": -476.4796, "y": 1.5, "z": 453.2817},
+    "module_guard_house": {"x": -475.986, "y": 1.5, "z": -179.8498},
+    "formation": {"x": -275.0, "y": 1.5, "z": -86.07383},
+    "cell_assembly": {"x": -275.0, "y": 1.5, "z": 267.195},
+    "module_area": {"x": -275.0, "y": 1.5, "z": -260.692},
+    "break_area": {"x": -264.298, "y": 1.5, "z": 413.2067},
+    "restrooms": {"x": -289.1841, "y": 1.5, "z": 328.4967},
+    "employee_lobby": {"x": -347.7921, "y": 1.5, "z": 514.4949},
+    "training_center": {"x": -360.0, "y": 1.5, "z": 470.0},
+    "anode": {"x": -180.0, "y": 1.5, "z": 470.973},
+    "cathode": {"x": -370.0, "y": 1.5, "z": 470.973}
+  },
+  "review": {
+    "status": "local_preview_only",
+    "route_certified": false
+  }
+}

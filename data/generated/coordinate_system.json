@@ -1,0 +1,54 @@
+{
+  "schema_version": "0.2.0",
+  "source": {
+    "name": "XEUS Unity world coordinates",
+    "up_axis": "Y",
+    "units": "Unity units"
+  },
+  "model": {
+    "name": "PGS GLB model coordinates",
+    "up_axis": "Y",
+    "format": "glTF 2.0 binary"
+  },
+  "source_to_model": {
+    "x": {
+      "source_axis": "x",
+      "scale": -1.0,
+      "offset": 0.0
+    },
+    "y": {
+      "source_axis": "y",
+      "scale": 1.0,
+      "offset": 0.0
+    },
+    "z": {
+      "source_axis": "z",
+      "scale": 1.0,
+      "offset": 0.0
+    },
+    "matrix_row_major": [
+      -1.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      1.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      1.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      1.0
+    ]
+  },
+  "runtime_alignment": {
+    "strategy": "shared_root_transform",
+    "instruction": "Apply identical centering, scale, and rotation to the GLB model root and the spatial-data root.",
+    "consumer_may_recenter": true
+  },
+  "status": "verified against named floor geometry; route certification still required"
+}
