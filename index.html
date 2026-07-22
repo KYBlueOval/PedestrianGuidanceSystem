@@ -186,45 +186,5 @@
     });
 </script>
 
-<script>
-    // Safe UI Bindings for Panels
-    document.addEventListener('DOMContentLoaded', () => {
-        // Layers Panel
-        const layersBtn = document.getElementById('layersOpen');
-        const layersPanel = document.getElementById('layersPanel');
-        const layersClose = document.getElementById('layersClose');
-
-        if (layersBtn && layersPanel) {
-            layersBtn.addEventListener('click', (e) => {
-                e.preventDefault();
-                layersPanel.classList.toggle('show');
-            });
-        }
-        if (layersClose && layersPanel) {
-            layersClose.addEventListener('click', (e) => {
-                e.preventDefault();
-                layersPanel.classList.remove('show');
-            });
-        }
-
-        // Legend Panel
-        const legendBtn = document.getElementById('legendOpen');
-        const legendPanel = document.getElementById('legendPanel');
-        const legendClose = document.getElementById('legendClose');
-
-        if (legendBtn && legendPanel) {
-            legendBtn.addEventListener('click', (e) => {
-                e.preventDefault();
-                legendPanel.classList.toggle('show');
-            });
-        }
-        if (legendClose && legendPanel) {
-            legendClose.addEventListener('click', (e) => {
-                e.preventDefault();
-                legendPanel.classList.remove('show');
-            });
-        }
-    });
-</script>
 </body>
 </html>
