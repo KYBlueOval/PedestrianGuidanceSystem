@@ -1,0 +1,22 @@
+﻿id,layer,building_id,floor_id,position,access,accessible,approved
+ped-node:0e5b24b5-5eba-58f4-bbb2-e000dc35f4fa,ground,,,"{""x"": -414.4886, ""y"": 0.3499, ""z"": 466.8922}","[""contractor"", ""emergency"", ""employee"", ""visitor""]",True,False
+ped-node:13078805-7b96-57e2-8622-b9a3efda9848,ground,,,"{""x"": -274.7021, ""y"": 0.6499, ""z"": 467.4079}","[""contractor"", ""emergency"", ""employee"", ""visitor""]",True,False
+ped-node:210007c0-3b19-5512-9b44-96d640af4291,ground,,,"{""x"": -274.2758, ""y"": 0.65, ""z"": 78.6723}","[""contractor"", ""emergency"", ""employee"", ""visitor""]",True,False
+ped-node:2c845f33-b766-5f9f-87c5-f8217a9758f6,ground,,,"{""x"": -267.7777, ""y"": 0.65, ""z"": 192.7459}","[""contractor"", ""emergency"", ""employee"", ""visitor""]",True,False
+ped-node:3d7f2145-9ce0-50c2-8012-4cde5cb7c50e,ground,,,"{""x"": -289.5217, ""y"": 0.6499, ""z"": 462.6891}","[""contractor"", ""emergency"", ""employee"", ""visitor""]",True,False
+ped-node:560321f6-8b4f-5f4c-81c4-14c690d8f6f2,ground,,,"{""x"": -278.8316, ""y"": 1.4401, ""z"": 192.5789}","[""contractor"", ""emergency"", ""employee"", ""visitor""]",True,False
+ped-node:5cb67390-9ca4-5398-9147-31b20bbd4ec5,ground,,,"{""x"": -138.9151, ""y"": 0.7184, ""z"": 467.0055}","[""contractor"", ""emergency"", ""employee"", ""visitor""]",True,False
+ped-node:62aa3d2d-eb8c-543a-b435-01210168f1a6,ground,,,"{""x"": -290.1214, ""y"": 0.6499, ""z"": 468.0453}","[""contractor"", ""emergency"", ""employee"", ""visitor""]",True,False
+ped-node:671ba5ec-0fce-5016-a98e-f651b370b72e,ground,,,"{""x"": -261.6991, ""y"": 0.65, ""z"": 198.0964}","[""contractor"", ""emergency"", ""employee"", ""visitor""]",True,False
+ped-node:6b35836d-1d74-52b4-8db0-84ef1375dbde,ground,,,"{""x"": -157.6062, ""y"": 2.1616, ""z"": -163.7829}","[""contractor"", ""emergency"", ""employee"", ""visitor""]",True,False
+ped-node:70e5f023-b227-587d-bbfd-0fe1aa403440,ground,,,"{""x"": -267.9793, ""y"": 0.65, ""z"": 198.2353}","[""contractor"", ""emergency"", ""employee"", ""visitor""]",True,False
+ped-node:8ccc8471-b4e8-57a2-b159-daa4a8c8f2a8,ground,,,"{""x"": -278.3306, ""y"": 0.65, ""z"": 199.8151}","[""contractor"", ""emergency"", ""employee"", ""visitor""]",True,False
+ped-node:947127f6-6978-50e6-b725-bf916751cb96,ground,,,"{""x"": -274.7778, ""y"": 0.65, ""z"": -223.813}","[""contractor"", ""emergency"", ""employee"", ""visitor""]",True,False
+ped-node:9ae981e2-6626-5f8c-8e6d-899c075a4412,ground,,,"{""x"": -274.0242, ""y"": 0.3501, ""z"": -383.1545}","[""contractor"", ""emergency"", ""employee"", ""visitor""]",True,False
+ped-node:af9cd5cd-e361-59e9-b26b-9cf0438bd104,ground,,,"{""x"": -274.4263, ""y"": 1.8892, ""z"": 625.7798}","[""contractor"", ""emergency"", ""employee"", ""visitor""]",True,False
+ped-node:b4157813-e05f-5f56-861f-c047a49f5b9f,ground,,,"{""x"": -274.1133, ""y"": 0.65, ""z"": -163.6211}","[""contractor"", ""emergency"", ""employee"", ""visitor""]",True,False
+ped-node:e744ae81-9fc0-50d7-8a48-956199b48656,ground,,,"{""x"": -396.7727, ""y"": 1.9869, ""z"": -163.0048}","[""contractor"", ""emergency"", ""employee"", ""visitor""]",True,False
+ped-node:eb968430-0084-547c-86ef-ac5504e05922,ground,,,"{""x"": -274.3321, ""y"": 0.65, ""z"": 192.1891}","[""contractor"", ""emergency"", ""employee"", ""visitor""]",True,False
+ped-node:fcc0595e-b938-5cbc-a3f1-6c10441f88f4,ground,,,"{""x"": -274.4191, ""y"": 0.6499, ""z"": 462.0699}","[""contractor"", ""emergency"", ""employee"", ""visitor""]",True,False
+ped-node:fd521b44-b388-5942-b2c5-e113be627761,ground,,,"{""x"": -138.9101, ""y"": 0.7276, ""z"": 78.677}","[""contractor"", ""emergency"", ""employee"", ""visitor""]",True,False
+ped-node:ffa5f27c-8404-5108-a165-f81c4337fc6b,ground,,,"{""x"": -408.7552, ""y"": 2.6284, ""z"": 79.6421}","[""contractor"", ""emergency"", ""employee"", ""visitor""]",True,False
