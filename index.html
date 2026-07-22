@@ -11,6 +11,17 @@
 <link rel="apple-touch-icon" sizes="180x180" href="assets/icons/pgs-icon-180.png"/>
 <meta name="theme-color" content="#061a33"/>
 <link rel="stylesheet" href="style.css?v=10.5.4"/>
+
+<!-- Fix: Import map to resolve 'three' module -->
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.185.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.185.0/examples/jsm/"
+  }
+}
+</script>
+
 <style>
     /* Force hide editors in production unless 'editor-active' class is present */
     #pedestrianNetworkMapperPanel, #mapLabelEditorPanel, #destinationAnchorEditorPanel {
@@ -155,6 +166,8 @@
     </section>
   </main>
 </div>
+
+<div id="toast" class="toast">Route copied</div>
 <script src="app.js?v=10.5.4"></script>
 <script type="module" src="viewer3d.js?v=10.5.4"></script>
 </body>
