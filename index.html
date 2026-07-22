@@ -4,61 +4,95 @@
     <meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
     <title>Ford Energy SiteNav Command v10</title>
+    <link rel="manifest" href="manifest.json"/>
+    <link rel="icon" href="assets/icons/favicon.ico" sizes="any"/>
     <link rel="stylesheet" href="style.css?v=10.5.4"/>
+    <script type="importmap">
+    {
+      "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.185.0/build/three.module.js",
+        "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.185.0/examples/jsm/"
+      }
+    }
+    </script>
     <style>
-        /* Panel Styles */
         .layers-panel, .legend-panel { display: none; position: absolute; top: 70px; right: 20px; background: #061a33; border: 1px solid #1a3a5f; z-index: 9999; padding: 15px; border-radius: 8px; color: white; box-shadow: 0 10px 30px rgba(0,0,0,0.7); }
         .layers-panel.show, .legend-panel.show { display: block; }
         .panel-header { display: flex; justify-content: space-between; border-bottom: 1px solid #1a3a5f; margin-bottom: 10px; }
-        /* Map Visibility */
-        #mapFrame { display: block; }
-        #threeFrame { display: none; }
-        .three-frame { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 50; }
     </style>
 </head>
 <body>
-    <!-- [Keep your existing body content up to map-shell, then replace the content below] -->
-    <section class="map-shell">
-        <!-- Panels -->
-        <div id="layersPanel" class="layers-panel">
-            <div class="panel-header"><h3>Map Layers</h3><button onclick="document.getElementById('layersPanel').classList.remove('show')">×</button></div>
-            <div><label><input type="checkbox" data-3d-layer="ground" checked> Ground Floor</label><br>
-                 <label><input type="checkbox" data-3d-layer="site" checked> Site Exterior</label></div>
-        </div>
-        <div id="legendPanel" class="legend-panel">
-            <div class="panel-header"><h3>Legend</h3><button onclick="document.getElementById('legendPanel').classList.remove('show')">×</button></div>
-            <p>━ Primary Route</p>
-        </div>
+<div class="app-shell">
+    <aside class="sidebar">
+        <!-- Sidebar Content -->
+        <section class="brand-panel">
+            <img class="brand-logo" src="assets/logos/ford-energy-white.png" alt="Ford Energy" onerror="this.src='assets/ford_energy_logo_white.png'"/>
+            <div class="app-title"><h1>SiteNav Command</h1><p>Pedestrian Guidance System</p></div>
+            <div class="system-status"><span class="online-dot"></span><div><b>Navigation Core Online</b></div></div>
+        </section>
+        <section class="control-section">
+            <label>Navigation Mode</label>
+            <div class="mode-grid">
+                <button class="mode active" data-mode="visitor">Visitor</button>
+                <button class="mode" data-mode="employee">Employee</button>
+                <button class="mode" data-mode="contractor">Contractor</button>
+                <button class="mode emergency" data-mode="emergency">Emergency</button>
+            </div>
+            <label for="searchBox">Destination Search</label>
+            <input id="searchBox" placeholder="Search..."/>
+            <label>Destination Category</label>
+            <select id="destinationCategory"></select>
+            <label>Start</label><select id="startSelect"></select>
+            <label>Destination</label><select id="endSelect"></select>
+            <button id="routeBtn" class="primary-action">Generate Route Preview</button>
+        </section>
+        <section class="quick-routes"><div class="section-heading">Quick Routes</div><div id="quickRoutes"></div></section>
+        <section class="route-status"><div class="route-title"><span>Route Status</span><b id="routeStatus">DRAFT PREVIEW</b></div></section>
+        <footer class="version-footer">PGS v10.0.0 Alpha</footer>
+    </aside>
 
-        <div id="mapFrame" class="map-frame">
-            <div id="mapStage"><img id="plantMap" src="assets/map-full.png"/></div>
-        </div>
+    <main class="workspace">
+        <header class="topbar">
+            <h2>BlueOval Glendale • Ground Floor</h2>
+            <nav class="top-actions">
+                <button id="view2DBtn">2D Map</button>
+                <button id="view3DBtn">3D Twin</button>
+                <button id="legendOpen">Legend</button>
+                <button id="layersOpen">Layers</button>
+            </nav>
+        </header>
 
-        <div id="threeFrame" class="three-frame">
-            <div id="threeCanvas" style="width:100%; height:100%;"></div>
-        </div>
-    </section>
+        <section class="map-shell">
+            <!-- Panels -->
+            <div id="layersPanel" class="layers-panel">
+                <div class="panel-header"><h3>Map Layers</h3><button onclick="document.getElementById('layersPanel').classList.remove('show')">×</button></div>
+                <div><label><input type="checkbox" data-3d-layer="ground" checked> Ground Floor</label><br><label><input type="checkbox" data-3d-layer="site" checked> Site</label></div>
+            </div>
+            <div id="legendPanel" class="legend-panel">
+                <div class="panel-header"><h3>Legend</h3><button onclick="document.getElementById('legendPanel').classList.remove('show')">×</button></div>
+                <p>━ Primary Route</p>
+            </div>
 
-    <script src="app.js?v=10.5.4"></script>
-    <script type="module" src="viewer3d.js?v=10.5.4"></script>
-    
-    <script>
-        // FORCED UI BINDINGS
-        document.getElementById('layersOpen').onclick = () => document.getElementById('layersPanel').classList.toggle('show');
-        document.getElementById('legendOpen').onclick = () => document.getElementById('legendPanel').classList.toggle('show');
-        
-        // FORCED 3D SWITCH
-        document.getElementById('view3DBtn').onclick = () => {
-            document.getElementById('mapFrame').style.display = 'none';
-            document.getElementById('threeFrame').style.display = 'block';
-            document.getElementById('threeFrame').hidden = false;
-            if(window.pgs3d) window.pgs3d.show();
-        };
-        document.getElementById('view2DBtn').onclick = () => {
-            document.getElementById('mapFrame').style.display = 'block';
-            document.getElementById('threeFrame').style.display = 'none';
-            if(window.pgs3d) window.pgs3d.hide();
-        };
-    </script>
+            <div id="mapFrame" class="map-frame"><div id="mapStage"><img id="plantMap" src="assets/map-full.png"/></div></div>
+            <div id="threeFrame" class="three-frame" hidden><div id="threeCanvas" style="width:100%; height:100%;"></div></div>
+        </section>
+    </main>
+</div>
+<script src="app.js?v=10.5.4"></script>
+<script type="module" src="viewer3d.js?v=10.5.4"></script>
+<script>
+    document.getElementById('layersOpen').onclick = () => document.getElementById('layersPanel').classList.toggle('show');
+    document.getElementById('legendOpen').onclick = () => document.getElementById('legendPanel').classList.toggle('show');
+    document.getElementById('view3DBtn').onclick = () => {
+        document.getElementById('mapFrame').style.display = 'none';
+        document.getElementById('threeFrame').hidden = false;
+        window.pgs3d.show();
+    };
+    document.getElementById('view2DBtn').onclick = () => {
+        document.getElementById('mapFrame').style.display = 'block';
+        document.getElementById('threeFrame').hidden = true;
+        window.pgs3d.hide();
+    };
+</script>
 </body>
 </html>
