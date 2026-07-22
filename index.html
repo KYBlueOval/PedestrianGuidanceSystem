@@ -25,13 +25,17 @@
         #pedestrianNetworkMapperPanel, #mapLabelEditorPanel, #destinationAnchorEditorPanel { display: none !important; }
         body.editor-active #pedestrianNetworkMapperPanel, body.editor-active #mapLabelEditorPanel, body.editor-active #destinationAnchorEditorPanel { display: block !important; }
         
-        /* Panel Styles */
-        .layers-panel, .legend-panel { display: none; position: absolute; top: 60px; right: 20px; background: #061a33; border: 1px solid #1a3a5f; z-index: 9999; padding: 15px; border-radius: 8px; color: white; box-shadow: 0 10px 30px rgba(0,0,0,0.7); }
+        /* Forced Panel Styles */
+        .layers-panel, .legend-panel { display: none; position: absolute; top: 60px; right: 20px; background: #061a33; border: 1px solid #1a3a5f; z-index: 99999 !important; padding: 15px; border-radius: 8px; color: white; box-shadow: 0 10px 30px rgba(0,0,0,0.7); pointer-events: auto !important; }
         .legend-panel { right: 90px; }
         .layers-panel.show, .legend-panel.show { display: block !important; }
         .panel-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #1a3a5f; margin-bottom: 10px; padding-bottom: 5px; }
         .panel-header h3 { margin: 0; font-size: 14px; }
         .panel-header button { background: none; border: none; color: white; cursor: pointer; font-size: 18px; }
+        
+        /* Map Layer Prioritization */
+        .top-actions button { position: relative; z-index: 100000; pointer-events: auto !important; }
+        #threeFrame { z-index: 100 !important; pointer-events: auto !important; }
     </style>
 </head>
 <body>
@@ -85,12 +89,14 @@
             <div><h2>BlueOval Glendale • Ground Floor</h2><p id="subtitle">Visitor-safe guided routing</p></div>
             <nav class="top-actions">
                 <div class="view-switch" aria-label="Map view">
-                    <button id="view2DBtn" class="active" aria-pressed="true">2D Map</button>
-                    <button id="view3DBtn" aria-pressed="false">3D Twin</button>
+                    <!-- INLINE ONCLICK COMMANDS -->
+                    <button id="view2DBtn" class="active" aria-pressed="true" onclick="window.switchTo2D()">2D Map</button>
+                    <button id="view3DBtn" aria-pressed="false" onclick="window.switchTo3D()">3D Twin</button>
                 </div>
                 <button id="searchFocus">⌕ Search</button>
-                <button id="legendOpen">Legend</button>
-                <button id="layersOpen">Layers</button>
+                <!-- INLINE ONCLICK COMMANDS -->
+                <button id="legendOpen" onclick="window.togglePanel('legendPanel')">Legend</button>
+                <button id="layersOpen" onclick="window.togglePanel('layersPanel')">Layers</button>
                 <button id="fullscreenBtn">⛶</button>
                 <button id="resetView">Reset</button>
                 <button id="fitRoute" class="fit-button">Fit Route</button>
@@ -99,9 +105,9 @@
         </header>
 
         <section class="map-shell">
-            <!-- Map Layers Panel -->
+            <!-- Layers Panel -->
             <div id="layersPanel" class="layers-panel">
-                <div class="panel-header"><h3>Map Layers</h3><button id="layersClose">×</button></div>
+                <div class="panel-header"><h3>Map Layers</h3><button onclick="window.closePanel('layersPanel')">×</button></div>
                 <div>
                     <h4 style="margin-top:0; border-bottom:1px solid #333; padding-bottom:5px;">3D Architecture</h4>
                     <label style="display:block; margin-bottom:8px;"><input type="checkbox" data-3d-layer="roof"> Roof Level</label>
@@ -117,7 +123,7 @@
 
             <!-- Legend Panel -->
             <div id="legendPanel" class="legend-panel">
-                <div class="panel-header"><h3>Legend</h3><button id="legendClose">×</button></div>
+                <div class="panel-header"><h3>Legend</h3><button onclick="window.closePanel('legendPanel')">×</button></div>
                 <div>
                     <p style="margin-bottom:10px;"><span style="color:#0f6cff;">━</span> Primary Route</p>
                     <p style="margin-bottom:10px;"><span style="color:#35f59a;">●</span> Start Point</p>
@@ -160,45 +166,30 @@
 <script src="app.js?v=10.5.4"></script>
 <script type="module" src="viewer3d.js?v=10.5.4"></script>
 
-<!-- Fail-Safe Script to Force UI Interactions -->
+<!-- Global Script to Ensure Button Commands Cannot Be Blocked -->
 <script>
-document.addEventListener('DOMContentLoaded', () => {
-    // Force Panels to Open/Close
-    const setupToggle = (btnId, panelId, closeId) => {
-        const btn = document.getElementById(btnId);
-        const panel = document.getElementById(panelId);
-        const close = document.getElementById(closeId);
-        if (btn && panel) btn.addEventListener('click', (e) => { e.preventDefault(); panel.classList.toggle('show'); });
-        if (close && panel) close.addEventListener('click', (e) => { e.preventDefault(); panel.classList.remove('show'); });
+    window.togglePanel = function(id) {
+        document.getElementById(id).classList.toggle('show');
     };
-    setupToggle('layersOpen', 'layersPanel', 'layersClose');
-    setupToggle('legendOpen', 'legendPanel', 'legendClose');
-
-    // Force 2D/3D Map Switching
-    const btn2D = document.getElementById('view2DBtn');
-    const btn3D = document.getElementById('view3DBtn');
-    const mapFrame = document.getElementById('mapFrame');
-    const threeFrame = document.getElementById('threeFrame');
-
-    if (btn3D && mapFrame && threeFrame) {
-        btn3D.addEventListener('click', () => {
-            mapFrame.style.display = 'none';
-            threeFrame.hidden = false;
-            btn3D.classList.add('active');
-            btn2D.classList.remove('active');
-            if (window.pgs3d) window.pgs3d.show();
-        });
-    }
-    if (btn2D && mapFrame && threeFrame) {
-        btn2D.addEventListener('click', () => {
-            mapFrame.style.display = 'block';
-            threeFrame.hidden = true;
-            btn2D.classList.add('active');
-            btn3D.classList.remove('active');
-            if (window.pgs3d) window.pgs3d.hide();
-        });
-    }
-});
+    window.closePanel = function(id) {
+        document.getElementById(id).classList.remove('show');
+    };
+    window.switchTo3D = function() {
+        document.getElementById('mapFrame').style.display = 'none';
+        const tf = document.getElementById('threeFrame');
+        tf.removeAttribute('hidden');
+        tf.style.display = 'block';
+        document.getElementById('view3DBtn').classList.add('active');
+        document.getElementById('view2DBtn').classList.remove('active');
+        if(window.pgs3d && typeof window.pgs3d.show === 'function') window.pgs3d.show();
+    };
+    window.switchTo2D = function() {
+        document.getElementById('threeFrame').style.display = 'none';
+        document.getElementById('mapFrame').style.display = 'block';
+        document.getElementById('view2DBtn').classList.add('active');
+        document.getElementById('view3DBtn').classList.remove('active');
+        if(window.pgs3d && typeof window.pgs3d.hide === 'function') window.pgs3d.hide();
+    };
 </script>
 </body>
 </html>
