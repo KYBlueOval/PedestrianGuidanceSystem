@@ -1,0 +1,840 @@
+{
+  "schema_version": "0.2.0",
+  "graph_type": "authored_pedestrian_network",
+  "coordinate_system": "PGS GLB model coordinates",
+  "review": {
+    "status": "draft_requires_site_approval",
+    "route_ready": false,
+    "mapping_valid": true,
+    "reviewer": null,
+    "review_date": null
+  },
+  "nodes": [
+    {
+      "id": "ped-node:0e5b24b5-5eba-58f4-bbb2-e000dc35f4fa",
+      "position": {
+        "x": -414.4886,
+        "y": 0.3499,
+        "z": 466.8922
+      },
+      "layer": "ground",
+      "building_id": null,
+      "floor_id": null,
+      "access": [
+        "contractor",
+        "emergency",
+        "employee",
+        "visitor"
+      ],
+      "accessible": true,
+      "source_ids": [
+        "pedestrian_network_map_2026-07-19.json:draft-node-11"
+      ],
+      "approved": false
+    },
+    {
+      "id": "ped-node:13078805-7b96-57e2-8622-b9a3efda9848",
+      "position": {
+        "x": -274.7021,
+        "y": 0.6499,
+        "z": 467.4079
+      },
+      "layer": "ground",
+      "building_id": null,
+      "floor_id": null,
+      "access": [
+        "contractor",
+        "emergency",
+        "employee",
+        "visitor"
+      ],
+      "accessible": true,
+      "source_ids": [
+        "pedestrian_network_map_2026-07-19.json:draft-node-12"
+      ],
+      "approved": false
+    },
+    {
+      "id": "ped-node:210007c0-3b19-5512-9b44-96d640af4291",
+      "position": {
+        "x": -274.2758,
+        "y": 0.65,
+        "z": 78.6723
+      },
+      "layer": "ground",
+      "building_id": null,
+      "floor_id": null,
+      "access": [
+        "contractor",
+        "emergency",
+        "employee",
+        "visitor"
+      ],
+      "accessible": true,
+      "source_ids": [
+        "pedestrian_network_map_2026-07-19.json:draft-node-2"
+      ],
+      "approved": false
+    },
+    {
+      "id": "ped-node:2c845f33-b766-5f9f-87c5-f8217a9758f6",
+      "position": {
+        "x": -267.7777,
+        "y": 0.65,
+        "z": 192.7459
+      },
+      "layer": "ground",
+      "building_id": null,
+      "floor_id": null,
+      "access": [
+        "contractor",
+        "emergency",
+        "employee",
+        "visitor"
+      ],
+      "accessible": true,
+      "source_ids": [
+        "pedestrian_network_map_2026-07-19.json:draft-node-19"
+      ],
+      "approved": false
+    },
+    {
+      "id": "ped-node:3d7f2145-9ce0-50c2-8012-4cde5cb7c50e",
+      "position": {
+        "x": -289.5217,
+        "y": 0.6499,
+        "z": 462.6891
+      },
+      "layer": "ground",
+      "building_id": null,
+      "floor_id": null,
+      "access": [
+        "contractor",
+        "emergency",
+        "employee",
+        "visitor"
+      ],
+      "accessible": true,
+      "source_ids": [
+        "pedestrian_network_map_2026-07-19.json:draft-node-9"
+      ],
+      "approved": false
+    },
+    {
+      "id": "ped-node:560321f6-8b4f-5f4c-81c4-14c690d8f6f2",
+      "position": {
+        "x": -278.8316,
+        "y": 1.4401,
+        "z": 192.5789
+      },
+      "layer": "ground",
+      "building_id": null,
+      "floor_id": null,
+      "access": [
+        "contractor",
+        "emergency",
+        "employee",
+        "visitor"
+      ],
+      "accessible": true,
+      "source_ids": [
+        "pedestrian_network_map_2026-07-19.json:draft-node-17"
+      ],
+      "approved": false
+    },
+    {
+      "id": "ped-node:5cb67390-9ca4-5398-9147-31b20bbd4ec5",
+      "position": {
+        "x": -138.9151,
+        "y": 0.7184,
+        "z": 467.0055
+      },
+      "layer": "ground",
+      "building_id": null,
+      "floor_id": null,
+      "access": [
+        "contractor",
+        "emergency",
+        "employee",
+        "visitor"
+      ],
+      "accessible": true,
+      "source_ids": [
+        "pedestrian_network_map_2026-07-19.json:draft-node-13"
+      ],
+      "approved": false
+    },
+    {
+      "id": "ped-node:62aa3d2d-eb8c-543a-b435-01210168f1a6",
+      "position": {
+        "x": -290.1214,
+        "y": 0.6499,
+        "z": 468.0453
+      },
+      "layer": "ground",
+      "building_id": null,
+      "floor_id": null,
+      "access": [
+        "contractor",
+        "emergency",
+        "employee",
+        "visitor"
+      ],
+      "accessible": true,
+      "source_ids": [
+        "pedestrian_network_map_2026-07-19.json:draft-node-10"
+      ],
+      "approved": false
+    },
+    {
+      "id": "ped-node:671ba5ec-0fce-5016-a98e-f651b370b72e",
+      "position": {
+        "x": -261.6991,
+        "y": 0.65,
+        "z": 198.0964
+      },
+      "layer": "ground",
+      "building_id": null,
+      "floor_id": null,
+      "access": [
+        "contractor",
+        "emergency",
+        "employee",
+        "visitor"
+      ],
+      "accessible": true,
+      "source_ids": [
+        "pedestrian_network_map_2026-07-19.json:draft-node-21"
+      ],
+      "approved": false
+    },
+    {
+      "id": "ped-node:6b35836d-1d74-52b4-8db0-84ef1375dbde",
+      "position": {
+        "x": -157.6062,
+        "y": 2.1616,
+        "z": -163.7829
+      },
+      "layer": "ground",
+      "building_id": null,
+      "floor_id": null,
+      "access": [
+        "contractor",
+        "emergency",
+        "employee",
+        "visitor"
+      ],
+      "accessible": true,
+      "source_ids": [
+        "pedestrian_network_map_2026-07-19.json:draft-node-6"
+      ],
+      "approved": false
+    },
+    {
+      "id": "ped-node:70e5f023-b227-587d-bbfd-0fe1aa403440",
+      "position": {
+        "x": -267.9793,
+        "y": 0.65,
+        "z": 198.2353
+      },
+      "layer": "ground",
+      "building_id": null,
+      "floor_id": null,
+      "access": [
+        "contractor",
+        "emergency",
+        "employee",
+        "visitor"
+      ],
+      "accessible": true,
+      "source_ids": [
+        "pedestrian_network_map_2026-07-19.json:draft-node-20"
+      ],
+      "approved": false
+    },
+    {
+      "id": "ped-node:8ccc8471-b4e8-57a2-b159-daa4a8c8f2a8",
+      "position": {
+        "x": -278.3306,
+        "y": 0.65,
+        "z": 199.8151
+      },
+      "layer": "ground",
+      "building_id": null,
+      "floor_id": null,
+      "access": [
+        "contractor",
+        "emergency",
+        "employee",
+        "visitor"
+      ],
+      "accessible": true,
+      "source_ids": [
+        "pedestrian_network_map_2026-07-19.json:draft-node-18"
+      ],
+      "approved": false
+    },
+    {
+      "id": "ped-node:947127f6-6978-50e6-b725-bf916751cb96",
+      "position": {
+        "x": -274.7778,
+        "y": 0.65,
+        "z": -223.813
+      },
+      "layer": "ground",
+      "building_id": null,
+      "floor_id": null,
+      "access": [
+        "contractor",
+        "emergency",
+        "employee",
+        "visitor"
+      ],
+      "accessible": true,
+      "source_ids": [
+        "pedestrian_network_map_2026-07-19.json:draft-node-3"
+      ],
+      "approved": false
+    },
+    {
+      "id": "ped-node:9ae981e2-6626-5f8c-8e6d-899c075a4412",
+      "position": {
+        "x": -274.0242,
+        "y": 0.3501,
+        "z": -383.1545
+      },
+      "layer": "ground",
+      "building_id": null,
+      "floor_id": null,
+      "access": [
+        "contractor",
+        "emergency",
+        "employee",
+        "visitor"
+      ],
+      "accessible": true,
+      "source_ids": [
+        "pedestrian_network_map_2026-07-19.json:draft-node-15"
+      ],
+      "approved": false
+    },
+    {
+      "id": "ped-node:af9cd5cd-e361-59e9-b26b-9cf0438bd104",
+      "position": {
+        "x": -274.4263,
+        "y": 1.8892,
+        "z": 625.7798
+      },
+      "layer": "ground",
+      "building_id": null,
+      "floor_id": null,
+      "access": [
+        "contractor",
+        "emergency",
+        "employee",
+        "visitor"
+      ],
+      "accessible": true,
+      "source_ids": [
+        "pedestrian_network_map_2026-07-19.json:draft-node-14"
+      ],
+      "approved": false
+    },
+    {
+      "id": "ped-node:b4157813-e05f-5f56-861f-c047a49f5b9f",
+      "position": {
+        "x": -274.1133,
+        "y": 0.65,
+        "z": -163.6211
+      },
+      "layer": "ground",
+      "building_id": null,
+      "floor_id": null,
+      "access": [
+        "contractor",
+        "emergency",
+        "employee",
+        "visitor"
+      ],
+      "accessible": true,
+      "source_ids": [
+        "pedestrian_network_map_2026-07-19.json:draft-node-5"
+      ],
+      "approved": false
+    },
+    {
+      "id": "ped-node:e744ae81-9fc0-50d7-8a48-956199b48656",
+      "position": {
+        "x": -396.7727,
+        "y": 1.9869,
+        "z": -163.0048
+      },
+      "layer": "ground",
+      "building_id": null,
+      "floor_id": null,
+      "access": [
+        "contractor",
+        "emergency",
+        "employee",
+        "visitor"
+      ],
+      "accessible": true,
+      "source_ids": [
+        "pedestrian_network_map_2026-07-19.json:draft-node-4"
+      ],
+      "approved": false
+    },
+    {
+      "id": "ped-node:eb968430-0084-547c-86ef-ac5504e05922",
+      "position": {
+        "x": -274.3321,
+        "y": 0.65,
+        "z": 192.1891
+      },
+      "layer": "ground",
+      "building_id": null,
+      "floor_id": null,
+      "access": [
+        "contractor",
+        "emergency",
+        "employee",
+        "visitor"
+      ],
+      "accessible": true,
+      "source_ids": [
+        "pedestrian_network_map_2026-07-19.json:draft-node-16"
+      ],
+      "approved": false
+    },
+    {
+      "id": "ped-node:fcc0595e-b938-5cbc-a3f1-6c10441f88f4",
+      "position": {
+        "x": -274.4191,
+        "y": 0.6499,
+        "z": 462.0699
+      },
+      "layer": "ground",
+      "building_id": null,
+      "floor_id": null,
+      "access": [
+        "contractor",
+        "emergency",
+        "employee",
+        "visitor"
+      ],
+      "accessible": true,
+      "source_ids": [
+        "pedestrian_network_map_2026-07-19.json:draft-node-8"
+      ],
+      "approved": false
+    },
+    {
+      "id": "ped-node:fd521b44-b388-5942-b2c5-e113be627761",
+      "position": {
+        "x": -138.9101,
+        "y": 0.7276,
+        "z": 78.677
+      },
+      "layer": "ground",
+      "building_id": null,
+      "floor_id": null,
+      "access": [
+        "contractor",
+        "emergency",
+        "employee",
+        "visitor"
+      ],
+      "accessible": true,
+      "source_ids": [
+        "pedestrian_network_map_2026-07-19.json:draft-node-7"
+      ],
+      "approved": false
+    },
+    {
+      "id": "ped-node:ffa5f27c-8404-5108-a165-f81c4337fc6b",
+      "position": {
+        "x": -408.7552,
+        "y": 2.6284,
+        "z": 79.6421
+      },
+      "layer": "ground",
+      "building_id": null,
+      "floor_id": null,
+      "access": [
+        "contractor",
+        "emergency",
+        "employee",
+        "visitor"
+      ],
+      "accessible": true,
+      "source_ids": [
+        "pedestrian_network_map_2026-07-19.json:draft-node-1"
+      ],
+      "approved": false
+    }
+  ],
+  "edges": [
+    {
+      "id": "ped-edge:05a5e405-b669-5258-936d-bd4e08fb2733",
+      "from": "ped-node:2c845f33-b766-5f9f-87c5-f8217a9758f6",
+      "to": "ped-node:70e5f023-b227-587d-bbfd-0fe1aa403440",
+      "distance": 5.4931,
+      "bidirectional": true,
+      "modes": [
+        "walking"
+      ],
+      "kind": "hallway",
+      "access": [
+        "contractor",
+        "emergency",
+        "employee",
+        "visitor"
+      ],
+      "accessible": true,
+      "approved": false
+    },
+    {
+      "id": "ped-edge:0fb453fe-a4dc-5a2f-91fe-358125d351a5",
+      "from": "ped-node:13078805-7b96-57e2-8622-b9a3efda9848",
+      "to": "ped-node:af9cd5cd-e361-59e9-b26b-9cf0438bd104",
+      "distance": 158.377,
+      "bidirectional": true,
+      "modes": [
+        "walking"
+      ],
+      "kind": "hallway",
+      "access": [
+        "contractor",
+        "emergency",
+        "employee",
+        "visitor"
+      ],
+      "accessible": true,
+      "approved": false
+    },
+    {
+      "id": "ped-edge:166ae8c4-90c0-5e7e-a0be-740d34ec4b75",
+      "from": "ped-node:62aa3d2d-eb8c-543a-b435-01210168f1a6",
+      "to": "ped-node:0e5b24b5-5eba-58f4-bbb2-e000dc35f4fa",
+      "distance": 124.3729,
+      "bidirectional": true,
+      "modes": [
+        "walking"
+      ],
+      "kind": "hallway",
+      "access": [
+        "contractor",
+        "emergency",
+        "employee",
+        "visitor"
+      ],
+      "accessible": true,
+      "approved": false
+    },
+    {
+      "id": "ped-edge:4273c241-b99f-5134-8479-871b4ff12c5a",
+      "from": "ped-node:eb968430-0084-547c-86ef-ac5504e05922",
+      "to": "ped-node:560321f6-8b4f-5f4c-81c4-14c690d8f6f2",
+      "distance": 4.5849,
+      "bidirectional": true,
+      "modes": [
+        "walking"
+      ],
+      "kind": "hallway",
+      "access": [
+        "contractor",
+        "emergency",
+        "employee",
+        "visitor"
+      ],
+      "accessible": true,
+      "approved": false
+    },
+    {
+      "id": "ped-edge:43946a75-ceff-53b4-bb2b-60d8d9c4a978",
+      "from": "ped-node:fcc0595e-b938-5cbc-a3f1-6c10441f88f4",
+      "to": "ped-node:13078805-7b96-57e2-8622-b9a3efda9848",
+      "distance": 5.3455,
+      "bidirectional": true,
+      "modes": [
+        "walking"
+      ],
+      "kind": "hallway",
+      "access": [
+        "contractor",
+        "emergency",
+        "employee",
+        "visitor"
+      ],
+      "accessible": true,
+      "approved": false
+    },
+    {
+      "id": "ped-edge:6adb167d-7a55-5b9f-ada1-3a03092e93a2",
+      "from": "ped-node:eb968430-0084-547c-86ef-ac5504e05922",
+      "to": "ped-node:2c845f33-b766-5f9f-87c5-f8217a9758f6",
+      "distance": 6.578,
+      "bidirectional": true,
+      "modes": [
+        "walking"
+      ],
+      "kind": "hallway",
+      "access": [
+        "contractor",
+        "emergency",
+        "employee",
+        "visitor"
+      ],
+      "accessible": true,
+      "approved": false
+    },
+    {
+      "id": "ped-edge:94a8d611-e124-5889-8f9f-94a94540a4b5",
+      "from": "ped-node:210007c0-3b19-5512-9b44-96d640af4291",
+      "to": "ped-node:947127f6-6978-50e6-b725-bf916751cb96",
+      "distance": 302.4857,
+      "bidirectional": true,
+      "modes": [
+        "walking"
+      ],
+      "kind": "hallway",
+      "access": [
+        "contractor",
+        "emergency",
+        "employee",
+        "visitor"
+      ],
+      "accessible": true,
+      "approved": false
+    },
+    {
+      "id": "ped-edge:95e40dce-bce0-5de4-a305-dd6f397e7e90",
+      "from": "ped-node:210007c0-3b19-5512-9b44-96d640af4291",
+      "to": "ped-node:fd521b44-b388-5942-b2c5-e113be627761",
+      "distance": 135.3657,
+      "bidirectional": true,
+      "modes": [
+        "walking"
+      ],
+      "kind": "hallway",
+      "access": [
+        "contractor",
+        "emergency",
+        "employee",
+        "visitor"
+      ],
+      "accessible": true,
+      "approved": false
+    },
+    {
+      "id": "ped-edge:a11d609c-784a-504b-a33e-cb6f656ea913",
+      "from": "ped-node:947127f6-6978-50e6-b725-bf916751cb96",
+      "to": "ped-node:9ae981e2-6626-5f8c-8e6d-899c075a4412",
+      "distance": 159.3436,
+      "bidirectional": true,
+      "modes": [
+        "walking"
+      ],
+      "kind": "hallway",
+      "access": [
+        "contractor",
+        "emergency",
+        "employee",
+        "visitor"
+      ],
+      "accessible": true,
+      "approved": false
+    },
+    {
+      "id": "ped-edge:a8ed5be7-9b5c-54b4-85e8-c9c98e6a5d17",
+      "from": "ped-node:e744ae81-9fc0-50d7-8a48-956199b48656",
+      "to": "ped-node:b4157813-e05f-5f56-861f-c047a49f5b9f",
+      "distance": 122.6682,
+      "bidirectional": true,
+      "modes": [
+        "walking"
+      ],
+      "kind": "hallway",
+      "access": [
+        "contractor",
+        "emergency",
+        "employee",
+        "visitor"
+      ],
+      "accessible": true,
+      "approved": false
+    },
+    {
+      "id": "ped-edge:a99fdda3-dc0d-5290-848a-0e4fdd15ac1c",
+      "from": "ped-node:ffa5f27c-8404-5108-a165-f81c4337fc6b",
+      "to": "ped-node:210007c0-3b19-5512-9b44-96d640af4291",
+      "distance": 134.4974,
+      "bidirectional": true,
+      "modes": [
+        "walking"
+      ],
+      "kind": "hallway",
+      "access": [
+        "contractor",
+        "emergency",
+        "employee",
+        "visitor"
+      ],
+      "accessible": true,
+      "approved": false
+    },
+    {
+      "id": "ped-edge:b05393da-7b85-5d6c-ba96-6bcf60519f01",
+      "from": "ped-node:70e5f023-b227-587d-bbfd-0fe1aa403440",
+      "to": "ped-node:671ba5ec-0fce-5016-a98e-f651b370b72e",
+      "distance": 6.2817,
+      "bidirectional": true,
+      "modes": [
+        "walking"
+      ],
+      "kind": "hallway",
+      "access": [
+        "contractor",
+        "emergency",
+        "employee",
+        "visitor"
+      ],
+      "accessible": true,
+      "approved": false
+    },
+    {
+      "id": "ped-edge:c7cb5ca1-68bf-54cf-b1d3-e9d01e825474",
+      "from": "ped-node:560321f6-8b4f-5f4c-81c4-14c690d8f6f2",
+      "to": "ped-node:8ccc8471-b4e8-57a2-b159-daa4a8c8f2a8",
+      "distance": 7.2964,
+      "bidirectional": true,
+      "modes": [
+        "walking"
+      ],
+      "kind": "hallway",
+      "access": [
+        "contractor",
+        "emergency",
+        "employee",
+        "visitor"
+      ],
+      "accessible": true,
+      "approved": false
+    },
+    {
+      "id": "ped-edge:c9fa1981-809d-5f92-9516-7902db5e79d1",
+      "from": "ped-node:13078805-7b96-57e2-8622-b9a3efda9848",
+      "to": "ped-node:5cb67390-9ca4-5398-9147-31b20bbd4ec5",
+      "distance": 135.7876,
+      "bidirectional": true,
+      "modes": [
+        "walking"
+      ],
+      "kind": "hallway",
+      "access": [
+        "contractor",
+        "emergency",
+        "employee",
+        "visitor"
+      ],
+      "accessible": true,
+      "approved": false
+    },
+    {
+      "id": "ped-edge:cb9ff869-ce5d-5c61-93a0-eec158ce19c1",
+      "from": "ped-node:b4157813-e05f-5f56-861f-c047a49f5b9f",
+      "to": "ped-node:6b35836d-1d74-52b4-8db0-84ef1375dbde",
+      "distance": 116.517,
+      "bidirectional": true,
+      "modes": [
+        "walking"
+      ],
+      "kind": "hallway",
+      "access": [
+        "contractor",
+        "emergency",
+        "employee",
+        "visitor"
+      ],
+      "accessible": true,
+      "approved": false
+    },
+    {
+      "id": "ped-edge:cc47b006-138a-580c-a2b3-8ee759a35b83",
+      "from": "ped-node:210007c0-3b19-5512-9b44-96d640af4291",
+      "to": "ped-node:fcc0595e-b938-5cbc-a3f1-6c10441f88f4",
+      "distance": 383.3976,
+      "bidirectional": true,
+      "modes": [
+        "walking"
+      ],
+      "kind": "hallway",
+      "access": [
+        "contractor",
+        "emergency",
+        "employee",
+        "visitor"
+      ],
+      "accessible": true,
+      "approved": false
+    },
+    {
+      "id": "ped-edge:e75dd8df-d379-5d04-9288-eeb606d451a2",
+      "from": "ped-node:3d7f2145-9ce0-50c2-8012-4cde5cb7c50e",
+      "to": "ped-node:62aa3d2d-eb8c-543a-b435-01210168f1a6",
+      "distance": 5.3897,
+      "bidirectional": true,
+      "modes": [
+        "walking"
+      ],
+      "kind": "hallway",
+      "access": [
+        "contractor",
+        "emergency",
+        "employee",
+        "visitor"
+      ],
+      "accessible": true,
+      "approved": false
+    },
+    {
+      "id": "ped-edge:eb5f90e1-1d5d-5345-a97e-b68443e69d7f",
+      "from": "ped-node:fcc0595e-b938-5cbc-a3f1-6c10441f88f4",
+      "to": "ped-node:3d7f2145-9ce0-50c2-8012-4cde5cb7c50e",
+      "distance": 15.1153,
+      "bidirectional": true,
+      "modes": [
+        "walking"
+      ],
+      "kind": "hallway",
+      "access": [
+        "contractor",
+        "emergency",
+        "employee",
+        "visitor"
+      ],
+      "accessible": true,
+      "approved": false
+    }
+  ],
+  "summary": {
+    "node_count": 21,
+    "edge_count": 18,
+    "component_count": 3,
+    "orphan_count": 0,
+    "merged_source_nodes": 0,
+    "total_distance": 1828.8973,
+    "walkway_kind_counts": {
+      "hallway": 18
+    },
+    "access_profile_counts": {
+      "contractor": 18,
+      "emergency": 18,
+      "employee": 18,
+      "visitor": 18
+    }
+  },
+  "sources": [
+    "pedestrian_network_map_2026-07-19.json"
+  ]
+}
