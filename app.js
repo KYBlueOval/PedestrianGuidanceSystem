@@ -9,60 +9,26 @@ const loc = id => destinations.find(d => d.id === id);
 const fetchJson = url => fetch(url, { cache: "no-store" });
 
 async function init() {
-    // Load master config first
     config = await fetchJson("data/config.json").then(r => r.ok ? r.json() : {}).catch(() => ({}));
 
-    const networkPath = config?.views?.basePedestrianNetwork || "data/pedestrian_network_map_FINAL_2026-07-21.json";
-    const anchorsPath = config?.views?.destinationAnchors || "data/destination_anchors_draft_FINAL_2026-07-21.json";
-
-    let anchorsData = null;
-
-    [destinations, routes, quickRoutes, pedestrianNetwork, anchorsData] = await Promise.all([
-        fetchJson("data/destinations.json").then(r => r.json()).catch(() => []),
-        fetchJson("data/routes.json").then(r => r.json()).catch(() => []),
-        fetchJson("data/quick_routes.json").then(r => r.json()).catch(() => []),
-        fetchJson(networkPath).then(r => r.ok ? r.json() : null).catch(() => null),
-        fetchJson(anchorsPath).then(r => r.ok ? r.json() : null).catch(() => null)
-    ]);
-
-    // Load destination crosswalk mapping
-    const crosswalk = await fetchJson("data/generated/destination_node_crosswalk.json").then(r => r.ok ? r.json() : null).catch(() => null);
-
-    if (crosswalk?.destinations) {
-        destinationNodeCrosswalk = Object.fromEntries((crosswalk.destinations || []).map(item => [item.destination_id, item.node_id]));
-    } else if (anchorsData?.destinations) {
-        // Fallback to destination anchors mapping if crosswalk file is absent
-        destinationNodeCrosswalk = Object.fromEntries((anchorsData.destinations || []).map(item => [item.id, item.network_node_id || item.node_id]));
-        (anchorsData.destinations || []).forEach(item => {
-            if (item.source_label_id) destinationNodeCrosswalk[item.source_label_id] = item.network_node_id || item.node_id;
-        });
-    }
-
-    // Handle Editor Mode Toggle
+    // URL Editor Toggle
     const urlParams = new URLSearchParams(window.location.search);
-    const isEditorEnabled = urlParams.get('editor') === 'true' || config.editorMode === true || config.enableAuthoringTools === true;
-
-    if (!isEditorEnabled) {
-        // Hide Editor UI Panels for Normal Use
-        const networkMapper = $("pedestrianNetworkMapperPanel") || document.querySelector(".pedestrian-network-mapper");
-        const labelEditor = $("mapLabelEditorPanel") || document.querySelector(".map-label-editor");
-        const anchorEditor = $("destinationAnchorEditorPanel") || document.querySelector(".destination-anchor-editor");
-
-        if (networkMapper) networkMapper.style.display = "none";
-        if (labelEditor) labelEditor.style.display = "none";
-        if (anchorEditor) anchorEditor.style.display = "none";
-
-        // Hide inner editor fieldsets if bundled inside the sidebar
-        document.querySelectorAll("fieldset, .editor-panel, [data-editor-panel]").forEach(el => {
-            if (el.textContent.includes("MAPPER") || el.textContent.includes("EDITOR")) {
-                el.style.display = "none";
-            }
-        });
-    } else {
+    if (urlParams.get('editor') === 'true') {
+        document.body.classList.add('editor-active');
         if (typeof initPedestrianNetworkEditor === "function") initPedestrianNetworkEditor();
         if (typeof initMapLabelEditor === "function") initMapLabelEditor();
         if (typeof initDestinationAnchorEditor === "function") initDestinationAnchorEditor();
     }
+
+    [destinations, routes, quickRoutes, pedestrianNetwork] = await Promise.all([
+        fetchJson("data/destinations.json").then(r => r.json()).catch(() => []),
+        fetchJson("data/routes.json").then(r => r.json()).catch(() => []),
+        fetchJson("data/quick_routes.json").then(r => r.json()).catch(() => []),
+        fetchJson("data/generated/pedestrian_network.json").then(r => r.ok ? r.json() : null).catch(() => null)
+    ]);
+
+    const crosswalk = await fetchJson("data/generated/destination_node_crosswalk.json").then(r => r.ok ? r.json() : null).catch(() => null);
+    if (crosswalk) destinationNodeCrosswalk = Object.fromEntries((crosswalk.destinations || []).map(item => [item.destination_id, item.node_id]));
 
     buildGraph(); buildPedestrianGraph(); populateSelects(); renderQuickRoutes(); drawNetwork(); drawNodes(); wireEvents(); resetView(); setMode("visitor"); updateClock(); setInterval(updateClock, 30000);
 }
@@ -83,14 +49,8 @@ function destinationGroup(destination) {
 
 function buildPedestrianGraph() {
     pedestrianGraph = {}; pedestrianNodes = {};
-
-    // Check top-level readiness/approval status
-    const isReady = pedestrianNetwork?.review?.route_ready === true ||
-        pedestrianNetwork?.approved === true ||
-        pedestrianNetwork?.review_status === "approved";
-
+    const isReady = pedestrianNetwork?.review?.route_ready === true || pedestrianNetwork?.approved === true || pedestrianNetwork?.review_status === "approved";
     if (!isReady) return;
-
     (pedestrianNetwork.nodes || []).forEach(node => { pedestrianNodes[node.id] = node; pedestrianGraph[node.id] = []; });
     (pedestrianNetwork.edges || []).forEach(edge => {
         if (!pedestrianGraph[edge.from] || !pedestrianGraph[edge.to]) return;
@@ -166,12 +126,10 @@ function wireEvents() {
     if ($("view3DBtn")) $("view3DBtn").onclick = () => setWorkspaceView("3d");
     if ($("searchFocus")) $("searchFocus").onclick = () => $("searchBox")?.focus();
     if ($("fullscreenBtn")) $("fullscreenBtn").onclick = () => document.documentElement.requestFullscreen?.();
-
     if ($("legendOpen")) $("legendOpen").onclick = () => $("legendPanel")?.classList.toggle("hide");
     if ($("legendClose")) $("legendClose").onclick = () => $("legendPanel")?.classList.add("hide");
     if ($("layersOpen")) $("layersOpen").onclick = () => $("layersPanel")?.classList.toggle("show");
     if ($("layersClose")) $("layersClose").onclick = () => $("layersPanel")?.classList.remove("show");
-
     if ($("labelsToggle")) $("labelsToggle").onchange = e => toggleLabels(e.target.checked);
     if ($("networkToggle")) $("networkToggle").onchange = e => toggleNetwork(e.target.checked);
     if ($("pulseToggle")) $("pulseToggle").onchange = e => $("overlay")?.classList.toggle("no-pulse", !e.target.checked);
@@ -200,35 +158,19 @@ function setWorkspaceView(next) {
     document.querySelector(".map-shell")?.classList.toggle("three-active", is3d);
     if ($("mapFrame")) $("mapFrame").hidden = is3d;
     if ($("threeFrame")) $("threeFrame").hidden = !is3d;
-    if ($("view2DBtn")) {
-        $("view2DBtn").classList.toggle("active", !is3d);
-        $("view2DBtn").setAttribute("aria-pressed", String(!is3d));
-    }
-    if ($("view3DBtn")) {
-        $("view3DBtn").classList.toggle("active", is3d);
-        $("view3DBtn").setAttribute("aria-pressed", String(is3d));
-    }
+    if ($("view2DBtn")) { $("view2DBtn").classList.toggle("active", !is3d); $("view2DBtn").setAttribute("aria-pressed", String(!is3d)); }
+    if ($("view3DBtn")) { $("view3DBtn").classList.toggle("active", is3d); $("view3DBtn").setAttribute("aria-pressed", String(is3d)); }
     ["zoomIn", "zoomOut", "centerView", "fitRoute"].forEach(id => { if ($(id)) $(id).disabled = is3d; });
-    if (is3d) window.pgs3d?.show();
-    else { window.pgs3d?.hide(); resetView(); }
+    if (is3d) window.pgs3d?.show(); else { window.pgs3d?.hide(); resetView(); }
 }
 
 function setMode(m, generate = true) {
     mode = m;
     document.querySelectorAll(".mode").forEach(b => b.classList.toggle("active", b.dataset.mode === m));
-    if (m === "visitor") {
-        if ($("destinationCategory")) $("destinationCategory").value = "visitor"; populateSelects("visitor");
-        if ($("subtitle")) $("subtitle").textContent = "Visitor-safe guided routing";
-    } else if (m === "employee") {
-        if ($("destinationCategory")) $("destinationCategory").value = "production"; populateSelects("production");
-        if ($("subtitle")) $("subtitle").textContent = "Employee pedestrian movement";
-    } else if (m === "contractor") {
-        if ($("destinationCategory")) $("destinationCategory").value = "production"; populateSelects("production");
-        if ($("subtitle")) $("subtitle").textContent = "Contractor / trade access routing";
-    } else {
-        if ($("destinationCategory")) $("destinationCategory").value = "emergency"; populateSelects("emergency");
-        if ($("subtitle")) $("subtitle").textContent = "Emergency reference routing";
-    }
+    if (m === "visitor") { if ($("destinationCategory")) $("destinationCategory").value = "visitor"; populateSelects("visitor"); if ($("subtitle")) $("subtitle").textContent = "Visitor-safe guided routing"; }
+    else if (m === "employee") { if ($("destinationCategory")) $("destinationCategory").value = "production"; populateSelects("production"); if ($("subtitle")) $("subtitle").textContent = "Employee pedestrian movement"; }
+    else if (m === "contractor") { if ($("destinationCategory")) $("destinationCategory").value = "production"; populateSelects("production"); if ($("subtitle")) $("subtitle").textContent = "Contractor / trade access routing"; }
+    else { if ($("destinationCategory")) $("destinationCategory").value = "emergency"; populateSelects("emergency"); if ($("subtitle")) $("subtitle").textContent = "Emergency reference routing"; }
     if (generate) generateRoute();
 }
 
@@ -286,9 +228,7 @@ function generateRoute() {
 
     const startNode = destinationNodeCrosswalk[start], endNode = destinationNodeCrosswalk[end];
 
-    const isNetworkApproved = pedestrianNetwork?.review?.route_ready === true ||
-        pedestrianNetwork?.approved === true ||
-        pedestrianNetwork?.review_status === "approved";
+    const isNetworkApproved = pedestrianNetwork?.review?.route_ready === true || pedestrianNetwork?.approved === true || pedestrianNetwork?.review_status === "approved";
 
     const approvedNetwork = isNetworkApproved && startNode && endNode && pedestrianGraph[startNode] && pedestrianGraph[endNode];
     const spatialResult = approvedNetwork ? dijkstra(startNode, endNode, pedestrianGraph) : null;
@@ -404,6 +344,5 @@ function shareRoute() {
 }
 function showToast(msg) { const t = $("toast"); if (!t) return; t.textContent = msg; t.classList.add("show"); setTimeout(() => t.classList.remove("show"), 1800); }
 function escapeHtml(s) { return String(s).replace(/[&<>"']/g, m => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;", "'": "&#039;" }[m])); }
-
 
 init();

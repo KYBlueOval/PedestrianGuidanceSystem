@@ -1,0 +1,330 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Ford Energy SiteNav Command v10</title>
+<link rel="manifest" href="manifest.json"/>
+<link rel="icon" href="assets/icons/favicon.ico" sizes="any"/>
+<link rel="icon" type="image/png" sizes="32x32" href="assets/icons/pgs-icon-32.png"/>
+<link rel="icon" type="image/png" sizes="192x192" href="assets/icons/pgs-icon-192.png"/>
+<link rel="apple-touch-icon" sizes="180x180" href="assets/icons/pgs-icon-180.png"/>
+<meta name="theme-color" content="#061a33"/>
+<link rel="stylesheet" href="style.css?v=10.5.4"/>
+</head>
+<body>
+<div class="app-shell">
+  <aside class="sidebar">
+    <section class="brand-panel">
+      <img class="brand-logo" src="assets/logos/ford-energy-white.png" alt="Ford Energy" onerror="this.src='assets/ford_energy_logo_white.png'"/>
+      <div class="app-title">
+        <img src="assets/icons/pgs-icon-96.png" alt="PGS"/>
+        <div>
+          <h1>SiteNav Command</h1>
+          <p>Pedestrian Guidance System</p>
+        </div>
+      </div>
+      <div class="system-status">
+        <span class="online-dot"></span>
+        <div>
+          <b>Navigation Core Online</b>
+          <small>Ground Floor • v10 digital-twin preview</small>
+        </div>
+      </div>
+    </section>
+
+    <section class="control-section">
+      <label>Navigation Mode</label>
+      <div class="mode-grid">
+        <button class="mode active" data-mode="visitor"><span>👥</span>Visitor</button>
+        <button class="mode" data-mode="employee"><span>🏭</span>Employee</button>
+        <button class="mode" data-mode="contractor"><span>🦺</span>Contractor</button>
+        <button class="mode emergency" data-mode="emergency"><span>🚨</span>Emergency</button>
+      </div>
+
+      <label for="searchBox">Destination Search</label>
+      <div class="search-box">
+        <input id="searchBox" placeholder="Search guardhouse, formation, training..."/>
+        <button id="searchClear">×</button>
+      </div>
+      <div id="searchResults" class="search-results"></div>
+
+      <label for="destinationCategory">Destination Category</label>
+      <select id="destinationCategory">
+        <option value="all">All Approved Destinations</option>
+        <option value="visitor">Visitor / Check-In</option>
+        <option value="security">Entrances / Security</option>
+        <option value="production">Production Areas</option>
+        <option value="amenities">Amenities / Employee Services</option>
+        <option value="emergency">Emergency / Muster</option>
+      </select>
+
+      <label for="startSelect">Start</label>
+      <select id="startSelect"></select>
+
+      <label for="endSelect">Destination</label>
+      <select id="endSelect"></select>
+
+      <button id="routeBtn" class="primary-action">Generate Route Preview</button>
+    </section>
+
+    <section class="quick-routes">
+      <div class="section-heading">Quick Routes</div>
+      <div id="quickRoutes"></div>
+    </section>
+
+    <section class="route-status">
+      <div class="route-title"><span>Route Status</span><b id="routeStatus">DRAFT PREVIEW</b></div>
+      <div class="metric-grid">
+        <div><strong id="distanceMetric">--</strong><small>Distance</small></div>
+        <div><strong id="timeMetric">--</strong><small>Est. Walk</small></div>
+      </div>
+    </section>
+
+    <section class="steps-panel">
+      <div class="section-heading">Turn-by-Turn</div>
+      <div id="steps"></div>
+    </section>
+
+    <footer class="version-footer"><span></span> PGS v10.0.0 Alpha</footer>
+  </aside>
+
+  <main class="workspace">
+    <header class="topbar">
+      <div>
+        <h2>BlueOval Glendale • Ground Floor</h2>
+        <p id="subtitle">Visitor-safe guided routing</p>
+      </div>
+      <nav class="top-actions">
+        <div class="view-switch" aria-label="Map view">
+          <button id="view2DBtn" class="active" aria-pressed="true">2D Map</button>
+          <button id="view3DBtn" aria-pressed="false">3D Twin</button>
+        </div>
+        <button id="searchFocus">⌕ Search</button>
+        <button id="legendOpen">Legend</button>
+        <button id="layersOpen">Layers</button>
+        <button id="fullscreenBtn">⛶</button>
+        <button id="resetView">Reset</button>
+        <button id="fitRoute" class="fit-button">Fit Route</button>
+      </nav>
+      <div class="clock-block"><b id="clock">--:--</b><small>System Online</small></div>
+    </header>
+
+    <section class="map-shell">
+      <div class="map-toolbar">
+        <span>Mouse wheel = zoom</span>
+        <span>Drag = pan</span>
+        <label><input type="checkbox" id="labelsToggle" checked/> Labels</label>
+        <label><input type="checkbox" id="networkToggle" checked/> Network</label>
+        <label><input type="checkbox" id="pulseToggle" checked/> Pulse</label>
+      </div>
+
+      <div id="mapFrame" class="map-frame">
+        <div id="mapStage" class="map-stage">
+          <img id="plantMap" src="assets/map-full.png" alt="Facility pedestrian access map"/>
+          <svg id="overlay" viewBox="0 0 1024 768" preserveAspectRatio="none">
+            <defs>
+              <filter id="glow"><feGaussianBlur stdDeviation="3" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+              <filter id="labelShadow"><feDropShadow dx="0" dy="1" stdDeviation="1.2" flood-color="#ffffff" flood-opacity="1"/></filter>
+              <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth"><path d="M0,0 L0,6 L9,3 z" fill="#0f6cff"/></marker>
+            </defs>
+            <g id="networkLayer"></g>
+            <g id="routeLayer"></g>
+            <g id="nodeLayer"></g>
+          </svg>
+        </div>
+      </div>
+
+      <div id="threeFrame" class="three-frame" hidden aria-label="Interactive 3D facility view">
+        <div id="threeCanvas" class="three-canvas"></div>
+        <div class="three-layers" aria-label="3D model layers">
+          <b>3D Layers</b>
+          <label><input type="checkbox" data-3d-layer="site" checked/> Site / Exterior</label>
+          <label><input type="checkbox" data-3d-layer="ground" checked/> Ground Floor</label>
+          <label><input type="checkbox" data-3d-layer="mezzanine"/> Mezzanine</label>
+          <label><input type="checkbox" data-3d-layer="roof"/> Roof</label>
+          <label><input type="checkbox" id="threeLabelsToggle" checked/> Building Labels</label>
+          <label><input type="checkbox" data-semantic-label="area" checked/> Departments / Key Areas</label>
+          <label><input type="checkbox" data-semantic-label="room"/> Individual Rooms</label>
+          <label><input type="checkbox" data-semantic-label="corridor"/> Corridors</label>
+          <label><input type="checkbox" data-semantic-label="amenity"/> Amenities</label>
+          <label><input type="checkbox" data-semantic-label="vertical"/> Stairs / Elevators</label>
+          <label><input type="checkbox" id="threeWalkwaysToggle" checked/> Pedestrian Walkways</label>
+          <label><input type="checkbox" id="threeRouteToggle" checked/> Route &amp; Tracking</label>
+          <small id="threeRouteStatus">Awaiting approved pedestrian network</small>
+          <button id="threeWalkToggle" class="three-walk-button" type="button">Pause Walk Preview</button>
+          <div class="three-editor-divider"></div>
+          <b>Pedestrian Network Mapper</b>
+          <small>Map hallway, sidewalk, and crossing centerlines before adding destinations.</small>
+          <select id="threeWalkwayKind" aria-label="Walkway type">
+            <option value="hallway">Indoor Hallway</option>
+            <option value="sidewalk">Outdoor Sidewalk</option>
+            <option value="crosswalk">Pedestrian Crossing</option>
+            <option value="entrance">Entrance Connector</option>
+            <option value="ramp">Accessible Ramp</option>
+            <option value="stairs">Stairs</option>
+            <option value="elevator">Elevator Transition</option>
+          </select>
+          <select id="threeWalkwayAccess" aria-label="Walkway access profile">
+            <option value="all">All Authorized Pedestrians</option>
+            <option value="visitor">Visitors / Escorted</option>
+            <option value="employee">Employees</option>
+            <option value="contractor">Contractors / Trades</option>
+            <option value="emergency">Emergency Use</option>
+          </select>
+          <label class="three-editor-option"><input id="threeWalkwayAccessible" type="checkbox" checked/> Wheelchair accessible</label>
+          <button id="threeEditToggle" class="three-editor-button" type="button">Start Mapping</button>
+          <small id="threeEditStatus">Network: 0 nodes / 0 walkways</small>
+          <div class="three-editor-actions">
+            <button id="threeEditUndo" type="button" disabled>Undo</button>
+            <button id="threeEditSegment" type="button" disabled>New Walkway</button>
+          </div>
+          <div class="three-editor-actions">
+            <button id="threeEditDelete" type="button" disabled>Delete Selected</button>
+            <button id="threeEditClear" type="button" disabled>Clear All</button>
+          </div>
+          <div class="three-editor-actions">
+            <button id="threeEditSave" type="button" disabled>Save Network</button>
+            <button id="threeEditExport" type="button" disabled>Export Network</button>
+          </div>
+          <div class="three-editor-actions">
+            <button id="threeEditImport" type="button">Import Network</button>
+            <input id="threeEditImportFile" type="file" accept="application/json,.json" hidden/>
+          </div>
+          <div class="three-editor-divider"></div>
+          <b>Map Label Editor</b>
+          <select id="threeLabelTarget" aria-label="Existing label to adjust">
+            <option value="new">New label</option>
+          </select>
+          <input id="threeLabelName" type="text" placeholder="Label name" aria-label="Label name"/>
+          <select id="threeLabelKind" aria-label="Label type">
+            <option value="building">Building</option>
+            <option value="entrance">Entrance / Turnstile</option>
+            <option value="area">Department / Key Area</option>
+            <option value="amenity">Amenity</option>
+          </select>
+          <button id="threeLabelPlace" class="three-label-editor-button" type="button">Place / Move Label</button>
+          <small id="threeLabelStatus">Select a label or create a new one</small>
+          <div class="three-editor-actions">
+            <button id="threeLabelRemove" type="button" disabled>Remove Override</button>
+            <button id="threeLabelSave" type="button">Save Labels</button>
+          </div>
+          <div class="three-editor-actions">
+            <button id="threeLabelImport" type="button">Import Labels</button>
+            <button id="threeLabelExport" type="button">Export Labels</button>
+            <input id="threeLabelImportFile" type="file" accept="application/json,.json" hidden/>
+          </div>
+          <div class="three-editor-divider"></div>
+          <b>Destination Anchor Editor</b>
+          <small>Choose a mapped label, then place its pedestrian entrance point.</small>
+          <select id="threeDestinationSource" aria-label="Destination source label">
+            <option value="">Select a mapped label</option>
+          </select>
+          <input id="threeDestinationName" type="text" placeholder="Destination name" aria-label="Destination name"/>
+          <select id="threeDestinationCategory" aria-label="Destination category">
+            <option value="visitor">Visitor / Check-In</option>
+            <option value="security">Entrance / Security</option>
+            <option value="department">Department / Key Area</option>
+            <option value="amenity">Amenity / Employee Service</option>
+            <option value="production">Production Area</option>
+            <option value="emergency">Emergency / Muster</option>
+          </select>
+          <select id="threeDestinationAccess" aria-label="Destination access profile">
+            <option value="visitor">Visitor / Escorted</option>
+            <option value="employee">Employees</option>
+            <option value="contractor">Contractors / Trades</option>
+            <option value="all">All Authorized Pedestrians</option>
+            <option value="emergency">Emergency Use</option>
+          </select>
+          <button id="threeDestinationPlace" class="three-label-editor-button" type="button">Place Entrance Anchor</button>
+          <small id="threeDestinationStatus">No destination anchor selected</small>
+          <div class="three-editor-actions">
+            <button id="threeDestinationRemove" type="button" disabled>Remove Anchor</button>
+            <button id="threeDestinationExport" type="button" disabled>Export Anchors</button>
+          </div>
+          <div class="three-editor-actions">
+            <button id="threeDestinationImport" type="button">Import Anchors</button>
+            <input id="threeDestinationImportFile" type="file" accept="application/json,.json" hidden/>
+          </div>
+        </div>
+        <div id="threeStatus" class="three-status" role="status">
+          <span class="three-spinner" aria-hidden="true"></span>
+          <span>3D twin loads when selected</span>
+        </div>
+        <div class="three-hint">Drag to orbit • Scroll to zoom • Right-drag to pan</div>
+        <div class="three-badge">Mobile model profile • Guided routing remains available in 2D</div>
+      </div>
+
+      <div class="zoom-stack">
+        <button id="zoomIn">+</button>
+        <button id="zoomOut">−</button>
+        <button id="centerView">⌖</button>
+      </div>
+
+      <aside id="legendPanel" class="legend-panel">
+        <div class="floating-heading">
+          <b>Legend</b>
+          <button id="legendClose">×</button>
+        </div>
+        <div class="legend-row"><span class="line green"></span>Construction / Trade Access</div>
+        <div class="legend-row"><span class="line red"></span>Plant Personnel Only</div>
+        <div class="legend-row"><span class="line blue"></span>Active Route</div>
+        <hr/>
+        <div class="legend-row"><span class="dot entry"></span>Guard House / Entry</div>
+        <div class="legend-row"><span class="dot checkpoint"></span>Checkpoint / Badge</div>
+        <div class="legend-row"><span class="dot production"></span>Production Area</div>
+        <div class="legend-row"><span class="dot amenity"></span>Amenities</div>
+        <div class="legend-row"><span class="dot safety"></span>Emergency / Muster</div>
+      </aside>
+
+      <aside id="layersPanel" class="layers-panel">
+        <div class="floating-heading">
+          <b>Layers</b>
+          <button id="layersClose">×</button>
+        </div>
+        <label><input type="checkbox" data-layer="entry" checked/> Guard Houses</label>
+        <label><input type="checkbox" data-layer="checkpoint" checked/> Checkpoints</label>
+        <label><input type="checkbox" data-layer="production" checked/> Production Areas</label>
+        <label><input type="checkbox" data-layer="amenity" checked/> Amenities</label>
+        <label><input type="checkbox" data-layer="safety" checked/> Muster / Emergency</label>
+        <label><input type="checkbox" data-layer="junction" checked/> Junctions</label>
+        <label><input type="checkbox" data-layer="corridor" checked/> Corridors</label>
+      </aside>
+    </section>
+
+    <section class="info-dock">
+      <article class="destination-card">
+        <span class="eyebrow">Destination Info</span>
+        <h2 id="drawerTitle">Select a destination</h2>
+        <p id="drawerDesc">Click a waypoint or generate a route.</p>
+        <div class="info-grid">
+          <span>👥 <b>Access:</b> <em id="drawerAccess">--</em></span>
+          <span>📍 <b>Location:</b> Ground Floor</span>
+          <span>🧭 <b>Type:</b> <em id="drawerType">Pedestrian Guidance Destination</em></span>
+          <span>🛡️ <b>Escort:</b> <em id="drawerEscort">As Required</em></span>
+        </div>
+      </article>
+
+      <article class="route-summary">
+        <span class="eyebrow">Route Summary</span>
+        <div class="summary-row"><span>⌘ Distance</span><b id="sumDistance">--</b></div>
+        <div class="summary-row"><span>🚶 Est. Walk Time</span><b id="sumTime">--</b></div>
+        <div class="summary-row"><span>🟢 Start</span><b id="sumStart">--</b></div>
+        <div class="summary-row"><span>🔵 End</span><b id="sumEnd">--</b></div>
+        <div class="summary-actions">
+          <button id="directionsBtn">Directions</button>
+          <button id="shareBtn">Share Route</button>
+        </div>
+      </article>
+    </section>
+  </main>
+</div>
+
+<div id="toast" class="toast">Route copied</div>
+<script type="importmap">
+{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.185.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.185.0/examples/jsm/"}}
+</script>
+<script src="app.js?v=10.5.4"></script>
+<script type="module" src="viewer3d.js?v=10.5.4"></script>
+</body>
+</html>
