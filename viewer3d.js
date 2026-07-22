@@ -74,9 +74,10 @@ function initialize(){
   document.querySelectorAll("[data-3d-layer]").forEach(input=>{
     input.addEventListener("change",()=>setLayerVisibility(input.dataset["3dLayer"],input.checked));
   });
-  document.getElementById("threeLabelsToggle").addEventListener("change",event=>{
-    frame.classList.toggle("three-labels-hidden",!event.target.checked);
-  });
+  const element = document.getElementById('someElement');
+  if (element) {
+  element.addEventListener('click', ...);
+  }
   document.querySelectorAll("[data-semantic-label]").forEach(input=>{
     input.addEventListener("change",updateSemanticLabelVisibility);
   });
