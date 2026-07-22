@@ -133,6 +133,41 @@
         </header>
 
         <section class="map-shell">
+            
+            <!-- RESTORED: Layers Panel -->
+            <div id="layersPanel" class="layers-panel">
+                <div class="panel-header">
+                    <h3>Map Layers</h3>
+                    <button id="layersClose" style="background:none;border:none;color:white;cursor:pointer;font-size:18px;">×</button>
+                </div>
+                <div style="padding:15px; color:white;">
+                    <h4 style="margin-top:0; border-bottom:1px solid #333; padding-bottom:5px;">3D Architecture</h4>
+                    <label style="display:block; margin-bottom:8px;"><input type="checkbox" data-3d-layer="roof"> Roof Level</label>
+                    <label style="display:block; margin-bottom:8px;"><input type="checkbox" data-3d-layer="mezzanine"> Mezzanine Level</label>
+                    <label style="display:block; margin-bottom:8px;"><input type="checkbox" data-3d-layer="ground" checked> Ground Floor</label>
+                    <label style="display:block; margin-bottom:15px;"><input type="checkbox" data-3d-layer="site" checked> Site & Exterior</label>
+
+                    <h4 style="border-bottom:1px solid #333; padding-bottom:5px;">3D Labels</h4>
+                    <label style="display:block; margin-bottom:8px;"><input type="checkbox" data-semantic-label="area" checked> Key Areas</label>
+                    <label style="display:block; margin-bottom:8px;"><input type="checkbox" data-semantic-label="room"> Rooms & Offices</label>
+                    <label style="display:block; margin-bottom:8px;"><input type="checkbox" data-semantic-label="vertical"> Stairs & Elevators</label>
+                </div>
+            </div>
+
+            <!-- RESTORED: Legend Panel -->
+            <div id="legendPanel" class="legend-panel hide">
+                <div class="panel-header">
+                    <h3>Legend</h3>
+                    <button id="legendClose" style="background:none;border:none;color:white;cursor:pointer;font-size:18px;">×</button>
+                </div>
+                <div style="padding:15px; color:white;">
+                    <p style="margin-bottom:10px;"><span style="color:#0f6cff;">━</span> Primary Route</p>
+                    <p style="margin-bottom:10px;"><span style="color:#35f59a;">●</span> Start Point</p>
+                    <p style="margin-bottom:10px;"><span style="color:#1687ff;">●</span> Destination</p>
+                    <p style="margin-bottom:10px;"><span style="color:#ffcf3a;">●</span> Tracked Position</p>
+                </div>
+            </div>
+
             <div class="map-toolbar">
                 <span>Mouse wheel = zoom</span>
                 <span>Drag = pan</span>
