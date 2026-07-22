@@ -1,0 +1,30 @@
+{
+  "schema_version": "0.2.0",
+  "coordinate_system": "PGS GLB model coordinates",
+  "destinations": [
+    {
+      "id": "destination-draft:label:f3ff17c7-be95-5ad5-88e4-dc32659f1803",
+      "source_label_id": "label:f3ff17c7-be95-5ad5-88e4-dc32659f1803",
+      "name": "HR Office",
+      "category": "department",
+      "access_profile": "employee",
+      "layer": "ground",
+      "position": {
+        "x": -277.5475,
+        "y": 1.6656,
+        "z": 193.4608
+      },
+      "node_id": "ped-node:560321f6-8b4f-5f4c-81c4-14c690d8f6f2",
+      "connector_distance": 1.574,
+      "assignment_method": "authored_network_node",
+      "mapped": true,
+      "approved": false
+    }
+  ],
+  "summary": {
+    "mapped": 1,
+    "unmapped": 0,
+    "total": 1
+  },
+  "source": "destination_anchors_draft_2026-07-19.json"
+}

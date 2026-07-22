@@ -405,38 +405,5 @@ function shareRoute() {
 function showToast(msg) { const t = $("toast"); if (!t) return; t.textContent = msg; t.classList.add("show"); setTimeout(() => t.classList.remove("show"), 1800); }
 function escapeHtml(s) { return String(s).replace(/[&<>"']/g, m => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;", "'": "&#039;" }[m])); }
 
-// Handle Editor Mode Toggle
-const urlParams = new URLSearchParams(window.location.search);
-// Specifically force false if config is missing
-const isEditorEnabled = urlParams.get('editor') === 'true' || (config && config.editorMode === true);
-
-if (!isEditorEnabled) {
-    // Inject global CSS rule to hide editor panels completely
-    const style = document.createElement('style');
-    style.innerHTML = `
-      #pedestrianNetworkMapperPanel, #mapLabelEditorPanel, #destinationAnchorEditorPanel,
-      .pedestrian-network-mapper, .map-label-editor, .destination-anchor-editor,
-      .editor-overlay, [data-editor-panel] {
-        display: none !important;
-        visibility: hidden !important;
-      }
-    `;
-    document.head.appendChild(style);
-}
-
-function generateRoute() {
-    const sSelect = $("startSelect"), eSelect = $("endSelect");
-    if (!sSelect || !eSelect) return;
-    const start = sSelect.value, end = eSelect.value;
-
-    // ADD THIS DEBUG LINE:
-    console.log("Routing from", start, "to", end);
-    console.log("Mapped Nodes:", destinationNodeCrosswalk[start], "to", destinationNodeCrosswalk[end]);
-
-    const startNode = destinationNodeCrosswalk[start] || start;
-    const endNode = destinationNodeCrosswalk[end] || end;
-    // ... rest of function
-
-
 
 init();
