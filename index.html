@@ -63,36 +63,49 @@
             <h2>BlueOval Glendale • Ground Floor</h2>
             <nav class="top-actions">
                 <button id="searchFocus">⌕ Search</button>
-                <button id="legendOpen" onclick="document.getElementById('legendPanel').classList.toggle('show')">Legend</button>
-                <button id="layersOpen" onclick="document.getElementById('layersPanel').classList.toggle('show')">Layers</button>
+                <button id="legendOpen">Legend</button>
+                <button id="layersOpen">Layers</button>
                 <button id="resetView">Reset</button>
                 <button id="fitRoute" class="fit-button">Fit Route</button>
             </nav>
         </header>
 
         <section class="map-shell">
+            <!-- Layers Panel -->
             <div id="layersPanel" class="layers-panel">
-                <div class="panel-header"><h3>Map Layers</h3><button onclick="document.getElementById('layersPanel').classList.remove('show')">×</button></div>
+                <div class="panel-header"><h3>Map Layers</h3><button id="layersClose">×</button></div>
                 <div>
                     <label><input type="checkbox" data-3d-layer="roof"> Roof Level</label><br>
-                    <label><input type="checkbox" data-3d-layer="mezzanine"> Mezzanine Level</label><br>
                     <label><input type="checkbox" data-3d-layer="ground" checked> Ground Floor</label><br>
                     <label><input type="checkbox" data-semantic-label="room" checked> Rooms & Offices</label>
                 </div>
             </div>
 
+            <!-- Legend Panel -->
             <div id="legendPanel" class="legend-panel">
-                <div class="panel-header"><h3>Legend</h3><button onclick="document.getElementById('legendPanel').classList.remove('show')">×</button></div>
+                <div class="panel-header"><h3>Legend</h3><button id="legendClose">×</button></div>
                 <div id="legendContent"><p>━ Primary Route</p></div>
             </div>
 
+            <!-- 3D Map Frame -->
             <div id="threeFrame" class="three-frame">
                 <div id="threeCanvas" class="three-canvas"></div>
             </div>
         </section>
     </main>
 </div>
+
 <script src="app.js?v=10.5.4"></script>
 <script type="module" src="viewer3d.js?v=10.5.4"></script>
+
+<script>
+    // Logic to handle panel clicks without conflict
+    document.addEventListener("DOMContentLoaded", () => {
+        document.getElementById("layersOpen").addEventListener("click", () => document.getElementById("layersPanel").classList.add("show"));
+        document.getElementById("layersClose").addEventListener("click", () => document.getElementById("layersPanel").classList.remove("show"));
+        document.getElementById("legendOpen").addEventListener("click", () => document.getElementById("legendPanel").classList.add("show"));
+        document.getElementById("legendClose").addEventListener("click", () => document.getElementById("legendPanel").classList.remove("show"));
+    });
+</script>
 </body>
 </html>
