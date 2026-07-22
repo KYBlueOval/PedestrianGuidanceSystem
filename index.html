@@ -12,7 +12,7 @@
     <meta name="theme-color" content="#061a33"/>
     <link rel="stylesheet" href="style.css?v=10.5.4"/>
 
-    <!-- Fix: Import map to resolve 'three' module -->
+    <!-- Import map to resolve 'three' module -->
     <script type="importmap">
     {
       "imports": {
@@ -159,6 +159,7 @@
 
             <div id="threeFrame" class="three-frame" hidden>
                 <div id="threeCanvas" class="three-canvas"></div>
+                <!-- Required Status DIV to prevent 'classList' crash -->
                 <div id="threeStatus" class="three-status">
                     <span class="three-spinner" aria-hidden="true"></span>
                     <span>Initializing...</span>
