@@ -156,3 +156,35 @@
 
 #spatialSearchResults button:hover { border-color: #00a8ff; filter: brightness(1.2); }
 #spatialSearchResults button b { color: #00ff88; font-size: 15px; }
+
+
+/* --- Layers Panel Styling --- */
+.layers-panel .layer-section {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
+.layers-panel h4 {
+    color: #4da8da;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin: 6px 0 4px 0;
+}
+
+.layers-panel .layer-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #e0e0e0;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.panel-divider {
+    border: 0;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    margin: 10px 0;
+}

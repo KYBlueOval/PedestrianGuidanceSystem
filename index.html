@@ -146,14 +146,63 @@
 
         <section class="map-shell">
             <!-- Layers Panel -->
-            <div id="layersPanel" class="layers-panel">
-                <div class="panel-header"><h3>Map Layers</h3><button id="layersClose">×</button></div>
-                <div>
-                    <label><input type="checkbox" data-3d-layer="roof"> Roof Level</label><br>
-                    <label><input type="checkbox" data-3d-layer="ground" checked> Ground Floor</label><br>
-                    <label><input type="checkbox" data-semantic-label="room" checked> Rooms & Offices</label>
-                </div>
-            </div>
+    <div id="layersPanel" class="layers-panel hide">
+		<div class="panel-header">
+			<h3>Map Layers</h3>
+			<button id="layersClose" class="close-btn" title="Close Panel">&times;</button>
+		</div>
+		<div class="panel-body">
+			<div class="layer-section">
+				<h4>3D Floor & Structure Layers</h4>
+				<label class="layer-item">
+					<input type="checkbox" data-3d-layer="site">
+					<span>Site Level / Grounds</span>
+				</label>
+				<label class="layer-item">
+					<input type="checkbox" data-3d-layer="ground" checked>
+					<span>Ground Floor</span>
+				</label>
+				<label class="layer-item">
+					<input type="checkbox" data-3d-layer="mezzanine">
+					<span>Mezzanine Level</span>
+				</label>
+				<label class="layer-item">
+					<input type="checkbox" data-3d-layer="roof">
+					<span>Roof Level</span>
+				</label>
+			</div>
+
+			<hr class="panel-divider">
+
+			<div class="layer-section">
+				<h4>Labels & Overlays</h4>
+				<label class="layer-item">
+					<input type="checkbox" data-semantic-label="building" checked>
+					<span>Building Labels</span>
+				</label>
+				<label class="layer-item">
+					<input type="checkbox" data-semantic-label="area" checked>
+					<span>Departments & Zones</span>
+				</label>
+				<label class="layer-item">
+					<input type="checkbox" data-semantic-label="room" checked>
+					<span>Individual Room Names</span>
+				</label>
+				<label class="layer-item">
+					<input type="checkbox" data-semantic-label="amenity" checked>
+					<span>Amenities & Employee Services</span>
+				</label>
+				<label class="layer-item">
+					<input type="checkbox" data-semantic-label="vertical" checked>
+					<span>Stairs & Elevators</span>
+				</label>
+				<label class="layer-item">
+					<input type="checkbox" id="threeWalkwaysToggle" checked>
+					<span>Pedestrian Walkway Network</span>
+				</label>
+        </div>
+    </div>
+</div>
 
             <!-- Legend Panel -->
 			<div id="legendPanel" class="legend-panel">
@@ -174,8 +223,8 @@
     </main>
 </div>
 
-<script src="app.js?v=10.7.0"></script>
-<script type="module" src="viewer3d.js?v=10.7.0"></script>
+<script src="app.js?v=10.7.2"></script>
+<script type="module" src="viewer3d.js?v=10.7.2"></script>
 
 <script>
     // Logic to handle panel clicks without conflict
