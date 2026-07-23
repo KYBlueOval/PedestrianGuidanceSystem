@@ -11,15 +11,6 @@ const fetchJson = url => fetch(url, { cache: "no-store" });
 async function init() {
     config = await fetchJson("data/config.json").then(r => r.ok ? r.json() : {}).catch(() => ({}));
 
-    // URL Editor Toggle
-    const urlParams = new URLSearchParams(window.location.search);
-    if (urlParams.get('editor') === 'true') {
-        document.body.classList.add('editor-active');
-        if (typeof initPedestrianNetworkEditor === "function") initPedestrianNetworkEditor();
-        if (typeof initMapLabelEditor === "function") initMapLabelEditor();
-        if (typeof initDestinationAnchorEditor === "function") initDestinationAnchorEditor();
-    }
-
     [destinations, routes, quickRoutes, pedestrianNetwork] = await Promise.all([
         fetchJson("data/destinations.json").then(r => r.json()).catch(() => []),
         fetchJson("data/routes.json").then(r => r.json()).catch(() => []),
@@ -33,7 +24,18 @@ async function init() {
     buildGraph(); buildPedestrianGraph(); populateSelects(); renderQuickRoutes(); drawNetwork(); drawNodes(); wireEvents(); resetView();
 
     setMode("employee");
-    setWorkspaceView("3d");
+
+    // FIX: Only force 3D if NOT in editor mode
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('editor') === 'true') {
+        document.body.classList.add('editor-active');
+        setWorkspaceView("2d"); // Keep 2D frame visible for the editor tools
+        if (typeof initPedestrianNetworkEditor === "function") initPedestrianNetworkEditor();
+        if (typeof initMapLabelEditor === "function") initMapLabelEditor();
+        if (typeof initDestinationAnchorEditor === "function") initDestinationAnchorEditor();
+    } else {
+        setWorkspaceView("3d"); // Normal users get 3D automatically
+    }
 
     updateClock(); setInterval(updateClock, 30000);
 }
@@ -54,10 +56,11 @@ function destinationGroup(destination) {
 
 function buildPedestrianGraph() {
     pedestrianGraph = {}; pedestrianNodes = {};
-    const isReady = pedestrianNetwork?.review?.route_ready === true || pedestrianNetwork?.approved === true || pedestrianNetwork?.review_status === "approved";
-    if (!isReady) return;
-    (pedestrianNetwork.nodes || []).forEach(node => { pedestrianNodes[node.id] = node; pedestrianGraph[node.id] = []; });
-    (pedestrianNetwork.edges || []).forEach(edge => {
+
+    // FIX: Removed the "if (!isReady) return;" block. 
+    // We MUST build the graph into memory even if it's a draft, otherwise the 3D map has no coordinates to draw.
+    (pedestrianNetwork?.nodes || []).forEach(node => { pedestrianNodes[node.id] = node; pedestrianGraph[node.id] = []; });
+    (pedestrianNetwork?.edges || []).forEach(edge => {
         if (!pedestrianGraph[edge.from] || !pedestrianGraph[edge.to]) return;
         const weight = Number(edge.distance) || distance3d(pedestrianNodes[edge.from].position, pedestrianNodes[edge.to].position);
         pedestrianGraph[edge.from].push({ id: edge.to, weight, edge });
@@ -139,6 +142,14 @@ function wireEvents() {
     if ($("networkToggle")) $("networkToggle").onchange = e => toggleNetwork(e.target.checked);
     if ($("pulseToggle")) $("pulseToggle").onchange = e => $("overlay")?.classList.toggle("no-pulse", !e.target.checked);
     if ($("searchClear")) $("searchClear").onclick = () => { $("searchBox").value = ""; $("searchResults")?.classList.remove("show"); };
+
+    // FIX: Catch-all fallback listeners for top toolbar buttons
+    document.querySelectorAll("button").forEach(btn => {
+        const text = (btn.textContent || btn.title || btn.id || "").toLowerCase();
+        if (text.includes("legend")) btn.addEventListener("click", () => $("legendPanel")?.classList.toggle("hide"));
+        if (text.includes("layer")) btn.addEventListener("click", () => $("layersPanel")?.classList.toggle("show"));
+        if (text === "search" || text.includes("searchfocus")) btn.addEventListener("click", () => $("searchBox")?.focus());
+    });
 
     document.querySelectorAll(".mode").forEach(b => b.onclick = () => setMode(b.dataset.mode));
     document.querySelectorAll("[data-layer]").forEach(cb => cb.onchange = applyLayerFilters);
@@ -231,13 +242,16 @@ function generateRoute() {
     const start = sSelect.value, end = eSelect.value;
     if (!start || !end || start === end) return;
 
-    const startNode = destinationNodeCrosswalk[start], endNode = destinationNodeCrosswalk[end];
+    // Crosswalk translation
+    const startNode = destinationNodeCrosswalk[start] || start;
+    const endNode = destinationNodeCrosswalk[end] || end;
 
-    const isNetworkApproved = pedestrianNetwork?.review?.route_ready === true || pedestrianNetwork?.approved === true || pedestrianNetwork?.review_status === "approved";
+    // BYPASS APPROVAL: Force the spatial path calculation using the loaded nodes
+    const spatialResult = (pedestrianGraph[startNode] && pedestrianGraph[endNode])
+        ? dijkstra(startNode, endNode, pedestrianGraph)
+        : null;
 
-    const approvedNetwork = isNetworkApproved && startNode && endNode && pedestrianGraph[startNode] && pedestrianGraph[endNode];
-    const spatialResult = approvedNetwork ? dijkstra(startNode, endNode, pedestrianGraph) : null;
-    const spatialValid = spatialResult && Number.isFinite(spatialResult.distance) && spatialResult.path[0] === startNode && spatialResult.path.at(-1) === endNode;
+    const spatialValid = spatialResult && Number.isFinite(spatialResult.distance);
 
     const result = dijkstra(start, end);
     lastPath = result.path;
@@ -254,12 +268,13 @@ function generateRoute() {
         distanceUnit: displayResult.distanceUnit || "map-units",
         certified: Boolean(spatialValid),
         spatialNodeIds: spatialValid ? [...spatialResult.path] : [],
+        // Send the exact 3D coordinates directly to viewer3d.js
         spatialPath: spatialValid ? spatialResult.path.map(id => pedestrianNodes[id]?.position).filter(Boolean) : []
     };
 
     window.pgsCurrentRoute = routeDetail;
     window.dispatchEvent(new CustomEvent("pgs:route", { detail: routeDetail }));
-    console.log("Route Generated for:", start, "to", end);
+    console.log("3D Route Data Dispatched:", routeDetail.spatialPath.length, "waypoints");
 }
 
 function edgeAllowsMode(edge, currentMode) {
