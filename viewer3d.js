@@ -114,7 +114,7 @@ async function loadModel() {
         indexLayers();
         createBuildingLabels();
         createSemanticLabels(labelsPayload.labels || []);
-        applyInitialLayerState(); // This sets the default visibility
+        applyInitialLayerState(); // Sets default layer visibilities
 
         if (window.pgsCurrentRoute) renderRoute(window.pgsCurrentRoute);
         setStatus("3D twin ready", { hidden: true });
@@ -145,14 +145,12 @@ function setLayerVisibility(layer, isVisible) {
     updateSemanticLabelVisibility();
 }
 
-// FIX: Force Mezzanine and Roof OFF by default on load
 function applyInitialLayerState() {
     setLayerVisibility("site", true);
     setLayerVisibility("ground", true);
     setLayerVisibility("mezzanine", false);
     setLayerVisibility("roof", false);
 
-    // Sync HTML checkboxes so the UI matches the reality
     const mezzCheck = document.querySelector("[data-3d-layer='mezzanine']");
     if (mezzCheck) mezzCheck.checked = false;
     const roofCheck = document.querySelector("[data-3d-layer='roof']");
@@ -258,17 +256,32 @@ function updateSemanticLabelLOD() {
     });
 }
 
-function destinationPosition(id) {
-    const value = (spatialOverrides.destinations || spatialOverrides)[id];
-    if (value && [value.model_position?.x, value.model_position?.y, value.model_position?.z].every(Number.isFinite)) {
-        return new THREE.Vector3(value.model_position.x, Math.max(value.model_position.y, 1.5), value.model_position.z);
+// FUZZY MATCH POSITION RESOLVER
+function destinationPosition(destObj) {
+    if (!destObj) return null;
+    const id = typeof destObj === "string" ? destObj : destObj.id;
+    const name = typeof destObj === "object" ? destObj.name : null;
+
+    // 1. Check spatial overrides
+    const override = (spatialOverrides.destinations || spatialOverrides)[id];
+    if (override) {
+        const pos = override.model_position || override;
+        if ([pos?.x, pos?.y, pos?.z].every(Number.isFinite)) {
+            return new THREE.Vector3(pos.x, Math.max(pos.y, 1.5), pos.z);
+        }
     }
-    const label = sourceLabelObjects.get(id);
-    if (label) {
+
+    // 2. Fallback: Search all labels currently attached to the 3D scene
+    const labels = Array.from(sourceLabelObjects.values());
+    const match = labels.find(l => l.userData.labelId === id) || 
+                  (name ? labels.find(l => (l.userData.displayName || "").toLowerCase() === name.toLowerCase()) : null);
+
+    if (match) {
         const pos = new THREE.Vector3();
-        label.getWorldPosition(pos);
+        match.getWorldPosition(pos);
         return new THREE.Vector3(pos.x, Math.max(pos.y, 1.5), pos.z);
     }
+
     return null;
 }
 
@@ -278,12 +291,16 @@ function routePositions(route) {
             .filter(p => [p?.x, p?.y, p?.z].every(Number.isFinite))
             .map(p => new THREE.Vector3(p.x, Math.max(p.y, 1.5), p.z));
     }
+
     const destinations = route?.destinations || [];
     if (destinations.length < 2) return [];
-    return [
-        destinationPosition(destinations[0].id),
-        destinationPosition(destinations.at(-1).id)
-    ].filter(Boolean);
+
+    const startPos = destinationPosition(destinations[0]);
+    const endPos = destinationPosition(destinations.at(-1));
+
+    if (!startPos || !endPos) return [];
+
+    return [startPos, endPos];
 }
 
 function clearRoute() {
@@ -304,7 +321,7 @@ function renderRoute(route) {
 
     const points = routePositions(route);
     if (!points || points.length < 2) {
-        setStatus("Network Crosswalk missing: Draw direct line mode active.", { hidden: true });
+        setStatus("Target locations are not mapped to 3D coordinates.", { hidden: true });
         return;
     }
 
@@ -322,7 +339,7 @@ function renderRoute(route) {
 function frameRoute(points) {
     const box = new THREE.Box3().setFromPoints(points);
     const center = box.getCenter(new THREE.Vector3()).add(model.position);
-    const radius = Math.max(box.getSize(new THREE.Vector3()).x, 40);
+    const radius = Math.max(box.getSize(new THREE.Vector3()).x, box.getSize(new THREE.Vector3()).z, 40);
     controls.target.copy(center);
     camera.position.set(center.x + radius * .75, center.y + radius * .65, center.z + radius * .75);
     controls.update();
@@ -361,14 +378,13 @@ function animate() {
 }
 
 // -----------------------------------------------------
-// NEW FEATURE: 3D Spatial Search & Label Focusing
+// 3D SPATIAL SEARCH & LABEL FOCUSING API
 // -----------------------------------------------------
 window.pgs3d = {
     show: async () => { visible = true; initialize(); resize(); await loadModel(); },
     hide: () => { visible = false; },
     reset: () => { if (controls) { controls.reset(); resize(); fitModel(); } },
 
-    // Grabs all labels from spatial_labels.json currently on the 3D map
     getSpatialLabels: () => {
         return Array.from(sourceLabelObjects.values()).map(l => ({
             id: l.userData.labelId,
@@ -377,12 +393,10 @@ window.pgs3d = {
         }));
     },
 
-    // Flies the camera to the specific room you clicked in the search
     focusSpatialLabel: (id) => {
         const label = sourceLabelObjects.get(id);
         if (!label || !camera || !controls) return;
 
-        // Force the layer (e.g. Ground) on just in case it was turned off
         const layerToggle = document.querySelector(`[data-3d-layer='${label.userData.layer}']`);
         if (layerToggle && !layerToggle.checked) {
             layerToggle.checked = true;
@@ -393,7 +407,6 @@ window.pgs3d = {
         label.getWorldPosition(pos);
         controls.target.copy(pos);
 
-        // Swoop camera down closely over the room
         camera.position.set(pos.x + 30, pos.y + 60, pos.z + 40);
         controls.update();
     }

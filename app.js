@@ -11,6 +11,10 @@ const fetchJson = url => fetch(url, { cache: "no-store" });
 async function init() {
     config = await fetchJson("data/config.json").then(r => r.ok ? r.json() : {}).catch(() => ({}));
 
+    // FIX 1: Rip the UI panels out of the mapFrame so they don't turn invisible when 3D mode activates
+    if ($("legendPanel")) document.body.appendChild($("legendPanel"));
+    if ($("layersPanel")) document.body.appendChild($("layersPanel"));
+
     [destinations, routes, quickRoutes, pedestrianNetwork] = await Promise.all([
         fetchJson("data/destinations.json").then(r => r.json()).catch(() => []),
         fetchJson("data/routes.json").then(r => r.json()).catch(() => []),
@@ -23,7 +27,7 @@ async function init() {
 
     buildGraph(); buildPedestrianGraph(); populateSelects(); renderQuickRoutes(); drawNetwork(); drawNodes();
 
-    injectSpatialSearchUI(); // Builds the new 3D search box
+    injectSpatialSearchUI();
     wireEvents();
     resetView();
 
@@ -123,7 +127,6 @@ function renderQuickRoutes() {
     });
 }
 
-// Builds the 3D Spatial Search interface into the page
 function injectSpatialSearchUI() {
     const overlay = document.createElement("div");
     overlay.id = "spatialSearchOverlay";
@@ -143,7 +146,6 @@ function injectSpatialSearchUI() {
         resBox.innerHTML = "";
         if (q.length < 2) return;
 
-        // Pull labels directly from the 3D engine
         const labels = window.pgs3d?.getSpatialLabels() || [];
         const matches = labels.filter(l => (l.name + " " + l.category).toLowerCase().includes(q)).slice(0, 15);
 
@@ -164,23 +166,26 @@ function wireEvents() {
     if ($("routeBtn")) $("routeBtn").onclick = generateRoute;
     if ($("destinationCategory")) $("destinationCategory").onchange = event => populateSelects(event.target.value);
 
-    // THE ULTIMATE TOOLBAR BUTTON FIX
-    // Listens to every click on the page. If it hits a button, reads the text and acts.
     document.addEventListener("click", e => {
         const btn = e.target.closest("button");
         if (!btn) return;
 
         const text = (btn.textContent || btn.innerText || btn.id || "").toLowerCase().trim();
-
-        // Sidebar Route button ignore
         if (btn.id === "routeBtn" || btn.classList.contains("quick-route")) return;
 
         if (text.includes("legend")) {
-            $("legendPanel")?.classList.toggle("hide");
+            const panel = $("legendPanel");
+            if (panel) {
+                panel.classList.toggle("hide");
+                panel.style.display = panel.classList.contains("hide") ? "none" : "block";
+            }
         } else if (text.includes("layer")) {
-            $("layersPanel")?.classList.toggle("show");
+            const panel = $("layersPanel");
+            if (panel) {
+                panel.classList.toggle("show");
+                panel.style.display = panel.classList.contains("show") ? "block" : "none";
+            }
         } else if (text.includes("search")) {
-            // Opens the new 3D Spatial Search window
             const overlay = $("spatialSearchOverlay");
             if (overlay) {
                 overlay.style.display = overlay.style.display === "block" ? "none" : "block";
@@ -212,7 +217,13 @@ function setWorkspaceView(next) {
     workspaceView = next === "3d" ? "3d" : "2d";
     const is3d = workspaceView === "3d";
     document.querySelector(".map-shell")?.classList.toggle("three-active", is3d);
-    if ($("mapFrame")) $("mapFrame").hidden = is3d;
+
+    // FIX 2: If Editor is active, NEVER hide the 2D mapFrame because the Editor tools live inside it.
+    const isEditor = document.body.classList.contains('editor-active');
+    if ($("mapFrame")) {
+        $("mapFrame").hidden = isEditor ? false : is3d;
+    }
+
     if ($("threeFrame")) $("threeFrame").hidden = !is3d;
     if ($("view2DBtn")) { $("view2DBtn").classList.toggle("active", !is3d); $("view2DBtn").setAttribute("aria-pressed", String(!is3d)); }
     if ($("view3DBtn")) { $("view3DBtn").classList.toggle("active", is3d); $("view3DBtn").setAttribute("aria-pressed", String(is3d)); }
@@ -285,17 +296,12 @@ function generateRoute() {
     const startNode = destinationNodeCrosswalk[start] || start;
     const endNode = destinationNodeCrosswalk[end] || end;
 
-    // Diagnose routing failures cleanly in the console
-    if (!pedestrianGraph[startNode]) console.warn(`Routing Warning: Start destination ${start} is not mapped to a network anchor.`);
-    if (!pedestrianGraph[endNode]) console.warn(`Routing Warning: End destination ${end} is not mapped to a network anchor.`);
-
     const spatialResult = (pedestrianGraph[startNode] && pedestrianGraph[endNode])
         ? dijkstra(startNode, endNode, pedestrianGraph)
         : null;
 
     let result = dijkstra(start, end);
 
-    // BULLETPROOF FALLBACK: If the network is missing a link, draw a straight line directly to the destination.
     if (result.path.length < 2) {
         result.path = [start, end];
         result.distance = distance3d(loc(start), loc(end)) || 50;
@@ -317,10 +323,8 @@ function generateRoute() {
         distanceUnit: displayResult.distanceUnit || "map-units",
         certified: Boolean(spatialValid),
         spatialNodeIds: spatialValid ? [...spatialResult.path] : [],
-        // If the path failed, pass the two fallback points directly to the 3D map
-        spatialPath: spatialValid
-            ? spatialResult.path.map(id => pedestrianNodes[id]?.position).filter(Boolean)
-            : [loc(start), loc(end)].map(l => ({ x: l?.x || 0, y: l?.y || 0, z: 0 }))
+        // FIX 3: Force the array to be EMPTY so the viewer3d.js fuzzy name match is triggered!
+        spatialPath: spatialValid ? spatialResult.path.map(id => pedestrianNodes[id]?.position).filter(Boolean) : []
     };
 
     window.pgsCurrentRoute = routeDetail;
