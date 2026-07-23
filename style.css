@@ -53,9 +53,9 @@
     box-shadow: 0 0 12px rgba(0, 168, 255, 0.5), inset 2px 2px 6px rgba(0,0,0,0.6);
     border-color: #00a8ff;
 }
-
 /* --- Search Results Dropdown Container --- */
 #searchResults {
+    display: none; /* FIX: Hides the blue line when empty */
     background: rgba(10, 25, 47, 0.85);
     border: 1px solid #1a4b82;
     border-radius: 12px;
@@ -68,6 +68,10 @@
     position: absolute; 
     width: calc(100% - 40px); 
     z-index: 9999;
+}
+
+#searchResults.show {
+    display: block; /* FIX: Shows only when active */
 }
 
 /* --- 3D Search Result Bubbles --- */
