@@ -9,7 +9,7 @@ const loc = id => destinations.find(d => d.id === id);
 const fetchJson = url => fetch(url, { cache: "no-store" });
 
 async function init() {
-    // Wipe stale PWA service worker cache
+    // Service Worker & Cache Wipe
     if ('serviceWorker' in navigator) {
         navigator.serviceWorker.getRegistrations().then(regs => { for (let r of regs) r.unregister(); });
     }
@@ -33,38 +33,45 @@ async function init() {
         );
     }
 
-    buildGraph();
-    buildPedestrianGraph();
-    populateSelects();
-    renderQuickRoutes();
-    drawNetwork();
-    drawNodes();
-    injectSpatialSearchUI();
-    wireEvents();
+    buildGraph(); 
+    buildPedestrianGraph(); 
+    populateSelects(); 
+    renderQuickRoutes(); 
+    drawNetwork(); 
+    drawNodes(); 
+    injectSpatialSearchUI(); 
+    wireEvents(); 
     resetView();
 
     setMode("employee");
 
-    // Editor URL Handler
+    // Editor URL Check
     const urlParams = new URLSearchParams(window.location.search);
     if (urlParams.get('editor') === 'true') {
         document.body.classList.add('editor-active');
-        injectEditorUI();
+        document.querySelectorAll('.editor-control, .editor-bar, #editorPanel, [data-editor-ui], .editor-ui, .editor-drawer, .editor-sidebar').forEach(el => {
+            el.style.display = 'block';
+            el.hidden = false;
+        });
+
+        if (typeof initPedestrianNetworkEditor === "function") initPedestrianNetworkEditor();
+        if (typeof initMapLabelEditor === "function") initMapLabelEditor();
+        if (typeof initDestinationAnchorEditor === "function") initDestinationAnchorEditor();
     }
 
     setWorkspaceView("3d");
-    updateClock();
+    updateClock(); 
     setInterval(updateClock, 30000);
 }
 
 function buildGraph() {
-    graph = {};
+    graph = {}; 
     destinations.forEach(d => graph[d.id] = []);
-    routes.forEach(([a, b, w]) => {
-        if (graph[a] && graph[b]) {
-            graph[a].push({ id: b, weight: w });
-            graph[b].push({ id: a, weight: w });
-        }
+    routes.forEach(([a, b, w]) => { 
+        if (graph[a] && graph[b]) { 
+            graph[a].push({ id: b, weight: w }); 
+            graph[b].push({ id: a, weight: w }); 
+        } 
     });
 }
 
@@ -78,11 +85,11 @@ function destinationGroup(destination) {
 }
 
 function buildPedestrianGraph() {
-    pedestrianGraph = {};
+    pedestrianGraph = {}; 
     pedestrianNodes = {};
-    (pedestrianNetwork?.nodes || []).forEach(node => {
-        pedestrianNodes[node.id] = node;
-        pedestrianGraph[node.id] = [];
+    (pedestrianNetwork?.nodes || []).forEach(node => { 
+        pedestrianNodes[node.id] = node; 
+        pedestrianGraph[node.id] = []; 
     });
     (pedestrianNetwork?.edges || []).forEach(edge => {
         if (!pedestrianGraph[edge.from] || !pedestrianGraph[edge.to]) return;
@@ -189,31 +196,11 @@ function injectSpatialSearchUI() {
     };
 }
 
-function injectEditorUI() {
-    if ($("editorToolbar")) return;
-    const bar = document.createElement("div");
-    bar.id = "editorToolbar";
-    bar.className = "editor-toolbar-overlay";
-    bar.innerHTML = `
-        <div class="editor-title">3D Pedestrian Network & Label Mapper</div>
-        <button id="btnToggleMapping" class="editor-btn">Start Mapping Network</button>
-        <button id="btnUndoNode" class="editor-btn">Undo Node</button>
-        <button id="btnClearDraft" class="editor-btn">Clear Draft</button>
-        <button id="btnExportDraft" class="editor-btn">Export Network JSON</button>
-    `;
-    document.body.appendChild(bar);
-
-    $("btnToggleMapping").onclick = () => window.pgs3d?.toggleRouteEditor();
-    $("btnUndoNode").onclick = () => window.pgs3d?.undoEditorNode();
-    $("btnClearDraft").onclick = () => window.pgs3d?.clearEditorDraft();
-    $("btnExportDraft").onclick = () => window.pgs3d?.exportEditorDraft();
-}
-
 function wireEvents() {
     if ($("routeBtn")) $("routeBtn").onclick = generateRoute;
     if ($("destinationCategory")) $("destinationCategory").onchange = event => populateSelects(event.target.value);
 
-    // Live checkbox listener for 3D map layers
+    // Live Layer Checkboxes for 3D View
     document.addEventListener("change", e => {
         const cb = e.target.closest("input[type='checkbox']");
         if (!cb) return;
@@ -226,7 +213,7 @@ function wireEvents() {
         }
     });
 
-    // Panel & Button Delegation
+    // Panel and Header Toolbar Click Listener
     document.addEventListener("click", e => {
         const btn = e.target.closest("button");
         if (!btn) return;
@@ -236,11 +223,11 @@ function wireEvents() {
 
         if (btn.id === "routeBtn" || btn.classList.contains("quick-route")) return;
 
-        if (id === "legendopen" || text.includes("legend")) {
+        if (id === "legendopen" || text === "legend" || text.includes("legend")) {
             togglePanelDisplay("legendPanel");
         } else if (id === "legendclose") {
             hidePanel("legendPanel");
-        } else if (id === "layersopen" || text.includes("layer")) {
+        } else if (id === "layersopen" || text === "layers" || text.includes("layer")) {
             togglePanelDisplay("layersPanel");
         } else if (id === "layersclose") {
             hidePanel("layersPanel");
@@ -276,15 +263,15 @@ function wireEvents() {
 function togglePanelDisplay(panelId) {
     const p = $(panelId);
     if (!p) return;
-    const isVisible = p.style.display === "block" || p.classList.contains("show");
-    if (isVisible) {
+    const isHidden = p.classList.contains("hide") || p.style.display === "none";
+    if (isHidden) {
+        p.style.display = "block";
+        p.classList.remove("hide");
+        p.classList.add("show");
+    } else {
         p.style.display = "none";
         p.classList.remove("show");
         p.classList.add("hide");
-    } else {
-        p.style.display = "block";
-        p.classList.add("show");
-        p.classList.remove("hide");
     }
 }
 
@@ -301,10 +288,10 @@ function setWorkspaceView(next) {
     const is3d = workspaceView === "3d";
     document.querySelector(".map-shell")?.classList.toggle("three-active", is3d);
 
-    // CRITICAL FIX: Hide 2D mapFrame completely in 3D mode so it does not block mouse events!
+    const isEditor = document.body.classList.contains('editor-active');
     if ($("mapFrame")) {
-        $("mapFrame").style.display = is3d ? "none" : "block";
-        $("mapFrame").hidden = is3d;
+        $("mapFrame").style.display = isEditor ? "block" : (is3d ? "none" : "block");
+        $("mapFrame").hidden = isEditor ? false : is3d;
     }
     if ($("threeFrame")) {
         $("threeFrame").style.display = "block";
@@ -352,11 +339,11 @@ function drawNodes() {
 
 function dijkstra(start, end, sourceGraph = graph) {
     const dist = {}, prev = {}, q = new Set(Object.keys(sourceGraph));
-    Object.keys(sourceGraph).forEach(k => dist[k] = Infinity);
+    Object.keys(sourceGraph).forEach(k => dist[k] = Infinity); 
     dist[start] = 0;
 
     while (q.size) {
-        let u = [...q].sort((a, b) => dist[a] - dist[b])[0];
+        let u = [...q].sort((a, b) => dist[a] - dist[b])[0]; 
         q.delete(u);
         if (u === end) break;
         for (const n of sourceGraph[u] || []) {
@@ -376,7 +363,7 @@ function generateRoute() {
     const start = sSelect.value, end = eSelect.value;
     if (!start || !end || start === end) return;
 
-    // Crosswalk Lookup
+    // Crosswalk Translation
     const startNode = destinationNodeCrosswalk[start] || start;
     const endNode = destinationNodeCrosswalk[end] || end;
 
@@ -388,11 +375,6 @@ function generateRoute() {
     const spatialValid = spatialResult && Array.isArray(spatialResult.path) && spatialResult.path.length >= 2 && Number.isFinite(spatialResult.distance);
 
     let result = dijkstra(start, end);
-    if (result.path.length < 2) {
-        result.path = [start, end];
-        result.distance = distance3d(loc(start), loc(end)) || 50;
-    }
-
     lastPath = result.path;
     const displayResult = spatialValid ? { ...result, distance: spatialResult.distance, distanceUnit: "meters", certified: true } : result;
 
@@ -403,6 +385,8 @@ function generateRoute() {
     const startObj = loc(start) || { id: start, name: start };
     const endObj = loc(end) || { id: end, name: end };
 
+    // DO NOT pass 2D SVG pixel points as 3D world points! 
+    // Pass spatial node coordinates if graph path succeeded, otherwise pass start/end destination objects for 3D label lookup.
     const routeDetail = {
         path: [...result.path],
         destinations: [startObj, endObj],
@@ -410,9 +394,8 @@ function generateRoute() {
         distanceUnit: displayResult.distanceUnit || "map-units",
         certified: Boolean(spatialValid),
         spatialNodeIds: spatialValid ? [...spatialResult.path] : [],
-        // Pass exact 3D coordinates for waypoints if spatial graph succeeded
-        spatialPath: spatialValid
-            ? spatialResult.path.map(id => pedestrianNodes[id]?.position).filter(Boolean)
+        spatialPath: spatialValid 
+            ? spatialResult.path.map(id => pedestrianNodes[id]?.position).filter(Boolean) 
             : []
     };
 
@@ -483,7 +466,7 @@ function renderSearch(q) {
         btn.onclick = () => {
             $("endSelect").value = d.id;
             showDestination(d.id);
-            box.style.display = "none";
+            box.style.display = "none"; 
             $("searchBox").value = displayName;
             generateRoute();
         };
