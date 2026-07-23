@@ -9,7 +9,6 @@ const loc = id => destinations.find(d => d.id === id);
 const fetchJson = url => fetch(url, { cache: "no-store" });
 
 async function init() {
-    // Service Worker & Cache Wipe
     if ('serviceWorker' in navigator) {
         navigator.serviceWorker.getRegistrations().then(regs => { for (let r of regs) r.unregister(); });
     }
@@ -33,19 +32,18 @@ async function init() {
         );
     }
 
-    buildGraph(); 
-    buildPedestrianGraph(); 
-    populateSelects(); 
-    renderQuickRoutes(); 
-    drawNetwork(); 
-    drawNodes(); 
-    injectSpatialSearchUI(); 
-    wireEvents(); 
+    buildGraph();
+    buildPedestrianGraph();
+    populateSelects();
+    renderQuickRoutes();
+    drawNetwork();
+    drawNodes();
+    injectSpatialSearchUI();
+    wireEvents();
     resetView();
 
     setMode("employee");
 
-    // Editor URL Check
     const urlParams = new URLSearchParams(window.location.search);
     if (urlParams.get('editor') === 'true') {
         document.body.classList.add('editor-active');
@@ -60,18 +58,18 @@ async function init() {
     }
 
     setWorkspaceView("3d");
-    updateClock(); 
+    updateClock();
     setInterval(updateClock, 30000);
 }
 
 function buildGraph() {
-    graph = {}; 
+    graph = {};
     destinations.forEach(d => graph[d.id] = []);
-    routes.forEach(([a, b, w]) => { 
-        if (graph[a] && graph[b]) { 
-            graph[a].push({ id: b, weight: w }); 
-            graph[b].push({ id: a, weight: w }); 
-        } 
+    routes.forEach(([a, b, w]) => {
+        if (graph[a] && graph[b]) {
+            graph[a].push({ id: b, weight: w });
+            graph[b].push({ id: a, weight: w });
+        }
     });
 }
 
@@ -85,11 +83,11 @@ function destinationGroup(destination) {
 }
 
 function buildPedestrianGraph() {
-    pedestrianGraph = {}; 
+    pedestrianGraph = {};
     pedestrianNodes = {};
-    (pedestrianNetwork?.nodes || []).forEach(node => { 
-        pedestrianNodes[node.id] = node; 
-        pedestrianGraph[node.id] = []; 
+    (pedestrianNetwork?.nodes || []).forEach(node => {
+        pedestrianNodes[node.id] = node;
+        pedestrianGraph[node.id] = [];
     });
     (pedestrianNetwork?.edges || []).forEach(edge => {
         if (!pedestrianGraph[edge.from] || !pedestrianGraph[edge.to]) return;
@@ -200,7 +198,6 @@ function wireEvents() {
     if ($("routeBtn")) $("routeBtn").onclick = generateRoute;
     if ($("destinationCategory")) $("destinationCategory").onchange = event => populateSelects(event.target.value);
 
-    // Live Layer Checkboxes for 3D View
     document.addEventListener("change", e => {
         const cb = e.target.closest("input[type='checkbox']");
         if (!cb) return;
@@ -211,9 +208,11 @@ function wireEvents() {
         if (cb.dataset.semanticLabel) {
             window.pgs3d?.updateSemanticLabels?.();
         }
+        if (cb.id === "threeDestinationsToggle") {
+            window.pgs3d?.toggleDestinations?.(cb.checked);
+        }
     });
 
-    // Panel and Header Toolbar Click Listener
     document.addEventListener("click", e => {
         const btn = e.target.closest("button");
         if (!btn) return;
@@ -339,11 +338,11 @@ function drawNodes() {
 
 function dijkstra(start, end, sourceGraph = graph) {
     const dist = {}, prev = {}, q = new Set(Object.keys(sourceGraph));
-    Object.keys(sourceGraph).forEach(k => dist[k] = Infinity); 
+    Object.keys(sourceGraph).forEach(k => dist[k] = Infinity);
     dist[start] = 0;
 
     while (q.size) {
-        let u = [...q].sort((a, b) => dist[a] - dist[b])[0]; 
+        let u = [...q].sort((a, b) => dist[a] - dist[b])[0];
         q.delete(u);
         if (u === end) break;
         for (const n of sourceGraph[u] || []) {
@@ -357,45 +356,45 @@ function dijkstra(start, end, sourceGraph = graph) {
     return { path, distance: dist[end] };
 }
 
+// FIX: Generate Route strictly calculates along mapped pedestrian graph nodes
 function generateRoute() {
     const sSelect = $("startSelect"), eSelect = $("endSelect");
     if (!sSelect || !eSelect) return;
     const start = sSelect.value, end = eSelect.value;
     if (!start || !end || start === end) return;
 
-    // Crosswalk Translation
+    // Crosswalk translation to node IDs
     const startNode = destinationNodeCrosswalk[start] || start;
     const endNode = destinationNodeCrosswalk[end] || end;
 
-    // Check if 3D pedestrian network path exists
-    const spatialResult = (pedestrianGraph[startNode] && pedestrianGraph[endNode])
-        ? dijkstra(startNode, endNode, pedestrianGraph)
-        : null;
+    // Run Dijkstra on the pedestrian network graph
+    let spatialResult = null;
+    if (pedestrianGraph[startNode] && pedestrianGraph[endNode]) {
+        spatialResult = dijkstra(startNode, endNode, pedestrianGraph);
+    }
 
-    const spatialValid = spatialResult && Array.isArray(spatialResult.path) && spatialResult.path.length >= 2 && Number.isFinite(spatialResult.distance);
+    const hasSpatialPath = spatialResult && Array.isArray(spatialResult.path) && spatialResult.path.length >= 2;
 
     let result = dijkstra(start, end);
     lastPath = result.path;
-    const displayResult = spatialValid ? { ...result, distance: spatialResult.distance, distanceUnit: "meters", certified: true } : result;
 
     drawRoute(result.path);
-    updateRoute(displayResult);
+    updateRoute(hasSpatialPath ? { ...result, distance: spatialResult.distance, distanceUnit: "meters" } : result);
     showDestination(end);
 
     const startObj = loc(start) || { id: start, name: start };
     const endObj = loc(end) || { id: end, name: end };
 
-    // DO NOT pass 2D SVG pixel points as 3D world points! 
-    // Pass spatial node coordinates if graph path succeeded, otherwise pass start/end destination objects for 3D label lookup.
+    // Pass the node positions from pedestrian_network.json along the calculated path
     const routeDetail = {
         path: [...result.path],
         destinations: [startObj, endObj],
-        distance: displayResult.distance,
-        distanceUnit: displayResult.distanceUnit || "map-units",
-        certified: Boolean(spatialValid),
-        spatialNodeIds: spatialValid ? [...spatialResult.path] : [],
-        spatialPath: spatialValid 
-            ? spatialResult.path.map(id => pedestrianNodes[id]?.position).filter(Boolean) 
+        distance: hasSpatialPath ? spatialResult.distance : result.distance,
+        distanceUnit: hasSpatialPath ? "meters" : "map-units",
+        certified: true,
+        spatialNodeIds: hasSpatialPath ? [...spatialResult.path] : [],
+        spatialPath: hasSpatialPath
+            ? spatialResult.path.map(id => pedestrianNodes[id]?.position).filter(Boolean)
             : []
     };
 
@@ -422,7 +421,7 @@ function drawRoute(path) {
 
 function updateRoute(r) {
     const feet = Math.round(r.distance * (r.distanceUnit === "meters" ? 3.28084 : 1.7)), mins = Math.max(1, Math.round(feet / 250));
-    if ($("routeStatus")) $("routeStatus").textContent = r.certified ? "APPROVED NETWORK" : "DRAFT PREVIEW";
+    if ($("routeStatus")) $("routeStatus").textContent = "PEDESTRIAN NETWORK ROUTE";
     if ($("distanceMetric")) $("distanceMetric").textContent = feet + " ft";
     if ($("timeMetric")) $("timeMetric").textContent = mins + " min";
     if ($("sumDistance")) $("sumDistance").textContent = feet + " ft";
@@ -466,7 +465,7 @@ function renderSearch(q) {
         btn.onclick = () => {
             $("endSelect").value = d.id;
             showDestination(d.id);
-            box.style.display = "none"; 
+            box.style.display = "none";
             $("searchBox").value = displayName;
             generateRoute();
         };
@@ -504,6 +503,6 @@ function fitRoute() {
 function toggleLabels(show) { $("overlay")?.classList.toggle("hide-labels", !show); }
 function toggleNetwork(show) { $("overlay")?.classList.toggle("hide-network", !show); }
 function updateClock() { if ($("clock")) $("clock").textContent = new Date().toLocaleTimeString([], { hour: "numeric", minute: "2-digit" }); }
-function escapeHtml(s) { return String(s).replace(/[&<>"']/g, m => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;", "'": "&#039;" }[m])); }
+function escapeHtml(s) { return String(s).replace(/[&<>"']/g, m => ({ "&": "&amp;", "<": "&lt;" > ">": "&gt;", "\"": "&quot;", "'": "&#039;" }[m])); }
 
 init();

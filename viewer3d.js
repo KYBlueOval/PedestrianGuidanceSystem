@@ -83,7 +83,7 @@ function initialize() {
         if (el) el.addEventListener(event, fn);
     };
 
-    // Tie map layer toggles specifically
+    // Layer checkboxes
     document.querySelectorAll("#layersPanel input[type='checkbox']").forEach(input => {
         if (input.dataset["3dLayer"]) {
             input.addEventListener("change", () => setLayerVisibility(input.dataset["3dLayer"], input.checked));
@@ -126,7 +126,7 @@ async function loadModel() {
     loading = true;
     setStatus("Preparing 3D twin…");
     try {
-        const config = await fetch("data/config.json", { cache: "no-store" }).then(r => r.ok ? r.json() : {}).catch(() => ({}));
+        const config = await fetch("data/config.json", { cache: "no-store" }).then(r => r.ok ? r.json() : {});
         const modelUrl = config.views?.model || "assets/models/site_mobile.glb";
 
         const [destinationsPayload, labelsPayload, floorsPayload, baseNetworkPayload] = await Promise.all([
@@ -310,7 +310,7 @@ function destinationPosition(destObj) {
 
     const cleanId = String(id || "").replace(/^destination-draft:/i, "");
 
-    // 1. Check spatial overrides JSON
+    // 1. Spatial overrides
     const override = (spatialOverrides.destinations || spatialOverrides)[id] || (spatialOverrides.destinations || spatialOverrides)[cleanId];
     if (override) {
         const pos = override.model_position || override;
@@ -319,13 +319,13 @@ function destinationPosition(destObj) {
         }
     }
 
-    // 2. Check destination drafts
+    // 2. Destination drafts
     const draft = destinationDrafts.find(d => d.source_label_id === cleanId || d.id === id);
     if (draft?.position && [draft.position.x, draft.position.y, draft.position.z].every(Number.isFinite)) {
         return new THREE.Vector3(draft.position.x, Math.max(draft.position.y, 1.5), draft.position.z);
     }
 
-    // 3. Fallback: Search rendering 3D labels
+    // 3. Rendered 3D labels
     const label = sourceLabelObjects.get(cleanId) || sourceLabelObjects.get(id);
     if (label) {
         const pos = new THREE.Vector3();
@@ -333,7 +333,7 @@ function destinationPosition(destObj) {
         return new THREE.Vector3(pos.x, Math.max(pos.y, 1.5), pos.z);
     }
 
-    // 4. Fuzzy label match by display name
+    // 4. Name fuzzy lookup
     if (name) {
         const normName = name.toLowerCase().replace(/[^a-z0-9]/g, "");
         for (const [lId, lObj] of sourceLabelObjects.entries()) {
@@ -456,10 +456,7 @@ function toggleWalkPreview() {
     if (wt) wt.textContent = trackingPaused ? "Resume Walk Preview" : "Pause Walk Preview";
 }
 
-// -----------------------------------------------------
-// NATIVE 3D PEDESTRIAN NETWORK & ANCHOR EDITOR
-// -----------------------------------------------------
-
+// Native 3D Pedestrian Network & Anchor Editor
 function toggleRouteEditor() {
     if (!model) return;
     if (labelPlacementActive) cancelLabelPlacement();
@@ -1177,7 +1174,15 @@ window.pgs3d = {
     setLayerVisibility: (layer, visible) => setLayerVisibility(layer, visible),
     updateSemanticLabels: () => updateSemanticLabelVisibility(),
 
-    // Native Editor Triggers
+    // Toggle Destination Points & Pin Labels
+    toggleDestinations: (visible) => {
+        if (destinationDraftGroup) destinationDraftGroup.visible = visible;
+        document.querySelectorAll('.three-destination-marker, .three-destination-label').forEach(el => {
+            el.style.display = visible ? '' : 'none';
+        });
+    },
+
+    // Native Editor Functions
     toggleRouteEditor: () => toggleRouteEditor(),
     undoEditorNode: () => undoEditorNode(),
     clearEditorDraft: () => clearEditorDraft(),

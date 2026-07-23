@@ -6,7 +6,7 @@
     <title>Ford Energy SiteNav Command v10</title>
     <link rel="manifest" href="manifest.json"/>
     <link rel="icon" href="assets/icons/favicon.ico" sizes="any"/>
-    <link rel="stylesheet" href="style.css?v=10.9.0"/>
+    <link rel="stylesheet" href="style.css?v=10.9.5"/>
     <script type="importmap">
     {
       "imports": {
@@ -129,7 +129,7 @@
 
         <section class="quick-routes"><div class="section-heading">Quick Routes</div><div id="quickRoutes"></div></section>
         <section class="route-status"><div class="route-title"><span>Route Status</span><b id="routeStatus">3D ROUTE</b></div></section>
-        <footer class="version-footer">PGS v10.0.0 Alpha</footer>
+        <footer class="version-footer">PGS v10.0.0 BETA</footer>
     </aside>
 
     <main class="workspace">
@@ -169,6 +169,10 @@
 				<label class="layer-item">
 					<input type="checkbox" data-3d-layer="roof">
 					<span>Roof Level</span>
+				</label>
+				<label class="layer-item">
+					<input type="checkbox" id="threeDestinationsToggle" checked>
+					<span>Destination Anchors & Points</span>
 				</label>
 			</div>
 
@@ -223,8 +227,8 @@
     </main>
 </div>
 
-<script src="app.js?v=10.9.0"></script>
-<script type="module" src="viewer3d.js?v=10.9.0"></script>
+<script src="app.js?v=10.9.5"></script>
+<script type="module" src="viewer3d.js?v=10.9.5"></script>
 
 <script>
     // Logic to handle panel clicks without conflict
