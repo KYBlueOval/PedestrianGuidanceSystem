@@ -258,7 +258,7 @@ function updateSemanticLabelLOD() {
 
 function normalizeString(str) {
     if (!str) return "";
-    return str.toLowerCase().replace(/[^a-z0-9]/g, "");
+    return str.toLowerCase().replace(/^destination-draft:/i, "").replace(/[^a-z0-9]/g, "");
 }
 
 function destinationPosition(destObj) {
@@ -267,7 +267,8 @@ function destinationPosition(destObj) {
     const name = typeof destObj === "object" ? destObj.name : null;
 
     // 1. Spatial overrides check
-    const override = (spatialOverrides.destinations || spatialOverrides)[id];
+    const rawId = String(id).replace(/^destination-draft:/i, "");
+    const override = (spatialOverrides.destinations || spatialOverrides)[id] || (spatialOverrides.destinations || spatialOverrides)[rawId];
     if (override) {
         const pos = override.model_position || override;
         if ([pos?.x, pos?.y, pos?.z].every(Number.isFinite)) {
@@ -275,7 +276,7 @@ function destinationPosition(destObj) {
         }
     }
 
-    // 2. Fuzzy Label search
+    // 2. Fuzzy Label search with prefix stripping
     const labels = Array.from(sourceLabelObjects.values());
     const normId = normalizeString(id);
     const normName = normalizeString(name);

@@ -9,6 +9,18 @@ const loc = id => destinations.find(d => d.id === id);
 const fetchJson = url => fetch(url, { cache: "no-store" });
 
 async function init() {
+    // 1. UNREGISTER SERVICE WORKERS & CLEAR STALE CACHE
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.getRegistrations().then(registrations => {
+            for (let registration of registrations) { registration.unregister(); }
+        });
+    }
+    if ('caches' in window) {
+        caches.keys().then(names => {
+            for (let name of names) { caches.delete(name); }
+        });
+    }
+
     config = await fetchJson("data/config.json").then(r => r.ok ? r.json() : {}).catch(() => ({}));
 
     [destinations, routes, quickRoutes, pedestrianNetwork] = await Promise.all([
@@ -33,12 +45,11 @@ async function init() {
 
     setMode("employee");
 
-    // Check URL for editor mode
+    // Editor URL activation
     const urlParams = new URLSearchParams(window.location.search);
     if (urlParams.get('editor') === 'true') {
         document.body.classList.add('editor-active');
-        // Unhide all editor controls/bars on page
-        document.querySelectorAll('.editor-control, .editor-bar, #editorPanel, [data-editor-ui]').forEach(el => el.style.display = 'block');
+        document.querySelectorAll('.editor-control, .editor-bar, #editorPanel, [data-editor-ui], .editor-ui').forEach(el => el.style.display = 'block');
         if (typeof initPedestrianNetworkEditor === "function") initPedestrianNetworkEditor();
         if (typeof initMapLabelEditor === "function") initMapLabelEditor();
         if (typeof initDestinationAnchorEditor === "function") initDestinationAnchorEditor();
@@ -171,23 +182,7 @@ function wireEvents() {
     if ($("routeBtn")) $("routeBtn").onclick = generateRoute;
     if ($("destinationCategory")) $("destinationCategory").onchange = event => populateSelects(event.target.value);
 
-    // Explicit Panel Toggle Handlers
-    const togglePanel = (panelId, forceState) => {
-        const panel = $(panelId);
-        if (!panel) return;
-        const isHidden = panel.classList.contains("hide") || panel.style.display === "none";
-        const targetState = forceState !== undefined ? forceState : isHidden;
-        if (targetState) {
-            panel.classList.remove("hide");
-            panel.classList.add("show");
-            panel.style.display = "block";
-        } else {
-            panel.classList.remove("show");
-            panel.classList.add("hide");
-            panel.style.display = "none";
-        }
-    };
-
+    // DIRECT DOM TOGGLE FOR PANELS
     document.addEventListener("click", e => {
         const btn = e.target.closest("button");
         if (!btn) return;
@@ -198,13 +193,15 @@ function wireEvents() {
         if (btn.id === "routeBtn" || btn.classList.contains("quick-route")) return;
 
         if (id === "legendopen" || text.includes("legend")) {
-            togglePanel("legendPanel");
+            const panel = $("legendPanel");
+            if (panel) panel.style.display = (panel.style.display === "block" || panel.classList.contains("show")) ? "none" : "block";
         } else if (id === "legendclose") {
-            togglePanel("legendPanel", false);
+            if ($("legendPanel")) $("legendPanel").style.display = "none";
         } else if (id === "layersopen" || text.includes("layer")) {
-            togglePanel("layersPanel");
+            const panel = $("layersPanel");
+            if (panel) panel.style.display = (panel.style.display === "block" || panel.classList.contains("show")) ? "none" : "block";
         } else if (id === "layersclose") {
-            togglePanel("layersPanel", false);
+            if ($("layersPanel")) $("layersPanel").style.display = "none";
         } else if (text.includes("search") && id !== "searchclear") {
             const overlay = $("spatialSearchOverlay");
             if (overlay) {
@@ -242,7 +239,7 @@ function setWorkspaceView(next) {
 
     const isEditor = document.body.classList.contains('editor-active');
     if ($("mapFrame")) $("mapFrame").hidden = isEditor ? false : is3d;
-    if ($("threeFrame")) $("threeFrame").hidden = false; // Always keep 3D visible
+    if ($("threeFrame")) $("threeFrame").hidden = false;
 
     if (is3d) window.pgs3d?.show(); else { window.pgs3d?.hide(); resetView(); }
 }
