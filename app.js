@@ -41,6 +41,9 @@ async function init() {
     // Default to employee mode on load
     setMode("employee");
 
+    // EXPLICITLY BOOT THE 3D ENGINE
+    setWorkspaceView("3d");
+
     updateClock(); setInterval(updateClock, 30000);
 }
 
@@ -232,7 +235,6 @@ function zoom(f) { view.scale = Math.max(.25, Math.min(5, view.scale * f)); appl
 function fitRoute() { const f = $("mapFrame"); if (!f || !lastPath.length) return; const pts = lastPath.map(loc).filter(Boolean); const minX = Math.min(...pts.map(p => p.x)), maxX = Math.max(...pts.map(p => p.x)), minY = Math.min(...pts.map(p => p.y)), maxY = Math.max(...pts.map(p => p.y)); view.scale = Math.min(f.clientWidth / (maxX - minX + 260), f.clientHeight / (maxY - minY + 260)); view.x = (MAP_W / 2 - (minX + maxX) / 2) * view.scale; view.y = (MAP_H / 2 - (minY + maxY) / 2) * view.scale; applyView(); }
 function applyLayerFilters() { document.querySelectorAll("[data-layer]").forEach(cb => { document.querySelectorAll(`[data-3d-layer="${cb.dataset.layer}"]`).forEach(el => el.style.display = cb.checked ? "" : "none"); }); }
 
-// Restored Search Logic and Helpers
 function escapeHtml(s) { return String(s).replace(/[&<>"']/g, m => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;", "'": "&#039;" }[m])); }
 
 function showDestination(id) {
@@ -245,23 +247,29 @@ function renderSearch(q) {
     q = q.toLowerCase().trim();
     const box = $("searchResults"); if (!box) return; box.innerHTML = "";
     if (q.length < 2) { box.classList.remove("show"); return; }
+
     const category = $("destinationCategory")?.value || "all";
     const matches = destinations
         .filter(d => !["junction", "corridor"].includes(d.type))
         .filter(d => matchesDestinationCategory(d, category))
-        .filter(d => ((d.name || "") + " " + (d.label || "") + " " + (d.category || "") + " " + (d.zone || "")).toLowerCase().includes(q))
-        .sort((a, b) => destinationGroup(a).localeCompare(destinationGroup(b)) || a.name.localeCompare(b.name))
-        .slice(0, 10);
+        .filter(d => {
+            // Broad search: checks name, id, label, category, zone, and description
+            const searchString = [d.name, d.id, d.label, d.category, d.zone, d.description].filter(Boolean).join(" ").toLowerCase();
+            return searchString.includes(q);
+        })
+        .sort((a, b) => destinationGroup(a).localeCompare(destinationGroup(b)) || (a.name || a.id).localeCompare(b.name || b.id))
+        .slice(0, 15);
 
     matches.forEach(d => {
         const btn = document.createElement("button");
-        btn.innerHTML = `<b>${escapeHtml(d.name)}</b><br><small>${escapeHtml(d.category || "")} • ${escapeHtml(d.access || "")}</small>`;
+        const displayName = escapeHtml(d.name || d.id || "Unnamed Room");
+        btn.innerHTML = `<b>${displayName}</b><br><small>${escapeHtml(d.category || "Room")} • ${escapeHtml(d.access || "Standard")}</small>`;
         btn.onclick = () => {
             $("endSelect").value = d.id;
             showDestination(d.id);
             box.classList.remove("show");
-            $("searchBox").value = d.name; // Fill the box with the selected name
-            generateRoute(); // Auto-route when they click a search result
+            $("searchBox").value = displayName;
+            generateRoute();
         };
         box.appendChild(btn);
     });
