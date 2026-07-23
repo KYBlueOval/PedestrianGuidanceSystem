@@ -101,3 +101,58 @@
     filter: brightness(1.2);
     border-color: #00a8ff;
 }
+
+/* FORCE PANELS TO THE FRONT */
+.legend-panel, .layers-panel, #legendPanel, #layersPanel {
+    z-index: 9999 !important; 
+}
+
+/* 3D SPATIAL SEARCH OVERLAY */
+#spatialSearchOverlay {
+    display: none; 
+    position: fixed; 
+    top: 80px; 
+    left: 50%; 
+    transform: translateX(-50%);
+    width: 450px; 
+    z-index: 10000;
+    background: rgba(10, 25, 47, 0.95);
+    border: 1px solid #1a4b82;
+    border-radius: 12px;
+    box-shadow: 0 15px 40px rgba(0,0,0,0.9);
+    backdrop-filter: blur(12px);
+    padding: 15px;
+}
+
+.spatial-search-header {
+    display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;
+}
+
+.spatial-search-header h3 {
+    margin: 0; color: #4da8da; font-size: 16px;
+}
+
+.spatial-search-header button {
+    background: transparent; border: none; color: #fff; font-size: 20px; cursor: pointer;
+}
+
+#spatialSearchInput {
+    background: linear-gradient(145deg, #0b2038, #102e52);
+    border: 1px solid #1a4b82; border-radius: 8px; color: #ffffff;
+    padding: 12px 16px; font-size: 14px; width: 100%; box-sizing: border-box;
+    box-shadow: inset 2px 2px 6px rgba(0,0,0,0.6); outline: none; margin-bottom: 10px;
+}
+
+#spatialSearchResults {
+    max-height: 300px; overflow-y: auto;
+}
+
+#spatialSearchResults button {
+    background: linear-gradient(145deg, #112d4e, #183e66);
+    border: 1px solid #23558c; border-radius: 10px; color: #e0e0e0;
+    padding: 12px; margin-bottom: 8px; width: 100%; text-align: left; cursor: pointer;
+    box-shadow: 3px 4px 10px rgba(0,0,0,0.4); display: block;
+}
+
+#spatialSearchResults button:hover { border-color: #00a8ff; filter: brightness(1.2); }
+#spatialSearchResults button b { color: #00ff88; font-size: 15px; }
