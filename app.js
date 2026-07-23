@@ -9,6 +9,7 @@ const loc = id => destinations.find(d => d.id === id);
 const fetchJson = url => fetch(url, { cache: "no-store" });
 
 async function init() {
+    // Service Worker & Cache Wipe
     if ('serviceWorker' in navigator) {
         navigator.serviceWorker.getRegistrations().then(regs => { for (let r of regs) r.unregister(); });
     }
@@ -44,6 +45,7 @@ async function init() {
 
     setMode("employee");
 
+    // Editor URL Check
     const urlParams = new URLSearchParams(window.location.search);
     if (urlParams.get('editor') === 'true') {
         document.body.classList.add('editor-active');
@@ -356,14 +358,13 @@ function dijkstra(start, end, sourceGraph = graph) {
     return { path, distance: dist[end] };
 }
 
-// FIX: Generate Route strictly calculates along mapped pedestrian graph nodes
 function generateRoute() {
     const sSelect = $("startSelect"), eSelect = $("endSelect");
     if (!sSelect || !eSelect) return;
     const start = sSelect.value, end = eSelect.value;
     if (!start || !end || start === end) return;
 
-    // Crosswalk translation to node IDs
+    // Crosswalk Translation
     const startNode = destinationNodeCrosswalk[start] || start;
     const endNode = destinationNodeCrosswalk[end] || end;
 
@@ -385,7 +386,6 @@ function generateRoute() {
     const startObj = loc(start) || { id: start, name: start };
     const endObj = loc(end) || { id: end, name: end };
 
-    // Pass the node positions from pedestrian_network.json along the calculated path
     const routeDetail = {
         path: [...result.path],
         destinations: [startObj, endObj],
@@ -503,6 +503,6 @@ function fitRoute() {
 function toggleLabels(show) { $("overlay")?.classList.toggle("hide-labels", !show); }
 function toggleNetwork(show) { $("overlay")?.classList.toggle("hide-network", !show); }
 function updateClock() { if ($("clock")) $("clock").textContent = new Date().toLocaleTimeString([], { hour: "numeric", minute: "2-digit" }); }
-function escapeHtml(s) { return String(s).replace(/[&<>"']/g, m => ({ "&": "&amp;", "<": "&lt;" > ">": "&gt;", "\"": "&quot;", "'": "&#039;" }[m])); }
+function escapeHtml(s) { return String(s).replace(/[&<>"']/g, m => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;", "'": "&#039;" }[m])); }
 
 init();
