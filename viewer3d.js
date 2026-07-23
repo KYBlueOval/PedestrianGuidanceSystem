@@ -71,14 +71,6 @@ function initialize() {
     resizeObserver = new ResizeObserver(resize);
     resizeObserver.observe(frame);
 
-    document.querySelectorAll("#layersPanel input[type='checkbox']").forEach(input => {
-        if (input.dataset["3dLayer"]) {
-            input.addEventListener("change", () => setLayerVisibility(input.dataset["3dLayer"], input.checked));
-        } else if (input.dataset.semanticLabel) {
-            input.addEventListener("change", updateSemanticLabelVisibility);
-        }
-    });
-
     renderer.domElement.addEventListener("pointerdown", event => { pointerStart = { x: event.clientX, y: event.clientY }; });
     window.addEventListener("pgs:route", event => renderRoute(event.detail));
     animate();
@@ -266,7 +258,6 @@ function destinationPosition(destObj) {
     const id = typeof destObj === "string" ? destObj : destObj.id;
     const name = typeof destObj === "object" ? destObj.name : null;
 
-    // 1. Spatial overrides check
     const rawId = String(id).replace(/^destination-draft:/i, "");
     const override = (spatialOverrides.destinations || spatialOverrides)[id] || (spatialOverrides.destinations || spatialOverrides)[rawId];
     if (override) {
@@ -276,7 +267,6 @@ function destinationPosition(destObj) {
         }
     }
 
-    // 2. Fuzzy Label search with prefix stripping
     const labels = Array.from(sourceLabelObjects.values());
     const normId = normalizeString(id);
     const normName = normalizeString(name);
@@ -386,10 +376,15 @@ function animate() {
     labelRenderer.render(scene, camera);
 }
 
+// -----------------------------------------------------
+// EXPOSED API FOR LIVE UI INTERACTION
+// -----------------------------------------------------
 window.pgs3d = {
     show: async () => { visible = true; initialize(); resize(); await loadModel(); },
     hide: () => { visible = false; },
     reset: () => { if (controls) { controls.reset(); resize(); fitModel(); } },
+    setLayerVisibility: (layer, visible) => setLayerVisibility(layer, visible),
+    updateSemanticLabels: () => updateSemanticLabelVisibility(),
 
     getSpatialLabels: () => {
         return Array.from(sourceLabelObjects.values()).map(l => ({
