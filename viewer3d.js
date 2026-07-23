@@ -79,7 +79,6 @@ function initialize() {
         if (el) el.addEventListener(event, fn);
     };
 
-    // Tie map layer toggles specifically by finding all data-attributes inside layersPanel
     document.querySelectorAll("#layersPanel input[type='checkbox']").forEach(input => {
         if (input.dataset["3dLayer"]) {
             input.addEventListener("change", () => setLayerVisibility(input.dataset["3dLayer"], input.checked));
@@ -130,12 +129,15 @@ async function loadModel() {
             return response.json();
         });
         const modelUrl = config.views?.model || "assets/models/site_mobile.glb";
+        
+        // EXPLICIT FIX: Forced base network path to point to data/generated/pedestrian_network.json
         const [destinationsPayload, labelsPayload, floorsPayload, baseNetworkPayload] = await Promise.all([
             fetch("data/generated/destination_spatial.json", { cache: "no-store" }).then(response => response.ok ? response.json() : {}).catch(() => ({})),
             fetch("data/generated/spatial_labels.json", { cache: "no-store" }).then(response => response.ok ? response.json() : {}).catch(() => ({})),
             fetch("data/generated/floor_layers.json", { cache: "no-store" }).then(response => response.ok ? response.json() : {}).catch(() => ({})),
-            fetch(config.views?.basePedestrianNetwork || "data/authored/pedestrian_network_base.json", { cache: "no-store" }).then(response => response.ok ? response.json() : {}).catch(() => ({}))
+            fetch("data/generated/pedestrian_network.json", { cache: "no-store" }).then(response => response.ok ? response.json() : {}).catch(() => ({}))
         ]);
+        
         spatialOverrides = destinationsPayload;
         floorLayerIndex.clear();
         (floorsPayload.layers || []).forEach(layer => floorLayerIndex.set(layer.floor_id, layer.code || "OUTDOOR"));
@@ -317,7 +319,6 @@ function destinationPosition(id) {
             return new THREE.Vector3(position.x, Math.max(position.y, 1.5), position.z);
         }
     }
-    // FAILSAFE: If spatial JSON is missing, pull position directly from the rendered 3D labels
     const label = sourceLabelObjects.get(id);
     if (label) {
         const pos = new THREE.Vector3();
@@ -390,7 +391,6 @@ function renderRoute(route) {
     if (!model) return;
     clearRoute();
 
-    // BYPASS: Removed 'if(!certified)' block so the route ALWAYS draws for previews
     const points = routePositions(route);
 
     if (!points || points.length < 2) {
