@@ -114,7 +114,7 @@ async function loadModel() {
         indexLayers();
         createBuildingLabels();
         createSemanticLabels(labelsPayload.labels || []);
-        applyInitialLayerState(); // Sets default layer visibilities
+        applyInitialLayerState();
 
         if (window.pgsCurrentRoute) renderRoute(window.pgsCurrentRoute);
         setStatus("3D twin ready", { hidden: true });
@@ -256,13 +256,17 @@ function updateSemanticLabelLOD() {
     });
 }
 
-// FUZZY MATCH POSITION RESOLVER
+function normalizeString(str) {
+    if (!str) return "";
+    return str.toLowerCase().replace(/[^a-z0-9]/g, "");
+}
+
 function destinationPosition(destObj) {
     if (!destObj) return null;
     const id = typeof destObj === "string" ? destObj : destObj.id;
     const name = typeof destObj === "object" ? destObj.name : null;
 
-    // 1. Check spatial overrides
+    // 1. Spatial overrides check
     const override = (spatialOverrides.destinations || spatialOverrides)[id];
     if (override) {
         const pos = override.model_position || override;
@@ -271,10 +275,14 @@ function destinationPosition(destObj) {
         }
     }
 
-    // 2. Fallback: Search all labels currently attached to the 3D scene
+    // 2. Fuzzy Label search
     const labels = Array.from(sourceLabelObjects.values());
-    const match = labels.find(l => l.userData.labelId === id) || 
-                  (name ? labels.find(l => (l.userData.displayName || "").toLowerCase() === name.toLowerCase()) : null);
+    const normId = normalizeString(id);
+    const normName = normalizeString(name);
+
+    const match = labels.find(l => normalizeString(l.userData.labelId) === normId) ||
+        labels.find(l => normName && normalizeString(l.userData.displayName) === normName) ||
+        labels.find(l => normName && (normalizeString(l.userData.displayName).includes(normName) || normName.includes(normalizeString(l.userData.displayName))));
 
     if (match) {
         const pos = new THREE.Vector3();
@@ -321,7 +329,7 @@ function renderRoute(route) {
 
     const points = routePositions(route);
     if (!points || points.length < 2) {
-        setStatus("Target locations are not mapped to 3D coordinates.", { hidden: true });
+        setStatus("Selected destinations could not be mapped to 3D positions.", { error: true });
         return;
     }
 
@@ -377,9 +385,6 @@ function animate() {
     labelRenderer.render(scene, camera);
 }
 
-// -----------------------------------------------------
-// 3D SPATIAL SEARCH & LABEL FOCUSING API
-// -----------------------------------------------------
 window.pgs3d = {
     show: async () => { visible = true; initialize(); resize(); await loadModel(); },
     hide: () => { visible = false; },

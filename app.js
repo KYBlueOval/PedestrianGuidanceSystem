@@ -11,10 +11,6 @@ const fetchJson = url => fetch(url, { cache: "no-store" });
 async function init() {
     config = await fetchJson("data/config.json").then(r => r.ok ? r.json() : {}).catch(() => ({}));
 
-    // FIX 1: Rip the UI panels out of the mapFrame so they don't turn invisible when 3D mode activates
-    if ($("legendPanel")) document.body.appendChild($("legendPanel"));
-    if ($("layersPanel")) document.body.appendChild($("layersPanel"));
-
     [destinations, routes, quickRoutes, pedestrianNetwork] = await Promise.all([
         fetchJson("data/destinations.json").then(r => r.json()).catch(() => []),
         fetchJson("data/routes.json").then(r => r.json()).catch(() => []),
@@ -25,26 +21,32 @@ async function init() {
     const crosswalk = await fetchJson("data/generated/destination_node_crosswalk.json").then(r => r.ok ? r.json() : null).catch(() => null);
     if (crosswalk) destinationNodeCrosswalk = Object.fromEntries((crosswalk.destinations || []).map(item => [item.destination_id, item.node_id]));
 
-    buildGraph(); buildPedestrianGraph(); populateSelects(); renderQuickRoutes(); drawNetwork(); drawNodes();
-
+    buildGraph();
+    buildPedestrianGraph();
+    populateSelects();
+    renderQuickRoutes();
+    drawNetwork();
+    drawNodes();
     injectSpatialSearchUI();
     wireEvents();
     resetView();
 
     setMode("employee");
 
+    // Check URL for editor mode
     const urlParams = new URLSearchParams(window.location.search);
     if (urlParams.get('editor') === 'true') {
         document.body.classList.add('editor-active');
-        setWorkspaceView("3d");
+        // Unhide all editor controls/bars on page
+        document.querySelectorAll('.editor-control, .editor-bar, #editorPanel, [data-editor-ui]').forEach(el => el.style.display = 'block');
         if (typeof initPedestrianNetworkEditor === "function") initPedestrianNetworkEditor();
         if (typeof initMapLabelEditor === "function") initMapLabelEditor();
         if (typeof initDestinationAnchorEditor === "function") initDestinationAnchorEditor();
-    } else {
-        setWorkspaceView("3d");
     }
 
-    updateClock(); setInterval(updateClock, 30000);
+    setWorkspaceView("3d");
+    updateClock();
+    setInterval(updateClock, 30000);
 }
 
 function buildGraph() {
@@ -128,17 +130,20 @@ function renderQuickRoutes() {
 }
 
 function injectSpatialSearchUI() {
+    if ($("spatialSearchOverlay")) return;
     const overlay = document.createElement("div");
     overlay.id = "spatialSearchOverlay";
     overlay.innerHTML = `
         <div class="spatial-search-header">
             <h3>Search 3D Map Locations</h3>
-            <button onclick="document.getElementById('spatialSearchOverlay').style.display='none'">×</button>
+            <button id="spatialSearchCloseBtn">×</button>
         </div>
         <input type="text" id="spatialSearchInput" placeholder="Type a room name, area, or department..." autocomplete="off">
         <div id="spatialSearchResults"></div>
     `;
     document.body.appendChild(overlay);
+
+    $("spatialSearchCloseBtn").onclick = () => { overlay.style.display = "none"; };
 
     $("spatialSearchInput").oninput = (e) => {
         const q = e.target.value.toLowerCase().trim();
@@ -166,33 +171,50 @@ function wireEvents() {
     if ($("routeBtn")) $("routeBtn").onclick = generateRoute;
     if ($("destinationCategory")) $("destinationCategory").onchange = event => populateSelects(event.target.value);
 
+    // Explicit Panel Toggle Handlers
+    const togglePanel = (panelId, forceState) => {
+        const panel = $(panelId);
+        if (!panel) return;
+        const isHidden = panel.classList.contains("hide") || panel.style.display === "none";
+        const targetState = forceState !== undefined ? forceState : isHidden;
+        if (targetState) {
+            panel.classList.remove("hide");
+            panel.classList.add("show");
+            panel.style.display = "block";
+        } else {
+            panel.classList.remove("show");
+            panel.classList.add("hide");
+            panel.style.display = "none";
+        }
+    };
+
     document.addEventListener("click", e => {
         const btn = e.target.closest("button");
         if (!btn) return;
 
-        const text = (btn.textContent || btn.innerText || btn.id || "").toLowerCase().trim();
+        const id = (btn.id || "").toLowerCase();
+        const text = (btn.textContent || btn.innerText || btn.title || "").toLowerCase().trim();
+
         if (btn.id === "routeBtn" || btn.classList.contains("quick-route")) return;
 
-        if (text.includes("legend")) {
-            const panel = $("legendPanel");
-            if (panel) {
-                panel.classList.toggle("hide");
-                panel.style.display = panel.classList.contains("hide") ? "none" : "block";
-            }
-        } else if (text.includes("layer")) {
-            const panel = $("layersPanel");
-            if (panel) {
-                panel.classList.toggle("show");
-                panel.style.display = panel.classList.contains("show") ? "block" : "none";
-            }
-        } else if (text.includes("search")) {
+        if (id === "legendopen" || text.includes("legend")) {
+            togglePanel("legendPanel");
+        } else if (id === "legendclose") {
+            togglePanel("legendPanel", false);
+        } else if (id === "layersopen" || text.includes("layer")) {
+            togglePanel("layersPanel");
+        } else if (id === "layersclose") {
+            togglePanel("layersPanel", false);
+        } else if (text.includes("search") && id !== "searchclear") {
             const overlay = $("spatialSearchOverlay");
             if (overlay) {
-                overlay.style.display = overlay.style.display === "block" ? "none" : "block";
-                if (overlay.style.display === "block") $("spatialSearchInput")?.focus();
+                const isVis = overlay.style.display === "block";
+                overlay.style.display = isVis ? "none" : "block";
+                if (!isVis) $("spatialSearchInput")?.focus();
             }
         } else if (text.includes("reset")) {
-            window.pgs3d?.reset(); resetView();
+            window.pgs3d?.reset();
+            resetView();
         } else if (text.includes("fit route")) {
             fitRoute();
         }
@@ -218,26 +240,20 @@ function setWorkspaceView(next) {
     const is3d = workspaceView === "3d";
     document.querySelector(".map-shell")?.classList.toggle("three-active", is3d);
 
-    // FIX 2: If Editor is active, NEVER hide the 2D mapFrame because the Editor tools live inside it.
     const isEditor = document.body.classList.contains('editor-active');
-    if ($("mapFrame")) {
-        $("mapFrame").hidden = isEditor ? false : is3d;
-    }
+    if ($("mapFrame")) $("mapFrame").hidden = isEditor ? false : is3d;
+    if ($("threeFrame")) $("threeFrame").hidden = false; // Always keep 3D visible
 
-    if ($("threeFrame")) $("threeFrame").hidden = !is3d;
-    if ($("view2DBtn")) { $("view2DBtn").classList.toggle("active", !is3d); $("view2DBtn").setAttribute("aria-pressed", String(!is3d)); }
-    if ($("view3DBtn")) { $("view3DBtn").classList.toggle("active", is3d); $("view3DBtn").setAttribute("aria-pressed", String(is3d)); }
-    ["zoomIn", "zoomOut", "centerView", "fitRoute"].forEach(id => { if ($(id)) $(id).disabled = is3d; });
     if (is3d) window.pgs3d?.show(); else { window.pgs3d?.hide(); resetView(); }
 }
 
 function setMode(m, generate = true) {
     mode = m;
     document.querySelectorAll(".mode").forEach(b => b.classList.toggle("active", b.dataset.mode === m));
-    if (m === "visitor") { if ($("destinationCategory")) $("destinationCategory").value = "visitor"; populateSelects("visitor"); if ($("subtitle")) $("subtitle").textContent = "Visitor-safe guided routing"; }
-    else if (m === "employee") { if ($("destinationCategory")) $("destinationCategory").value = "production"; populateSelects("production"); if ($("subtitle")) $("subtitle").textContent = "Employee pedestrian movement"; }
-    else if (m === "contractor") { if ($("destinationCategory")) $("destinationCategory").value = "production"; populateSelects("production"); if ($("subtitle")) $("subtitle").textContent = "Contractor / trade access routing"; }
-    else { if ($("destinationCategory")) $("destinationCategory").value = "emergency"; populateSelects("emergency"); if ($("subtitle")) $("subtitle").textContent = "Emergency reference routing"; }
+    if (m === "visitor") { if ($("destinationCategory")) $("destinationCategory").value = "visitor"; populateSelects("visitor"); }
+    else if (m === "employee") { if ($("destinationCategory")) $("destinationCategory").value = "production"; populateSelects("production"); }
+    else if (m === "contractor") { if ($("destinationCategory")) $("destinationCategory").value = "production"; populateSelects("production"); }
+    else { if ($("destinationCategory")) $("destinationCategory").value = "emergency"; populateSelects("emergency"); }
     if (generate) generateRoute();
 }
 
@@ -261,10 +277,7 @@ function drawNodes() {
         g.setAttribute("class", `node ${d.type}`);
         g.setAttribute("transform", `translate(${d.x || 0},${d.y || 0})`);
         g.dataset.id = d.id; g.dataset.type = d.type;
-        g.innerHTML = `<circle class="pulse" r="0"></circle>
-      <circle class="marker-ring" r="12"></circle>
-      <circle class="marker-dot marker-core" r="8"></circle>
-      <text x="16" y="-9">${escapeHtml(d.label || d.name)}</text>`;
+        g.innerHTML = `<circle class="pulse" r="0"></circle><circle class="marker-ring" r="12"></circle><circle class="marker-dot marker-core" r="8"></circle><text x="16" y="-9">${escapeHtml(d.label || d.name)}</text>`;
         g.onclick = () => { if (!["junction", "corridor"].includes(d.type)) if ($("endSelect")) $("endSelect").value = d.id; showDestination(d.id); };
         l.appendChild(g);
     });
@@ -301,14 +314,12 @@ function generateRoute() {
         : null;
 
     let result = dijkstra(start, end);
-
     if (result.path.length < 2) {
         result.path = [start, end];
         result.distance = distance3d(loc(start), loc(end)) || 50;
     }
 
     lastPath = result.path;
-
     const spatialValid = spatialResult && Number.isFinite(spatialResult.distance);
     const displayResult = spatialValid ? { ...result, distance: spatialResult.distance, distanceUnit: "meters", certified: true } : result;
 
@@ -316,14 +327,16 @@ function generateRoute() {
     updateRoute(displayResult);
     showDestination(end);
 
+    const startObj = loc(start) || { id: start, name: start };
+    const endObj = loc(end) || { id: end, name: end };
+
     const routeDetail = {
         path: [...result.path],
-        destinations: result.path.map(id => loc(id)).filter(Boolean),
+        destinations: [startObj, endObj],
         distance: displayResult.distance,
         distanceUnit: displayResult.distanceUnit || "map-units",
         certified: Boolean(spatialValid),
         spatialNodeIds: spatialValid ? [...spatialResult.path] : [],
-        // FIX 3: Force the array to be EMPTY so the viewer3d.js fuzzy name match is triggered!
         spatialPath: spatialValid ? spatialResult.path.map(id => pedestrianNodes[id]?.position).filter(Boolean) : []
     };
 
@@ -338,22 +351,11 @@ function edgeAllowsMode(edge, currentMode) {
 }
 
 function drawRoute(path) {
-    const l = $("routeLayer");
-    if (!l) return;
-    l.innerHTML = "";
-
-    const points = path
-        .map(id => loc(id))
-        .filter(d => d && typeof d.x !== 'undefined' && typeof d.y !== 'undefined')
-        .map(d => `${d.x},${d.y}`)
-        .join(" ");
-
+    const l = $("routeLayer"); if (!l) return; l.innerHTML = "";
+    const points = path.map(id => loc(id)).filter(d => d && typeof d.x !== 'undefined' && typeof d.y !== 'undefined').map(d => `${d.x},${d.y}`).join(" ");
     if (!points) return;
-
     const pl = document.createElementNS("http://www.w3.org/2000/svg", "polyline");
-    pl.setAttribute("points", points);
-    pl.setAttribute("class", "route");
-    pl.setAttribute("marker-end", "url(#arrow)");
+    pl.setAttribute("points", points); pl.setAttribute("class", "route"); pl.setAttribute("marker-end", "url(#arrow)");
     l.appendChild(pl);
     document.querySelectorAll(".node").forEach(n => n.classList.remove("selected"));
     path.forEach(id => document.querySelector(`.node[data-id="${id}"]`)?.classList.add("selected"));
@@ -388,22 +390,13 @@ function showDestination(id) {
 
 function renderSearch(q) {
     q = q.toLowerCase().trim();
-    const box = $("searchResults"); if (!box) return;
-    box.innerHTML = "";
-
-    if (q.length < 2) {
-        box.style.display = "none";
-        return;
-    }
-
+    const box = $("searchResults"); if (!box) return; box.innerHTML = "";
+    if (q.length < 2) { box.style.display = "none"; return; }
     const category = $("destinationCategory")?.value || "all";
     const matches = destinations
         .filter(d => !["junction", "corridor"].includes(d.type))
         .filter(d => matchesDestinationCategory(d, category))
-        .filter(d => {
-            const searchText = [d.name, d.id, d.label, d.category, d.zone, d.description].filter(Boolean).join(" ").toLowerCase();
-            return searchText.includes(q);
-        })
+        .filter(d => [d.name, d.id, d.label, d.category, d.zone, d.description].filter(Boolean).join(" ").toLowerCase().includes(q))
         .sort((a, b) => destinationGroup(a).localeCompare(destinationGroup(b)) || (a.name || a.id).localeCompare(b.name || b.id))
         .slice(0, 15);
 
@@ -420,7 +413,6 @@ function renderSearch(q) {
         };
         box.appendChild(btn);
     });
-
     box.style.display = matches.length > 0 ? "block" : "none";
 }
 
@@ -446,13 +438,6 @@ function fitRoute() {
 function toggleLabels(show) { $("overlay")?.classList.toggle("hide-labels", !show); }
 function toggleNetwork(show) { $("overlay")?.classList.toggle("hide-network", !show); }
 function updateClock() { if ($("clock")) $("clock").textContent = new Date().toLocaleTimeString([], { hour: "numeric", minute: "2-digit" }); }
-function shareRoute() {
-    const start = $("startSelect")?.value, end = $("endSelect")?.value;
-    const url = `${location.origin}${location.pathname}?start=${start}&end=${end}`;
-    navigator.clipboard?.writeText(url);
-    showToast("Route link copied");
-}
-function showToast(msg) { const t = $("toast"); if (!t) return; t.textContent = msg; t.classList.add("show"); setTimeout(() => t.classList.remove("show"), 1800); }
 function escapeHtml(s) { return String(s).replace(/[&<>"']/g, m => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;", "'": "&#039;" }[m])); }
 
 init();
