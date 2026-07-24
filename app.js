@@ -763,7 +763,7 @@ function drawRoute(path) {
     path.forEach(id => document.querySelector(`.node[data-id="${id}"]`)?.classList.add("selected"));
 }
 
-// SMART VECTOR-COMPACTING & INTERSECTION-AWARE TURN-BY-TURN INSTRUCTIONS
+// SMART VECTOR-COMPACTING, INTERSECTION & LANDMARK-AWARE INSTRUCTIONS
 function renderStepInstructions(startObj, endObj, positions, totalMeters, isValid, pathNodeIds = []) {
     const totalFeet = Math.round(totalMeters * 3.28084);
     const mins = Math.max(1, Math.round(totalFeet / 250));
@@ -794,6 +794,26 @@ function renderStepInstructions(startObj, endObj, positions, totalMeters, isVali
         stepsContainer.innerHTML = `<div class="step-error">⚠️ <b>Network Gap Detected:</b> Walkway nodes between ${escapeHtml(startObj.name)} and ${escapeHtml(endObj.name)} are disconnected in 3D Editor.</div>`;
         return;
     }
+
+    // Helper: Find nearest named landmark/room to a 3D position (within ~20ft / 6 meters)
+    const getNearbyLandmark = (pos) => {
+        if (!pos) return null;
+        let closest = null;
+        let minD = 6.0; // max threshold in meters (~20 ft)
+
+        destinations.forEach(d => {
+            if (d.name && d.position && Number.isFinite(d.position.x)) {
+                // Ignore start/end objects to prevent repetitive callouts
+                if (d.id === startObj.id || d.id === endObj.id) return;
+                const dist = distance3d(pos, d.position);
+                if (dist < minD) {
+                    minD = dist;
+                    closest = d.name;
+                }
+            }
+        });
+        return closest;
+    };
 
     const instructions = [];
     instructions.push(`Exit <b>${escapeHtml(startObj.name)}</b> onto the pedestrian walkway network.`);
@@ -830,18 +850,34 @@ function renderStepInstructions(startObj, endObj, positions, totalMeters, isVali
                 }
             }
 
+            // Look up nearest landmark at the turn or intersection point
+            const landmarkName = getNearbyLandmark(p2);
+
             if (isSpineIntersection && !isTurn) {
                 instructions.push(`Proceed straight for <b>${accumulatedFeet} ft</b> through the <b>Spine Intersection</b>.`);
                 accumulatedFeet = 0;
             } else if (isTurn) {
-                if (accumulatedFeet > 0) {
-                    instructions.push(`Proceed straight for <b>${accumulatedFeet} ft</b>, then turn <b>${turnDirection}</b> into the hallway corridor.`);
+                let turnText = `Turn <b>${turnDirection}</b>`;
+                if (landmarkName) {
+                    turnText += ` near <b>${escapeHtml(landmarkName)}</b> into the corridor`;
                 } else {
-                    instructions.push(`Turn <b>${turnDirection}</b> into the hallway corridor.`);
+                    turnText += ` into the hallway corridor`;
+                }
+
+                if (accumulatedFeet > 0) {
+                    instructions.push(`Proceed straight for <b>${accumulatedFeet} ft</b>, then ${turnText.toLowerCase()}.`);
+                } else {
+                    instructions.push(`${turnText}.`);
                 }
                 accumulatedFeet = 0;
             } else if (i === positions.length - 2 && accumulatedFeet > 0) {
-                instructions.push(`Continue straight along walkway for <b>${accumulatedFeet} ft</b> towards destination.`);
+                let endStraightText = `Continue straight along walkway for <b>${accumulatedFeet} ft</b>`;
+                if (landmarkName) {
+                    endStraightText += ` past <b>${escapeHtml(landmarkName)}</b> towards destination`;
+                } else {
+                    endStraightText += ` towards destination`;
+                }
+                instructions.push(`${endStraightText}.`);
             }
         }
     } else {
