@@ -235,6 +235,12 @@ function distance3d(a, b) {
     return Math.hypot((a.x || 0) - (b.x || 0), (a.y || 0) - (b.y || 0), (a.z || 0) - (b.z || 0));
 }
 
+// 2D Horizontal Distance (XZ plane only - ignores height offset skews)
+function distance2dHorizontal(a, b) {
+    if (!a || !b) return 10;
+    return Math.hypot((a.x || 0) - (b.x || 0), (a.z || 0) - (b.z || 0));
+}
+
 function get3DPositionForDestination(targetDestId) {
     const d = loc(targetDestId);
     if (d && d.position && Number.isFinite(d.position.x) && (d.position.x !== 0 || d.position.z !== 0)) {
@@ -282,17 +288,14 @@ function findNearestPedestrianNodeByPos(pos) {
 function findNearestPedestrianNode(targetDestId) {
     if (!targetDestId) return null;
 
-    // 1. Direct match in pedestrian graph
     if (pedestrianGraph[targetDestId] && pedestrianGraph[targetDestId].length > 0) {
         return targetDestId;
     }
 
-    // 2. Check destination crosswalk override map
     if (destinationNodeCrosswalk[targetDestId] && pedestrianGraph[destinationNodeCrosswalk[targetDestId]]) {
         return destinationNodeCrosswalk[targetDestId];
     }
 
-    // 3. Check Destination Drafts (local storage anchors)
     try {
         const savedAnchors = JSON.parse(localStorage.getItem("pgs-v10-destination-anchors-draft") || "null");
         if (savedAnchors && Array.isArray(savedAnchors.destinations)) {
@@ -303,7 +306,6 @@ function findNearestPedestrianNode(targetDestId) {
         }
     } catch { }
 
-    // 4. Look up physical 3D Position
     let targetPos = get3DPositionForDestination(targetDestId);
 
     if (!targetPos) {
@@ -320,39 +322,56 @@ function findNearestPedestrianNode(targetDestId) {
         }
     }
 
-    // 5. Snap 3D Position to nearest connected red node
     if (!targetPos) return targetDestId;
     return findNearestPedestrianNodeByPos(targetPos) || targetDestId;
 }
 
-// Real-Time GPS Tracking & 3D Model Snapping
+// Robust Multi-Strategy GPS Tracking for Surface Laptops & Mobile Phones
 function initMobileGPS() {
-    if (!navigator.geolocation) return;
+    if (!navigator.geolocation) {
+        console.warn("Geolocation API not supported by browser.");
+        return;
+    }
 
+    const handlePos = (pos) => {
+        const lat = pos.coords.latitude;
+        const lng = pos.coords.longitude;
+
+        const x3d = (lng - ORIGIN_LNG) * METERS_PER_LNG;
+        const z3d = -(lat - ORIGIN_LAT) * METERS_PER_LAT;
+        const userPos = { x: x3d, y: 0.35, z: z3d };
+
+        if (window.pgs3d?.updateUserPosition) {
+            window.pgs3d.updateUserPosition(userPos);
+        }
+
+        const nearestNodeId = findNearestPedestrianNodeByPos(userPos);
+        if (nearestNodeId && $("startSelect") && $("startSelect").value !== nearestNodeId) {
+            $("startSelect").value = nearestNodeId;
+            generateRoute();
+        }
+    };
+
+    // Immediate Location Probe
+    navigator.geolocation.getCurrentPosition(
+        handlePos,
+        (err) => console.warn("Initial GPS Quick Probe Warning:", err.message),
+        { enableHighAccuracy: false, timeout: 6000, maximumAge: 10000 }
+    );
+
+    // Continuous Watch Listener
     navigator.geolocation.watchPosition(
-        (pos) => {
-            const lat = pos.coords.latitude;
-            const lng = pos.coords.longitude;
-
-            // Convert GPS Delta to 3D Model Coordinates
-            const x3d = (lng - ORIGIN_LNG) * METERS_PER_LNG;
-            const z3d = -(lat - ORIGIN_LAT) * METERS_PER_LAT;
-            const userPos = { x: x3d, y: 0.35, z: z3d };
-
-            // Update user position marker in 3D Scene
-            if (window.pgs3d?.updateUserPosition) {
-                window.pgs3d.updateUserPosition(userPos);
-            }
-
-            // Auto-snap start dropdown to closest node in network
-            const nearestNodeId = findNearestPedestrianNodeByPos(userPos);
-            if (nearestNodeId && $("startSelect") && $("startSelect").value !== nearestNodeId) {
-                $("startSelect").value = nearestNodeId;
-                generateRoute();
-            }
+        handlePos,
+        (err) => {
+            console.warn("GPS Tracking High Accuracy Failed, falling back:", err.message);
+            // Fallback for Windows Surface Wi-Fi positioning without high-accuracy hardware
+            navigator.geolocation.watchPosition(
+                handlePos,
+                (e) => console.warn("Fallback GPS Tracking Error:", e.message),
+                { enableHighAccuracy: false, maximumAge: 5000, timeout: 15000 }
+            );
         },
-        (err) => console.warn("GPS Tracking Error:", err),
-        { enableHighAccuracy: true, maximumAge: 1000, timeout: 5000 }
+        { enableHighAccuracy: true, maximumAge: 2000, timeout: 8000 }
     );
 }
 
@@ -793,7 +812,7 @@ function drawRoute(path) {
     path.forEach(id => document.querySelector(`.node[data-id="${id}"]`)?.classList.add("selected"));
 }
 
-// SMART VECTOR-COMPACTING, INTERSECTION & ACCURATE CORRIDOR LANDMARK INSTRUCTIONS
+// SMART VECTOR-COMPACTING & STRICT NOISE-FILTERED LANDMARK INSTRUCTIONS
 function renderStepInstructions(startObj, endObj, positions, totalMeters, isValid, pathNodeIds = []) {
     const totalFeet = Math.round(totalMeters * 3.28084);
     const mins = Math.max(1, Math.round(totalFeet / 250));
@@ -825,9 +844,10 @@ function renderStepInstructions(startObj, endObj, positions, totalMeters, isVali
         return;
     }
 
-    // Helper: Finds prominent department/zone landmarks passed along a list of 3D positions
-    const findPassedLandmarks = (legPositions) => {
-        const found = [];
+    // Advanced Landmark Scanner (Filters HVAC/Corridor noise and matches 2D horizontal proximity)
+    const findPassedLandmarks = (legPositions, excludeIntersectionName = null) => {
+        const candidateScores = [];
+
         legPositions.forEach(pos => {
             if (!pos) return;
             destinations.forEach(d => {
@@ -837,18 +857,35 @@ function renderStepInstructions(startObj, endObj, positions, totalMeters, isVali
                 const name = d.name.trim();
                 const lower = name.toLowerCase();
 
-                // Exclude technical equipment, stair numbers, and minor codes
-                if (/pqc|d\/r|mach|stair-|material lift|open l-|storage|electrical|utility|jcm|vestibule/i.test(lower)) return;
+                // 1. STRICT NOISE FILTER: Exclude utility tags, technical equipment, stair/corridor numbers
+                if (/pqc|d\/r|mach|stair-|material lift|open l-|storage|electrical|utility|jcm|vestibule|ahu\s*\d+|corridor\s+[a-z0-9-]+|intersection/i.test(lower)) return;
 
-                const dist = distance3d(pos, d.position);
-                if (dist <= 14.0) { // ~45ft scanning radius along leg
-                    if (!found.includes(name)) {
-                        found.push(name);
-                    }
+                // 2. Ignore intersection pin that was turned at in previous step
+                if (excludeIntersectionName && name.toLowerCase() === excludeIntersectionName.toLowerCase()) return;
+
+                // 3. 2D Horizontal distance (XZ Plane) to avoidSkews from ceiling heights (y=5.1m)
+                const dist2d = distance2dHorizontal(pos, d.position);
+
+                if (dist2d <= 18.0) { // Scan within ~60ft horizontal radius
+                    let score = 100 - dist2d;
+
+                    // Priority Weight Boosts
+                    if (/break area|office|locker|assembly|rebuild|kitchen/i.test(lower)) score += 150;
+                    if ((d.category || "").includes("department") || (d.zone || "").includes("production")) score += 100;
+
+                    candidateScores.push({ name, score });
                 }
             });
         });
-        return found;
+
+        // Deduplicate and return highest priority landmark
+        candidateScores.sort((a, b) => b.score - a.score);
+        const unique = [];
+        for (const item of candidateScores) {
+            if (!unique.includes(item.name)) unique.push(item.name);
+            if (unique.length >= 2) break;
+        }
+        return unique;
     };
 
     // Dynamic Intersection Scanner (Matches custom placed intersection labels)
@@ -858,7 +895,7 @@ function renderStepInstructions(startObj, endObj, positions, totalMeters, isVali
         destinations.forEach(d => {
             if (d.name && d.position && Number.isFinite(d.position.x)) {
                 if (/intersection/i.test(d.name)) {
-                    const dist = distance3d(pos, d.position);
+                    const dist = distance2dHorizontal(pos, d.position);
                     if (dist <= 10.0) { // Within ~33 feet
                         match = d.name;
                     }
@@ -875,6 +912,7 @@ function renderStepInstructions(startObj, endObj, positions, totalMeters, isVali
         let accumulatedFeet = 0;
         let legPositions = [positions[0]];
         let legNodeIds = [pathNodeIds[0]];
+        let lastTurnIntersection = null;
 
         for (let i = 0; i < positions.length - 1; i++) {
             const p1 = positions[i];
@@ -911,17 +949,18 @@ function renderStepInstructions(startObj, endObj, positions, totalMeters, isVali
             // 1. Explicit Intersection Trigger
             if (dynamicIntersection && (isTurn || currentNId === "draft-node-9")) {
                 instructions.push(`Proceed straight for <b>${accumulatedFeet} ft</b> to the <b>${escapeHtml(dynamicIntersection)}</b> and turn <b>${turnDirection || "right"}</b> into the Spine corridor.`);
+                lastTurnIntersection = dynamicIntersection;
                 accumulatedFeet = 0;
                 legPositions = [p2];
                 legNodeIds = [currentNId];
             }
             // 2. Standard Turn Trigger
             else if (isTurn) {
-                const landmarks = findPassedLandmarks(legPositions);
+                const landmarks = findPassedLandmarks(legPositions, lastTurnIntersection);
                 let stepText = `Proceed straight for <b>${accumulatedFeet} ft</b>`;
 
                 if (landmarks.length > 0) {
-                    stepText += ` past <b>${escapeHtml(landmarks.slice(0, 2).join(" / "))}</b>`;
+                    stepText += ` past <b>${escapeHtml(landmarks.join(" / "))}</b>`;
                 }
                 stepText += `, then turn <b>${turnDirection}</b> into the corridor.`;
 
@@ -932,7 +971,7 @@ function renderStepInstructions(startObj, endObj, positions, totalMeters, isVali
             }
             // 3. Final Straight Leg to Destination
             else if (i === positions.length - 2 && accumulatedFeet > 0) {
-                const landmarks = findPassedLandmarks(legPositions);
+                const landmarks = findPassedLandmarks(legPositions, lastTurnIntersection);
                 let endText = `Continue straight along walkway for <b>${accumulatedFeet} ft</b>`;
 
                 if (landmarks.length > 0) {
