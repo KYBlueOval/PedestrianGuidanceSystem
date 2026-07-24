@@ -211,14 +211,36 @@ function get3DPositionForDestination(targetDestId) {
     return null;
 }
 
+// Robust 3D Node Snapping
 function findNearestPedestrianNode(targetDestId) {
+    // 1. Check destination crosswalk override first
     if (destinationNodeCrosswalk[targetDestId] && pedestrianGraph[destinationNodeCrosswalk[targetDestId]]) {
         return destinationNodeCrosswalk[targetDestId];
     }
 
-    const targetPos = get3DPositionForDestination(targetDestId);
+    // 2. Look up position from destinations list or spatial labels
+    let targetPos = get3DPositionForDestination(targetDestId);
+
+    // 3. If missing, attempt fuzzy lookup in spatialLabelsData array
+    if (!targetPos) {
+        const dObj = loc(targetDestId);
+        const searchName = (dObj?.name || targetDestId).toLowerCase().trim();
+
+        const match = spatialLabelsData.find(l =>
+            l.id === targetDestId ||
+            (l.name && l.name.toLowerCase().trim() === searchName)
+        );
+
+        if (match?.model_position && Number.isFinite(match.model_position.x)) {
+            targetPos = match.model_position;
+        }
+    }
+
+    // Filter only active connected nodes
     const connectedNodeIds = Object.keys(pedestrianNodes).filter(id => (pedestrianGraph[id] || []).length > 0);
     if (!connectedNodeIds.length) return targetDestId;
+
+    // If target position is STILL unknown, return nearest node to world center rather than defaulting everything to node-1
     if (!targetPos) return connectedNodeIds[0];
 
     let closestId = connectedNodeIds[0];
