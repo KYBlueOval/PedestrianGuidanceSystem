@@ -763,7 +763,7 @@ function drawRoute(path) {
     path.forEach(id => document.querySelector(`.node[data-id="${id}"]`)?.classList.add("selected"));
 }
 
-// SMART VECTOR-COMPACTING, INTERSECTION & DEPT/ZONE LANDMARK-AWARE INSTRUCTIONS
+// SMART VECTOR-COMPACTING, INTERSECTION & ACCURATE CORRIDOR LANDMARK INSTRUCTIONS
 function renderStepInstructions(startObj, endObj, positions, totalMeters, isValid, pathNodeIds = []) {
     const totalFeet = Math.round(totalMeters * 3.28084);
     const mins = Math.max(1, Math.round(totalFeet / 250));
@@ -795,47 +795,30 @@ function renderStepInstructions(startObj, endObj, positions, totalMeters, isVali
         return;
     }
 
-    // Strict Landmark Scorer: Focuses ONLY on Departments, Major Zones & Amenities
-    const getLandmarkAtPosition = (pos, maxDistMeters = 10.0) => {
-        if (!pos) return null;
-        let bestName = null;
-        let bestScore = -1;
+    // Helper: Finds all prominent department/zone landmarks passed along a list of 3D positions
+    const findPassedLandmarks = (legPositions) => {
+        const found = [];
+        legPositions.forEach(pos => {
+            if (!pos) return;
+            destinations.forEach(d => {
+                if (!d.name || !d.position || !Number.isFinite(d.position.x)) return;
+                if (d.id === startObj.id || d.id === endObj.id) return;
 
-        destinations.forEach(d => {
-            if (!d.name || !d.position || !Number.isFinite(d.position.x)) return;
-            if (d.id === startObj.id || d.id === endObj.id) return;
+                const name = d.name.trim();
+                const lower = name.toLowerCase();
 
-            const name = d.name.trim();
-            const lowerName = name.toLowerCase();
-            const category = (d.category || "").toLowerCase();
-            const zone = (d.zone || "").toLowerCase();
-            const dist = distance3d(pos, d.position);
+                // Exclude technical equipment, stair numbers, and minor codes
+                if (/pqc|d\/r|mach|stair-|material lift|open l-|storage|electrical|utility|jcm|vestibule/i.test(lower)) return;
 
-            // Filter out mechanical lifts, stairs numbers, and utility storage tags
-            if (/material lift|stair-|mach rm|open l-|storage|electrical|utility|jcm|vestibule/i.test(lowerName)) return;
-
-            if (dist <= maxDistMeters) {
-                let score = 100 - dist;
-
-                // Priority 1: Departments, Offices & Production Zones
-                if (category.includes("department") || zone.includes("production") || /office|break area|locker|assembly|rebuild/i.test(lowerName)) {
-                    score += 150;
+                const dist = distance3d(pos, d.position);
+                if (dist <= 14.0) { // ~45ft scanning radius along leg
+                    if (!found.includes(name)) {
+                        found.push(name);
+                    }
                 }
-                // Priority 2: Key Amenities & Services
-                else if (category.includes("amenity") || category.includes("service") || /kitchen|canteen|lounge/i.test(lowerName)) {
-                    score += 90;
-                } else {
-                    return; // Ignore general minor room labels
-                }
-
-                if (score > bestScore) {
-                    bestScore = score;
-                    bestName = name;
-                }
-            }
+            });
         });
-
-        return bestName;
+        return found;
     };
 
     const instructions = [];
@@ -844,6 +827,7 @@ function renderStepInstructions(startObj, endObj, positions, totalMeters, isVali
     if (positions.length >= 2) {
         let accumulatedFeet = 0;
         let legPositions = [positions[0]];
+        let legNodeIds = [pathNodeIds[0]];
 
         for (let i = 0; i < positions.length - 1; i++) {
             const p1 = positions[i];
@@ -853,10 +837,11 @@ function renderStepInstructions(startObj, endObj, positions, totalMeters, isVali
 
             accumulatedFeet += segDist;
             legPositions.push(p2);
+            legNodeIds.push(currentNId);
 
             let isTurn = false;
             let turnDirection = "";
-            let isSpineIntersection = (currentNId === "draft-node-9");
+            const hitSpineIntersection = legNodeIds.includes("draft-node-9");
 
             if (i < positions.length - 2) {
                 const p3 = positions[i + 2];
@@ -876,36 +861,39 @@ function renderStepInstructions(startObj, endObj, positions, totalMeters, isVali
                 }
             }
 
-            // Find landmarks along leg and at the turn point
-            const turnLandmark = getLandmarkAtPosition(p2, 12.0);
-
-            if (isSpineIntersection) {
-                if (isTurn) {
-                    instructions.push(`Proceed straight for <b>${accumulatedFeet} ft</b> to the <b>Main Spine Intersection</b> and turn <b>${turnDirection}</b> into the Spine corridor.`);
-                } else {
-                    instructions.push(`Proceed straight for <b>${accumulatedFeet} ft</b> through the <b>Main Spine Intersection</b>.`);
-                }
+            // 1. Explicit Spine Intersection Trigger
+            if (hitSpineIntersection && (isTurn || currentNId === "draft-node-9")) {
+                instructions.push(`Proceed straight for <b>${accumulatedFeet} ft</b> to the <b>Main Spine Intersection</b> and turn <b>${turnDirection || "right"}</b> into the Spine corridor.`);
                 accumulatedFeet = 0;
                 legPositions = [p2];
-            } else if (isTurn) {
+                legNodeIds = [currentNId];
+            }
+            // 2. Standard Turn Trigger
+            else if (isTurn) {
+                const landmarks = findPassedLandmarks(legPositions);
                 let stepText = `Proceed straight for <b>${accumulatedFeet} ft</b>`;
-                if (turnLandmark) {
-                    stepText += ` toward <b>${escapeHtml(turnLandmark)}</b>, then turn <b>${turnDirection}</b> into the corridor`;
-                } else {
-                    stepText += `, then turn <b>${turnDirection}</b> into the corridor`;
-                }
 
-                instructions.push(`${stepText}.`);
+                if (landmarks.length > 0) {
+                    stepText += ` past <b>${escapeHtml(landmarks.slice(0, 2).join(" / "))}</b>`;
+                }
+                stepText += `, then turn <b>${turnDirection}</b> into the corridor.`;
+
+                instructions.push(stepText);
                 accumulatedFeet = 0;
                 legPositions = [p2];
-            } else if (i === positions.length - 2 && accumulatedFeet > 0) {
-                let endStraightText = `Continue straight along walkway for <b>${accumulatedFeet} ft</b>`;
-                if (turnLandmark) {
-                    endStraightText += ` in the <b>${escapeHtml(turnLandmark)}</b> towards destination`;
+                legNodeIds = [currentNId];
+            }
+            // 3. Final Straight Leg to Destination
+            else if (i === positions.length - 2 && accumulatedFeet > 0) {
+                const landmarks = findPassedLandmarks(legPositions);
+                let endText = `Continue straight along walkway for <b>${accumulatedFeet} ft</b>`;
+
+                if (landmarks.length > 0) {
+                    endText += ` past <b>${escapeHtml(landmarks[0])}</b> towards destination`;
                 } else {
-                    endStraightText += ` towards destination`;
+                    endText += ` towards destination`;
                 }
-                instructions.push(`${endStraightText}.`);
+                instructions.push(`${endText}.`);
             }
         }
     } else {
