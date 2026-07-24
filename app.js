@@ -649,7 +649,7 @@ function generateRoute() {
     const totalDistMeters = spatialResult.distance;
 
     drawRoute(spatialResult.path);
-    renderStepInstructions(startObj, endObj, spatialPositions, totalDistMeters, true);
+    renderStepInstructions(startObj, endObj, spatialPositions, totalDistMeters, true, spatialResult.path);
     showDestination(end);
 
     const routeDetail = {
@@ -683,8 +683,8 @@ function drawRoute(path) {
     path.forEach(id => document.querySelector(`.node[data-id="${id}"]`)?.classList.add("selected"));
 }
 
-// SMART VECTOR-COMPACTING TURN-BY-TURN INSTRUCTIONS
-function renderStepInstructions(startObj, endObj, positions, totalMeters, isValid) {
+// SMART VECTOR-COMPACTING & INTERSECTION-AWARE TURN-BY-TURN INSTRUCTIONS
+function renderStepInstructions(startObj, endObj, positions, totalMeters, isValid, pathNodeIds = []) {
     const totalFeet = Math.round(totalMeters * 3.28084);
     const mins = Math.max(1, Math.round(totalFeet / 250));
 
@@ -724,11 +724,13 @@ function renderStepInstructions(startObj, endObj, positions, totalMeters, isVali
         for (let i = 0; i < positions.length - 1; i++) {
             const p1 = positions[i];
             const p2 = positions[i + 1];
+            const currentNId = pathNodeIds[i + 1]; // Node ID at arrival of this segment
             const segDist = Math.round(distance3d(p1, p2) * 3.28084);
             accumulatedFeet += segDist;
 
             let isTurn = false;
             let turnDirection = "";
+            let isSpineIntersection = (currentNId === "draft-node-9");
 
             if (i < positions.length - 2) {
                 const p3 = positions[i + 2];
@@ -739,17 +741,26 @@ function renderStepInstructions(startObj, endObj, positions, totalMeters, isVali
                 const dot = v1.x * v2.x + v1.z * v2.z;
                 const angle = Math.atan2(cross, dot) * (180 / Math.PI);
 
-                if (angle > 25) {
+                // Require a sharper angle (> 38 degrees) to trigger an actual turn
+                if (angle > 38) {
                     isTurn = true;
                     turnDirection = "right";
-                } else if (angle < -25) {
+                } else if (angle < -38) {
                     isTurn = true;
                     turnDirection = "left";
                 }
             }
 
-            if (isTurn) {
-                instructions.push(`Proceed straight for <b>${accumulatedFeet} ft</b>, then turn <b>${turnDirection}</b> into hallway corridor.`);
+            // Callout for crossing the main Spine Intersection (Node 9)
+            if (isSpineIntersection && !isTurn) {
+                instructions.push(`Proceed straight for <b>${accumulatedFeet} ft</b> through the <b>Spine Intersection</b>.`);
+                accumulatedFeet = 0; // Reset accumulator for post-intersection walk
+            } else if (isTurn) {
+                if (accumulatedFeet > 0) {
+                    instructions.push(`Proceed straight for <b>${accumulatedFeet} ft</b>, then turn <b>${turnDirection}</b> into the hallway corridor.`);
+                } else {
+                    instructions.push(`Turn <b>${turnDirection}</b> into the hallway corridor.`);
+                }
                 accumulatedFeet = 0;
             } else if (i === positions.length - 2 && accumulatedFeet > 0) {
                 instructions.push(`Continue straight along walkway for <b>${accumulatedFeet} ft</b> towards destination.`);
