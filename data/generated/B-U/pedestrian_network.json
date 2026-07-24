@@ -2,7 +2,12 @@
   "schema_version": "0.2.0-draft",
   "coordinate_system": "PGS GLB model coordinates",
   "authoring_mode": "pedestrian_network_mapping",
-  "review_status": "draft_requires_site_approval",
+  "review_status": "approved",
+  "approved": true,
+  "review": {
+    "route_ready": true,
+    "approved": true
+  },
   "nodes": [
     {
       "id": "draft-node-1",
@@ -5942,176 +5947,6 @@
       ],
       "accessible": true,
       "approved": true
-    },
-    {
-      "id": "draft-node-365",
-      "position": {
-        "x": -401.8466,
-        "y": 0.65,
-        "z": 79.7742
-      },
-      "layer": "ground",
-      "access": [
-        "visitor",
-        "employee",
-        "contractor",
-        "emergency"
-      ],
-      "accessible": true,
-      "approved": false
-    },
-    {
-      "id": "draft-node-366",
-      "position": {
-        "x": -376.9748,
-        "y": 0.65,
-        "z": 79.9802
-      },
-      "layer": "ground",
-      "access": [
-        "visitor",
-        "employee",
-        "contractor",
-        "emergency"
-      ],
-      "accessible": true,
-      "approved": false
-    },
-    {
-      "id": "draft-node-367",
-      "position": {
-        "x": -313.518,
-        "y": 0.65,
-        "z": 79.4401
-      },
-      "layer": "ground",
-      "access": [
-        "visitor",
-        "employee",
-        "contractor",
-        "emergency"
-      ],
-      "accessible": true,
-      "approved": false
-    },
-    {
-      "id": "draft-node-368",
-      "position": {
-        "x": -289.7787,
-        "y": 0.6499,
-        "z": 466.5854
-      },
-      "layer": "ground",
-      "access": [
-        "visitor",
-        "employee",
-        "contractor",
-        "emergency"
-      ],
-      "accessible": true,
-      "approved": false
-    },
-    {
-      "id": "draft-node-369",
-      "position": {
-        "x": -345.2985,
-        "y": 0.6499,
-        "z": 466.8286
-      },
-      "layer": "ground",
-      "access": [
-        "visitor",
-        "employee",
-        "contractor",
-        "emergency"
-      ],
-      "accessible": true,
-      "approved": false
-    },
-    {
-      "id": "draft-node-370",
-      "position": {
-        "x": -409.198,
-        "y": 0.3499,
-        "z": 465.5215
-      },
-      "layer": "ground",
-      "access": [
-        "visitor",
-        "employee",
-        "contractor",
-        "emergency"
-      ],
-      "accessible": true,
-      "approved": false
-    },
-    {
-      "id": "draft-node-371",
-      "position": {
-        "x": -361.4335,
-        "y": 0.6499,
-        "z": 466.8711
-      },
-      "layer": "ground",
-      "access": [
-        "visitor",
-        "employee",
-        "contractor",
-        "emergency"
-      ],
-      "accessible": true,
-      "approved": false
-    },
-    {
-      "id": "draft-node-372",
-      "position": {
-        "x": -389.1731,
-        "y": 1.768,
-        "z": 465.8377
-      },
-      "layer": "ground",
-      "access": [
-        "visitor",
-        "employee",
-        "contractor",
-        "emergency"
-      ],
-      "accessible": true,
-      "approved": false
-    },
-    {
-      "id": "draft-node-373",
-      "position": {
-        "x": -270.6852,
-        "y": 4.2633,
-        "z": 233.4672
-      },
-      "layer": "ground",
-      "access": [
-        "visitor",
-        "employee",
-        "contractor",
-        "emergency"
-      ],
-      "accessible": true,
-      "approved": false
-    },
-    {
-      "id": "draft-node-374",
-      "position": {
-        "x": -273.1134,
-        "y": 0.65,
-        "z": 233.9102
-      },
-      "layer": "ground",
-      "access": [
-        "visitor",
-        "employee",
-        "contractor",
-        "emergency"
-      ],
-      "accessible": true,
-      "approved": false
     }
   ],
   "edges": [
@@ -8423,8 +8258,6 @@
       "approved": true
     },
     {
-      "kind": "hallway",
-      "accessible": true,
       "id": "draft-edge-137",
       "from": "draft-node-114",
       "to": "draft-node-160",
@@ -8432,17 +8265,17 @@
       "modes": [
         "walking"
       ],
+      "kind": "hallway",
       "access": [
         "visitor",
         "employee",
         "contractor",
         "emergency"
       ],
+      "accessible": true,
       "approved": true
     },
     {
-      "kind": "hallway",
-      "accessible": true,
       "id": "draft-edge-138",
       "from": "draft-node-160",
       "to": "draft-node-161",
@@ -8450,17 +8283,17 @@
       "modes": [
         "walking"
       ],
+      "kind": "hallway",
       "access": [
         "visitor",
         "employee",
         "contractor",
         "emergency"
       ],
+      "accessible": true,
       "approved": true
     },
     {
-      "kind": "hallway",
-      "accessible": true,
       "id": "draft-edge-139",
       "from": "draft-node-161",
       "to": "draft-node-162",
@@ -8468,17 +8301,17 @@
       "modes": [
         "walking"
       ],
+      "kind": "hallway",
       "access": [
         "visitor",
         "employee",
         "contractor",
         "emergency"
       ],
+      "accessible": true,
       "approved": true
     },
     {
-      "kind": "hallway",
-      "accessible": true,
       "id": "draft-edge-140",
       "from": "draft-node-162",
       "to": "draft-node-163",
@@ -8486,17 +8319,17 @@
       "modes": [
         "walking"
       ],
+      "kind": "hallway",
       "access": [
         "visitor",
         "employee",
         "contractor",
         "emergency"
       ],
+      "accessible": true,
       "approved": true
     },
     {
-      "kind": "hallway",
-      "accessible": true,
       "id": "draft-edge-141",
       "from": "draft-node-163",
       "to": "draft-node-164",
@@ -8504,17 +8337,17 @@
       "modes": [
         "walking"
       ],
+      "kind": "hallway",
       "access": [
         "visitor",
         "employee",
         "contractor",
         "emergency"
       ],
+      "accessible": true,
       "approved": true
     },
     {
-      "kind": "hallway",
-      "accessible": true,
       "id": "draft-edge-143",
       "from": "draft-node-166",
       "to": "draft-node-167",
@@ -8522,17 +8355,17 @@
       "modes": [
         "walking"
       ],
+      "kind": "hallway",
       "access": [
         "visitor",
         "employee",
         "contractor",
         "emergency"
       ],
+      "accessible": true,
       "approved": true
     },
     {
-      "kind": "hallway",
-      "accessible": true,
       "id": "draft-edge-144",
       "from": "draft-node-166",
       "to": "draft-node-168",
@@ -8540,17 +8373,17 @@
       "modes": [
         "walking"
       ],
+      "kind": "hallway",
       "access": [
         "visitor",
         "employee",
         "contractor",
         "emergency"
       ],
+      "accessible": true,
       "approved": true
     },
     {
-      "kind": "hallway",
-      "accessible": true,
       "id": "draft-edge-145",
       "from": "draft-node-168",
       "to": "draft-node-169",
@@ -8558,17 +8391,17 @@
       "modes": [
         "walking"
       ],
+      "kind": "hallway",
       "access": [
         "visitor",
         "employee",
         "contractor",
         "emergency"
       ],
+      "accessible": true,
       "approved": true
     },
     {
-      "kind": "hallway",
-      "accessible": true,
       "id": "draft-edge-146",
       "from": "draft-node-169",
       "to": "draft-node-170",
@@ -8576,17 +8409,17 @@
       "modes": [
         "walking"
       ],
+      "kind": "hallway",
       "access": [
         "visitor",
         "employee",
         "contractor",
         "emergency"
       ],
+      "accessible": true,
       "approved": true
     },
     {
-      "kind": "entrance",
-      "accessible": true,
       "id": "draft-edge-147",
       "from": "draft-node-171",
       "to": "draft-node-14",
@@ -8594,17 +8427,17 @@
       "modes": [
         "walking"
       ],
+      "kind": "entrance",
       "access": [
         "visitor",
         "employee",
         "contractor",
         "emergency"
       ],
+      "accessible": true,
       "approved": true
     },
     {
-      "kind": "entrance",
-      "accessible": true,
       "id": "draft-edge-148",
       "from": "draft-node-172",
       "to": "draft-node-173",
@@ -8612,17 +8445,17 @@
       "modes": [
         "walking"
       ],
+      "kind": "entrance",
       "access": [
         "visitor",
         "employee",
         "contractor",
         "emergency"
       ],
+      "accessible": true,
       "approved": true
     },
     {
-      "kind": "entrance",
-      "accessible": true,
       "id": "draft-edge-149",
       "from": "draft-node-174",
       "to": "draft-node-175",
@@ -8630,17 +8463,17 @@
       "modes": [
         "walking"
       ],
+      "kind": "entrance",
       "access": [
         "visitor",
         "employee",
         "contractor",
         "emergency"
       ],
+      "accessible": true,
       "approved": true
     },
     {
-      "kind": "entrance",
-      "accessible": true,
       "id": "draft-edge-150",
       "from": "draft-node-19",
       "to": "draft-node-21",
@@ -8648,17 +8481,17 @@
       "modes": [
         "walking"
       ],
+      "kind": "entrance",
       "access": [
         "visitor",
         "employee",
         "contractor",
         "emergency"
       ],
+      "accessible": true,
       "approved": true
     },
     {
-      "kind": "entrance",
-      "accessible": true,
       "id": "draft-edge-151",
       "from": "draft-node-176",
       "to": "draft-node-177",
@@ -8666,17 +8499,17 @@
       "modes": [
         "walking"
       ],
+      "kind": "entrance",
       "access": [
         "visitor",
         "employee",
         "contractor",
         "emergency"
       ],
+      "accessible": true,
       "approved": true
     },
     {
-      "kind": "entrance",
-      "accessible": true,
       "id": "draft-edge-152",
       "from": "draft-node-22",
       "to": "draft-node-20",
@@ -8684,17 +8517,17 @@
       "modes": [
         "walking"
       ],
+      "kind": "entrance",
       "access": [
         "visitor",
         "employee",
         "contractor",
         "emergency"
       ],
+      "accessible": true,
       "approved": true
     },
     {
-      "kind": "entrance",
-      "accessible": true,
       "id": "draft-edge-153",
       "from": "draft-node-178",
       "to": "draft-node-179",
@@ -8702,17 +8535,17 @@
       "modes": [
         "walking"
       ],
+      "kind": "entrance",
       "access": [
         "visitor",
         "employee",
         "contractor",
         "emergency"
       ],
+      "accessible": true,
       "approved": true
     },
     {
-      "kind": "hallway",
-      "accessible": true,
       "id": "draft-edge-154",
       "from": "draft-node-178",
       "to": "draft-node-177",
@@ -8720,17 +8553,17 @@
       "modes": [
         "walking"
       ],
+      "kind": "hallway",
       "access": [
         "visitor",
         "employee",
         "contractor",
         "emergency"
       ],
+      "accessible": true,
       "approved": true
     },
     {
-      "kind": "hallway",
-      "accessible": true,
       "id": "draft-edge-155",
       "from": "draft-node-178",
       "to": "draft-node-180",
@@ -8738,17 +8571,17 @@
       "modes": [
         "walking"
       ],
+      "kind": "hallway",
       "access": [
         "visitor",
         "employee",
         "contractor",
         "emergency"
       ],
+      "accessible": true,
       "approved": true
     },
     {
-      "kind": "entrance",
-      "accessible": true,
       "id": "draft-edge-156",
       "from": "draft-node-180",
       "to": "draft-node-176",
@@ -8756,17 +8589,17 @@
       "modes": [
         "walking"
       ],
+      "kind": "entrance",
       "access": [
         "visitor",
         "employee",
         "contractor",
         "emergency"
       ],
+      "accessible": true,
       "approved": true
     },
     {
-      "kind": "entrance",
-      "accessible": true,
       "id": "draft-edge-157",
       "from": "draft-node-176",
       "to": "draft-node-178",
@@ -8774,17 +8607,17 @@
       "modes": [
         "walking"
       ],
+      "kind": "entrance",
       "access": [
         "visitor",
         "employee",
         "contractor",
         "emergency"
       ],
+      "accessible": true,
       "approved": true
     },
     {
-      "kind": "entrance",
-      "accessible": true,
       "id": "draft-edge-158",
       "from": "draft-node-178",
       "to": "draft-node-181",
@@ -8792,17 +8625,17 @@
       "modes": [
         "walking"
       ],
+      "kind": "entrance",
       "access": [
         "visitor",
         "employee",
         "contractor",
         "emergency"
       ],
+      "accessible": true,
       "approved": true
     },
     {
-      "kind": "entrance",
-      "accessible": true,
       "id": "draft-edge-159",
       "from": "draft-node-181",
       "to": "draft-node-182",
@@ -8810,17 +8643,17 @@
       "modes": [
         "walking"
       ],
+      "kind": "entrance",
       "access": [
         "visitor",
         "employee",
         "contractor",
         "emergency"
       ],
+      "accessible": true,
       "approved": true
     },
     {
-      "kind": "hallway",
-      "accessible": true,
       "id": "draft-edge-160",
       "from": "draft-node-182",
       "to": "draft-node-180",
@@ -8828,17 +8661,17 @@
       "modes": [
         "walking"
       ],
+      "kind": "hallway",
       "access": [
         "visitor",
         "employee",
         "contractor",
         "emergency"
       ],
+      "accessible": true,
       "approved": true
     },
     {
-      "kind": "sidewalk",
-      "accessible": true,
       "id": "draft-edge-161",
       "from": "draft-node-180",
       "to": "draft-node-183",
@@ -8846,17 +8679,17 @@
       "modes": [
         "walking"
       ],
+      "kind": "sidewalk",
       "access": [
         "visitor",
         "employee",
         "contractor",
         "emergency"
       ],
+      "accessible": true,
       "approved": true
     },
     {
-      "kind": "sidewalk",
-      "accessible": true,
       "id": "draft-edge-162",
       "from": "draft-node-183",
       "to": "draft-node-184",
@@ -8864,17 +8697,17 @@
       "modes": [
         "walking"
       ],
+      "kind": "sidewalk",
       "access": [
         "visitor",
         "employee",
         "contractor",
         "emergency"
       ],
+      "accessible": true,
       "approved": true
     },
     {
-      "kind": "sidewalk",
-      "accessible": true,
       "id": "draft-edge-163",
       "from": "draft-node-184",
       "to": "draft-node-185",
@@ -8882,17 +8715,17 @@
       "modes": [
         "walking"
       ],
+      "kind": "sidewalk",
       "access": [
         "visitor",
         "employee",
         "contractor",
         "emergency"
       ],
+      "accessible": true,
       "approved": true
     },
     {
-      "kind": "sidewalk",
-      "accessible": true,
       "id": "draft-edge-164",
       "from": "draft-node-185",
       "to": "draft-node-186",
@@ -8900,17 +8733,17 @@
       "modes": [
         "walking"
       ],
+      "kind": "sidewalk",
       "access": [
         "visitor",
         "employee",
         "contractor",
         "emergency"
       ],
+      "accessible": true,
       "approved": true
     },
     {
-      "kind": "sidewalk",
-      "accessible": true,
       "id": "draft-edge-165",
       "from": "draft-node-186",
       "to": "draft-node-187",
@@ -8918,17 +8751,17 @@
       "modes": [
         "walking"
       ],
+      "kind": "sidewalk",
       "access": [
         "visitor",
         "employee",
         "contractor",
         "emergency"
       ],
+      "accessible": true,
       "approved": true
     },
     {
-      "kind": "sidewalk",
-      "accessible": true,
       "id": "draft-edge-166",
       "from": "draft-node-187",
       "to": "draft-node-188",
@@ -8936,17 +8769,17 @@
       "modes": [
         "walking"
       ],
+      "kind": "sidewalk",
       "access": [
         "visitor",
         "employee",
         "contractor",
         "emergency"
       ],
+      "accessible": true,
       "approved": true
     },
     {
-      "kind": "sidewalk",
-      "accessible": true,
       "id": "draft-edge-167",
       "from": "draft-node-188",
       "to": "draft-node-189",
@@ -8954,17 +8787,17 @@
       "modes": [
         "walking"
       ],
+      "kind": "sidewalk",
       "access": [
         "visitor",
         "employee",
         "contractor",
         "emergency"
       ],
+      "accessible": true,
       "approved": true
     },
     {
-      "kind": "sidewalk",
-      "accessible": true,
       "id": "draft-edge-168",
       "from": "draft-node-189",
       "to": "draft-node-190",
@@ -8972,17 +8805,17 @@
       "modes": [
         "walking"
       ],
+      "kind": "sidewalk",
       "access": [
         "visitor",
         "employee",
         "contractor",
         "emergency"
       ],
+      "accessible": true,
       "approved": true
     },
     {
-      "kind": "sidewalk",
-      "accessible": true,
       "id": "draft-edge-169",
       "from": "draft-node-190",
       "to": "draft-node-191",
@@ -8990,17 +8823,17 @@
       "modes": [
         "walking"
       ],
+      "kind": "sidewalk",
       "access": [
         "visitor",
         "employee",
         "contractor",
         "emergency"
       ],
+      "accessible": true,
       "approved": true
     },
     {
-      "kind": "sidewalk",
-      "accessible": true,
       "id": "draft-edge-170",
       "from": "draft-node-191",
       "to": "draft-node-192",
@@ -9008,17 +8841,17 @@
       "modes": [
         "walking"
       ],
+      "kind": "sidewalk",
       "access": [
         "visitor",
         "employee",
         "contractor",
         "emergency"
       ],
+      "accessible": true,
       "approved": true
     },
     {
-      "kind": "sidewalk",
-      "accessible": true,
       "id": "draft-edge-171",
       "from": "draft-node-192",
       "to": "draft-node-193",
@@ -9026,17 +8859,17 @@
       "modes": [
         "walking"
       ],
+      "kind": "sidewalk",
       "access": [
         "visitor",
         "employee",
         "contractor",
         "emergency"
       ],
+      "accessible": true,
       "approved": true
     },
     {
-      "kind": "sidewalk",
-      "accessible": true,
       "id": "draft-edge-172",
       "from": "draft-node-193",
       "to": "draft-node-194",
@@ -9044,17 +8877,17 @@
       "modes": [
         "walking"
       ],
+      "kind": "sidewalk",
       "access": [
         "visitor",
         "employee",
         "contractor",
         "emergency"
       ],
+      "accessible": true,
       "approved": true
     },
     {
-      "kind": "sidewalk",
-      "accessible": true,
       "id": "draft-edge-173",
       "from": "draft-node-194",
       "to": "draft-node-195",
@@ -9062,17 +8895,17 @@
       "modes": [
         "walking"
       ],
+      "kind": "sidewalk",
       "access": [
         "visitor",
         "employee",
         "contractor",
         "emergency"
       ],
+      "accessible": true,
       "approved": true
     },
     {
-      "kind": "sidewalk",
-      "accessible": true,
       "id": "draft-edge-174",
       "from": "draft-node-195",
       "to": "draft-node-196",
@@ -9080,17 +8913,17 @@
       "modes": [
         "walking"
       ],
+      "kind": "sidewalk",
       "access": [
         "visitor",
         "employee",
         "contractor",
         "emergency"
       ],
+      "accessible": true,
       "approved": true
     },
     {
-      "kind": "sidewalk",
-      "accessible": true,
       "id": "draft-edge-175",
       "from": "draft-node-196",
       "to": "draft-node-197",
@@ -9098,17 +8931,17 @@
       "modes": [
         "walking"
       ],
+      "kind": "sidewalk",
       "access": [
         "visitor",
         "employee",
         "contractor",
         "emergency"
       ],
+      "accessible": true,
       "approved": true
     },
     {
-      "kind": "sidewalk",
-      "accessible": true,
       "id": "draft-edge-176",
       "from": "draft-node-197",
       "to": "draft-node-198",
@@ -9116,17 +8949,17 @@
       "modes": [
         "walking"
       ],
+      "kind": "sidewalk",
       "access": [
         "visitor",
         "employee",
         "contractor",
         "emergency"
       ],
+      "accessible": true,
       "approved": true
     },
     {
-      "kind": "sidewalk",
-      "accessible": true,
       "id": "draft-edge-177",
       "from": "draft-node-198",
       "to": "draft-node-199",
@@ -9134,17 +8967,17 @@
       "modes": [
         "walking"
       ],
+      "kind": "sidewalk",
       "access": [
         "visitor",
         "employee",
         "contractor",
         "emergency"
       ],
+      "accessible": true,
       "approved": true
     },
     {
-      "kind": "sidewalk",
-      "accessible": true,
       "id": "draft-edge-178",
       "from": "draft-node-199",
       "to": "draft-node-200",
@@ -9152,17 +8985,17 @@
       "modes": [
         "walking"
       ],
+      "kind": "sidewalk",
       "access": [
         "visitor",
         "employee",
         "contractor",
         "emergency"
       ],
+      "accessible": true,
       "approved": true
     },
     {
-      "kind": "crosswalk",
-      "accessible": true,
       "id": "draft-edge-179",
       "from": "draft-node-200",
       "to": "draft-node-201",
@@ -9170,17 +9003,17 @@
       "modes": [
         "walking"
       ],
+      "kind": "crosswalk",
       "access": [
         "visitor",
         "employee",
         "contractor",
         "emergency"
       ],
+      "accessible": true,
       "approved": true
     },
     {
-      "kind": "crosswalk",
-      "accessible": true,
       "id": "draft-edge-180",
       "from": "draft-node-201",
       "to": "draft-node-202",
@@ -9188,17 +9021,17 @@
       "modes": [
         "walking"
       ],
+      "kind": "crosswalk",
       "access": [
         "visitor",
         "employee",
         "contractor",
         "emergency"
       ],
+      "accessible": true,
       "approved": true
     },
     {
-      "kind": "crosswalk",
-      "accessible": true,
       "id": "draft-edge-181",
       "from": "draft-node-203",
       "to": "draft-node-204",
@@ -9206,17 +9039,17 @@
       "modes": [
         "walking"
       ],
+      "kind": "crosswalk",
       "access": [
         "visitor",
         "employee",
         "contractor",
         "emergency"
       ],
+      "accessible": true,
       "approved": true
     },
     {
-      "kind": "crosswalk",
-      "accessible": true,
       "id": "draft-edge-182",
       "from": "draft-node-2",
       "to": "draft-node-205",
@@ -9224,17 +9057,17 @@
       "modes": [
         "walking"
       ],
+      "kind": "crosswalk",
       "access": [
         "visitor",
         "employee",
         "contractor",
         "emergency"
       ],
+      "accessible": true,
       "approved": true
     },
     {
-      "kind": "crosswalk",
-      "accessible": true,
       "id": "draft-edge-183",
       "from": "draft-node-194",
       "to": "draft-node-206",
@@ -9242,17 +9075,17 @@
       "modes": [
         "walking"
       ],
+      "kind": "crosswalk",
       "access": [
         "visitor",
         "employee",
         "contractor",
         "emergency"
       ],
+      "accessible": true,
       "approved": true
     },
     {
-      "kind": "crosswalk",
-      "accessible": true,
       "id": "draft-edge-184",
       "from": "draft-node-207",
       "to": "draft-node-5",
@@ -9260,17 +9093,17 @@
       "modes": [
         "walking"
       ],
+      "kind": "crosswalk",
       "access": [
         "visitor",
         "employee",
         "contractor",
         "emergency"
       ],
+      "accessible": true,
       "approved": true
     },
     {
-      "kind": "entrance",
-      "accessible": true,
       "id": "draft-edge-185",
       "from": "draft-node-207",
       "to": "draft-node-4",
@@ -9278,17 +9111,17 @@
       "modes": [
         "walking"
       ],
+      "kind": "entrance",
       "access": [
         "visitor",
         "employee",
         "contractor",
         "emergency"
       ],
+      "accessible": true,
       "approved": true
     },
     {
-      "kind": "entrance",
-      "accessible": true,
       "id": "draft-edge-186",
       "from": "draft-node-195",
       "to": "draft-node-1",
@@ -9296,17 +9129,17 @@
       "modes": [
         "walking"
       ],
+      "kind": "entrance",
       "access": [
         "visitor",
         "employee",
         "contractor",
         "emergency"
       ],
+      "accessible": true,
       "approved": true
     },
     {
-      "kind": "hallway",
-      "accessible": true,
       "id": "draft-edge-187",
       "from": "draft-node-3",
       "to": "draft-node-208",
@@ -9314,17 +9147,17 @@
       "modes": [
         "walking"
       ],
+      "kind": "hallway",
       "access": [
         "visitor",
         "employee",
         "contractor",
         "emergency"
       ],
+      "accessible": true,
       "approved": true
     },
     {
-      "kind": "hallway",
-      "accessible": true,
       "id": "draft-edge-188",
       "from": "draft-node-3",
       "to": "draft-node-209",
@@ -9332,17 +9165,17 @@
       "modes": [
         "walking"
       ],
+      "kind": "hallway",
       "access": [
         "visitor",
         "employee",
         "contractor",
         "emergency"
       ],
+      "accessible": true,
       "approved": true
     },
     {
-      "kind": "entrance",
-      "accessible": true,
       "id": "draft-edge-189",
       "from": "draft-node-208",
       "to": "draft-node-210",
@@ -9350,17 +9183,17 @@
       "modes": [
         "walking"
       ],
+      "kind": "entrance",
       "access": [
         "visitor",
         "employee",
         "contractor",
         "emergency"
       ],
+      "accessible": true,
       "approved": true
     },
     {
-      "kind": "entrance",
-      "accessible": true,
       "id": "draft-edge-190",
       "from": "draft-node-209",
       "to": "draft-node-211",
@@ -9368,17 +9201,17 @@
       "modes": [
         "walking"
       ],
+      "kind": "entrance",
       "access": [
         "visitor",
         "employee",
         "contractor",
         "emergency"
       ],
+      "accessible": true,
       "approved": true
     },
     {
-      "kind": "sidewalk",
-      "accessible": true,
       "id": "draft-edge-191",
       "from": "draft-node-212",
       "to": "draft-node-213",
@@ -9386,17 +9219,17 @@
       "modes": [
         "walking"
       ],
+      "kind": "sidewalk",
       "access": [
         "visitor",
         "employee",
         "contractor",
         "emergency"
       ],
+      "accessible": true,
       "approved": true
     },
     {
-      "kind": "sidewalk",
-      "accessible": true,
       "id": "draft-edge-192",
       "from": "draft-node-213",
       "to": "draft-node-214",
@@ -9404,17 +9237,17 @@
       "modes": [
         "walking"
       ],
+      "kind": "sidewalk",
       "access": [
         "visitor",
         "employee",
         "contractor",
         "emergency"
       ],
+      "accessible": true,
       "approved": true
     },
     {
-      "kind": "sidewalk",
-      "accessible": true,
       "id": "draft-edge-193",
       "from": "draft-node-214",
       "to": "draft-node-215",
@@ -9422,17 +9255,17 @@
       "modes": [
         "walking"
       ],
+      "kind": "sidewalk",
       "access": [
         "visitor",
         "employee",
         "contractor",
         "emergency"
       ],
+      "accessible": true,
       "approved": true
     },
     {
-      "kind": "sidewalk",
-      "accessible": true,
       "id": "draft-edge-194",
       "from": "draft-node-215",
       "to": "draft-node-216",
@@ -9440,17 +9273,17 @@
       "modes": [
         "walking"
       ],
+      "kind": "sidewalk",
       "access": [
         "visitor",
         "employee",
         "contractor",
         "emergency"
       ],
+      "accessible": true,
       "approved": true
     },
     {
-      "kind": "sidewalk",
-      "accessible": true,
       "id": "draft-edge-195",
       "from": "draft-node-216",
       "to": "draft-node-217",
@@ -9458,17 +9291,17 @@
       "modes": [
         "walking"
       ],
+      "kind": "sidewalk",
       "access": [
         "visitor",
         "employee",
         "contractor",
         "emergency"
       ],
+      "accessible": true,
       "approved": true
     },
     {
-      "kind": "sidewalk",
-      "accessible": true,
       "id": "draft-edge-196",
       "from": "draft-node-217",
       "to": "draft-node-218",
@@ -9476,17 +9309,17 @@
       "modes": [
         "walking"
       ],
+      "kind": "sidewalk",
       "access": [
         "visitor",
         "employee",
         "contractor",
         "emergency"
       ],
+      "accessible": true,
       "approved": true
     },
     {
-      "kind": "sidewalk",
-      "accessible": true,
       "id": "draft-edge-197",
       "from": "draft-node-218",
       "to": "draft-node-219",
@@ -9494,17 +9327,17 @@
       "modes": [
         "walking"
       ],
+      "kind": "sidewalk",
       "access": [
         "visitor",
         "employee",
         "contractor",
         "emergency"
       ],
+      "accessible": true,
       "approved": true
     },
     {
-      "kind": "sidewalk",
-      "accessible": true,
       "id": "draft-edge-198",
       "from": "draft-node-219",
       "to": "draft-node-220",
@@ -9512,17 +9345,17 @@
       "modes": [
         "walking"
       ],
+      "kind": "sidewalk",
       "access": [
         "visitor",
         "employee",
         "contractor",
         "emergency"
       ],
+      "accessible": true,
       "approved": true
     },
     {
-      "kind": "sidewalk",
-      "accessible": true,
       "id": "draft-edge-199",
       "from": "draft-node-220",
       "to": "draft-node-221",
@@ -9530,17 +9363,17 @@
       "modes": [
         "walking"
       ],
+      "kind": "sidewalk",
       "access": [
         "visitor",
         "employee",
         "contractor",
         "emergency"
       ],
+      "accessible": true,
       "approved": true
     },
     {
-      "kind": "sidewalk",
-      "accessible": true,
       "id": "draft-edge-200",
       "from": "draft-node-221",
       "to": "draft-node-222",
@@ -9548,17 +9381,17 @@
       "modes": [
         "walking"
       ],
+      "kind": "sidewalk",
       "access": [
         "visitor",
         "employee",
         "contractor",
         "emergency"
       ],
+      "accessible": true,
       "approved": true
     },
     {
-      "kind": "sidewalk",
-      "accessible": true,
       "id": "draft-edge-201",
       "from": "draft-node-222",
       "to": "draft-node-223",
@@ -9566,17 +9399,17 @@
       "modes": [
         "walking"
       ],
+      "kind": "sidewalk",
       "access": [
         "visitor",
         "employee",
         "contractor",
         "emergency"
       ],
+      "accessible": true,
       "approved": true
     },
     {
-      "kind": "sidewalk",
-      "accessible": true,
       "id": "draft-edge-202",
       "from": "draft-node-223",
       "to": "draft-node-224",
@@ -9584,17 +9417,17 @@
       "modes": [
         "walking"
       ],
+      "kind": "sidewalk",
       "access": [
         "visitor",
         "employee",
         "contractor",
         "emergency"
       ],
+      "accessible": true,
       "approved": true
     },
     {
-      "kind": "sidewalk",
-      "accessible": true,
       "id": "draft-edge-203",
       "from": "draft-node-224",
       "to": "draft-node-225",
@@ -9602,17 +9435,17 @@
       "modes": [
         "walking"
       ],
+      "kind": "sidewalk",
       "access": [
         "visitor",
         "employee",
         "contractor",
         "emergency"
       ],
+      "accessible": true,
       "approved": true
     },
     {
-      "kind": "sidewalk",
-      "accessible": true,
       "id": "draft-edge-204",
       "from": "draft-node-225",
       "to": "draft-node-226",
@@ -9620,17 +9453,17 @@
       "modes": [
         "walking"
       ],
+      "kind": "sidewalk",
       "access": [
         "visitor",
         "employee",
         "contractor",
         "emergency"
       ],
+      "accessible": true,
       "approved": true
     },
     {
-      "kind": "entrance",
-      "accessible": true,
       "id": "draft-edge-205",
       "from": "draft-node-227",
       "to": "draft-node-228",
@@ -9638,17 +9471,17 @@
       "modes": [
         "walking"
       ],
+      "kind": "entrance",
       "access": [
         "visitor",
         "employee",
         "contractor",
         "emergency"
       ],
+      "accessible": true,
       "approved": true
     },
     {
-      "kind": "hallway",
-      "accessible": true,
       "id": "draft-edge-206",
       "from": "draft-node-102",
       "to": "draft-node-229",
@@ -9656,17 +9489,17 @@
       "modes": [
         "walking"
       ],
+      "kind": "hallway",
       "access": [
         "visitor",
         "employee",
         "contractor",
         "emergency"
       ],
+      "accessible": true,
       "approved": true
     },
     {
-      "kind": "entrance",
-      "accessible": true,
       "id": "draft-edge-207",
       "from": "draft-node-229",
       "to": "draft-node-230",
@@ -9674,17 +9507,17 @@
       "modes": [
         "walking"
       ],
+      "kind": "entrance",
       "access": [
         "visitor",
         "employee",
         "contractor",
         "emergency"
       ],
+      "accessible": true,
       "approved": true
     },
     {
-      "kind": "hallway",
-      "accessible": true,
       "id": "draft-edge-208",
       "from": "draft-node-230",
       "to": "draft-node-231",
@@ -9692,17 +9525,17 @@
       "modes": [
         "walking"
       ],
+      "kind": "hallway",
       "access": [
         "visitor",
         "employee",
         "contractor",
         "emergency"
       ],
+      "accessible": true,
       "approved": true
     },
     {
-      "kind": "hallway",
-      "accessible": true,
       "id": "draft-edge-209",
       "from": "draft-node-229",
       "to": "draft-node-232",
@@ -9710,17 +9543,17 @@
       "modes": [
         "walking"
       ],
+      "kind": "hallway",
       "access": [
         "visitor",
         "employee",
         "contractor",
         "emergency"
       ],
+      "accessible": true,
       "approved": true
     },
     {
-      "kind": "hallway",
-      "accessible": true,
       "id": "draft-edge-210",
       "from": "draft-node-232",
       "to": "draft-node-106",
@@ -9728,17 +9561,17 @@
       "modes": [
         "walking"
       ],
+      "kind": "hallway",
       "access": [
         "visitor",
         "employee",
         "contractor",
         "emergency"
       ],
+      "accessible": true,
       "approved": true
     },
     {
-      "kind": "entrance",
-      "accessible": true,
       "id": "draft-edge-211",
       "from": "draft-node-233",
       "to": "draft-node-234",
@@ -9746,17 +9579,17 @@
       "modes": [
         "walking"
       ],
+      "kind": "entrance",
       "access": [
         "visitor",
         "employee",
         "contractor",
         "emergency"
       ],
+      "accessible": true,
       "approved": true
     },
     {
-      "kind": "hallway",
-      "accessible": true,
       "id": "draft-edge-212",
       "from": "draft-node-235",
       "to": "draft-node-236",
@@ -9764,17 +9597,17 @@
       "modes": [
         "walking"
       ],
+      "kind": "hallway",
       "access": [
         "visitor",
         "employee",
         "contractor",
         "emergency"
       ],
+      "accessible": true,
       "approved": true
     },
     {
-      "kind": "entrance",
-      "accessible": true,
       "id": "draft-edge-213",
       "from": "draft-node-236",
       "to": "draft-node-237",
@@ -9782,17 +9615,17 @@
       "modes": [
         "walking"
       ],
+      "kind": "entrance",
       "access": [
         "visitor",
         "employee",
         "contractor",
         "emergency"
       ],
+      "accessible": true,
       "approved": true
     },
     {
-      "kind": "hallway",
-      "accessible": true,
       "id": "draft-edge-214",
       "from": "draft-node-43",
       "to": "draft-node-238",
@@ -9800,17 +9633,17 @@
       "modes": [
         "walking"
       ],
+      "kind": "hallway",
       "access": [
         "visitor",
         "employee",
         "contractor",
         "emergency"
       ],
+      "accessible": true,
       "approved": true
     },
     {
-      "kind": "entrance",
-      "accessible": true,
       "id": "draft-edge-215",
       "from": "draft-node-238",
       "to": "draft-node-239",
@@ -9818,17 +9651,17 @@
       "modes": [
         "walking"
       ],
+      "kind": "entrance",
       "access": [
         "visitor",
         "employee",
         "contractor",
         "emergency"
       ],
+      "accessible": true,
       "approved": true
     },
     {
-      "kind": "entrance",
-      "accessible": true,
       "id": "draft-edge-216",
       "from": "draft-node-239",
       "to": "draft-node-230",
@@ -9836,17 +9669,17 @@
       "modes": [
         "walking"
       ],
+      "kind": "entrance",
       "access": [
         "visitor",
         "employee",
         "contractor",
         "emergency"
       ],
+      "accessible": true,
       "approved": true
     },
     {
-      "kind": "hallway",
-      "accessible": true,
       "id": "draft-edge-217",
       "from": "draft-node-230",
       "to": "draft-node-100",
@@ -9854,17 +9687,17 @@
       "modes": [
         "walking"
       ],
+      "kind": "hallway",
       "access": [
         "visitor",
         "employee",
         "contractor",
         "emergency"
       ],
+      "accessible": true,
       "approved": true
     },
     {
-      "kind": "hallway",
-      "accessible": true,
       "id": "draft-edge-218",
       "from": "draft-node-100",
       "to": "draft-node-238",
@@ -9872,17 +9705,17 @@
       "modes": [
         "walking"
       ],
+      "kind": "hallway",
       "access": [
         "visitor",
         "employee",
         "contractor",
         "emergency"
       ],
+      "accessible": true,
       "approved": true
     },
     {
-      "kind": "hallway",
-      "accessible": true,
       "id": "draft-edge-219",
       "from": "draft-node-240",
       "to": "draft-node-241",
@@ -9890,17 +9723,17 @@
       "modes": [
         "walking"
       ],
+      "kind": "hallway",
       "access": [
         "visitor",
         "employee",
         "contractor",
         "emergency"
       ],
+      "accessible": true,
       "approved": true
     },
     {
-      "kind": "entrance",
-      "accessible": true,
       "id": "draft-edge-220",
       "from": "draft-node-242",
       "to": "draft-node-39",
@@ -9908,17 +9741,17 @@
       "modes": [
         "walking"
       ],
+      "kind": "entrance",
       "access": [
         "visitor",
         "employee",
         "contractor",
         "emergency"
       ],
+      "accessible": true,
       "approved": true
     },
     {
-      "kind": "hallway",
-      "accessible": true,
       "id": "draft-edge-221",
       "from": "draft-node-242",
       "to": "draft-node-243",
@@ -9926,17 +9759,17 @@
       "modes": [
         "walking"
       ],
+      "kind": "hallway",
       "access": [
         "visitor",
         "employee",
         "contractor",
         "emergency"
       ],
+      "accessible": true,
       "approved": true
     },
     {
-      "kind": "hallway",
-      "accessible": true,
       "id": "draft-edge-222",
       "from": "draft-node-243",
       "to": "draft-node-244",
@@ -9944,17 +9777,17 @@
       "modes": [
         "walking"
       ],
+      "kind": "hallway",
       "access": [
         "visitor",
         "employee",
         "contractor",
         "emergency"
       ],
+      "accessible": true,
       "approved": true
     },
     {
-      "kind": "hallway",
-      "accessible": true,
       "id": "draft-edge-223",
       "from": "draft-node-243",
       "to": "draft-node-42",
@@ -9962,17 +9795,17 @@
       "modes": [
         "walking"
       ],
+      "kind": "hallway",
       "access": [
         "visitor",
         "employee",
         "contractor",
         "emergency"
       ],
+      "accessible": true,
       "approved": true
     },
     {
-      "kind": "entrance",
-      "accessible": true,
       "id": "draft-edge-224",
       "from": "draft-node-35",
       "to": "draft-node-245",
@@ -9980,14 +9813,14 @@
       "modes": [
         "walking"
       ],
+      "kind": "entrance",
       "access": [
         "employee"
       ],
+      "accessible": true,
       "approved": true
     },
     {
-      "kind": "entrance",
-      "accessible": true,
       "id": "draft-edge-225",
       "from": "draft-node-246",
       "to": "draft-node-247",
@@ -9995,14 +9828,14 @@
       "modes": [
         "walking"
       ],
+      "kind": "entrance",
       "access": [
         "employee"
       ],
+      "accessible": true,
       "approved": true
     },
     {
-      "kind": "hallway",
-      "accessible": true,
       "id": "draft-edge-226",
       "from": "draft-node-248",
       "to": "draft-node-166",
@@ -10010,17 +9843,17 @@
       "modes": [
         "walking"
       ],
+      "kind": "hallway",
       "access": [
         "visitor",
         "employee",
         "contractor",
         "emergency"
       ],
+      "accessible": true,
       "approved": true
     },
     {
-      "kind": "entrance",
-      "accessible": true,
       "id": "draft-edge-228",
       "from": "draft-node-250",
       "to": "draft-node-168",
@@ -10028,14 +9861,14 @@
       "modes": [
         "walking"
       ],
+      "kind": "entrance",
       "access": [
         "employee"
       ],
+      "accessible": true,
       "approved": true
     },
     {
-      "kind": "hallway",
-      "accessible": true,
       "id": "draft-edge-229",
       "from": "draft-node-10",
       "to": "draft-node-251",
@@ -10043,17 +9876,17 @@
       "modes": [
         "walking"
       ],
+      "kind": "hallway",
       "access": [
         "visitor",
         "employee",
         "contractor",
         "emergency"
       ],
+      "accessible": true,
       "approved": true
     },
     {
-      "kind": "hallway",
-      "accessible": true,
       "id": "draft-edge-230",
       "from": "draft-node-251",
       "to": "draft-node-252",
@@ -10061,17 +9894,17 @@
       "modes": [
         "walking"
       ],
+      "kind": "hallway",
       "access": [
         "visitor",
         "employee",
         "contractor",
         "emergency"
       ],
+      "accessible": true,
       "approved": true
     },
     {
-      "kind": "hallway",
-      "accessible": true,
       "id": "draft-edge-231",
       "from": "draft-node-10",
       "to": "draft-node-170",
@@ -10079,17 +9912,17 @@
       "modes": [
         "walking"
       ],
+      "kind": "hallway",
       "access": [
         "visitor",
         "employee",
         "contractor",
         "emergency"
       ],
+      "accessible": true,
       "approved": true
     },
     {
-      "kind": "entrance",
-      "accessible": true,
       "id": "draft-edge-232",
       "from": "draft-node-249",
       "to": "draft-node-248",
@@ -10097,17 +9930,17 @@
       "modes": [
         "walking"
       ],
+      "kind": "entrance",
       "access": [
         "visitor",
         "employee",
         "contractor",
         "emergency"
       ],
+      "accessible": true,
       "approved": true
     },
     {
-      "kind": "hallway",
-      "accessible": true,
       "id": "draft-edge-233",
       "from": "draft-node-248",
       "to": "draft-node-170",
@@ -10115,17 +9948,17 @@
       "modes": [
         "walking"
       ],
+      "kind": "hallway",
       "access": [
         "visitor",
         "employee",
         "contractor",
         "emergency"
       ],
+      "accessible": true,
       "approved": true
     },
     {
-      "kind": "sidewalk",
-      "accessible": true,
       "id": "draft-edge-234",
       "from": "draft-node-249",
       "to": "draft-node-250",
@@ -10133,17 +9966,17 @@
       "modes": [
         "walking"
       ],
+      "kind": "sidewalk",
       "access": [
         "visitor",
         "employee",
         "contractor",
         "emergency"
       ],
+      "accessible": true,
       "approved": true
     },
     {
-      "kind": "sidewalk",
-      "accessible": true,
       "id": "draft-edge-235",
       "from": "draft-node-250",
       "to": "draft-node-253",
@@ -10151,17 +9984,17 @@
       "modes": [
         "walking"
       ],
+      "kind": "sidewalk",
       "access": [
         "visitor",
         "employee",
         "contractor",
         "emergency"
       ],
+      "accessible": true,
       "approved": true
     },
     {
-      "kind": "sidewalk",
-      "accessible": true,
       "id": "draft-edge-236",
       "from": "draft-node-254",
       "to": "draft-node-249",
@@ -10169,17 +10002,17 @@
       "modes": [
         "walking"
       ],
+      "kind": "sidewalk",
       "access": [
         "visitor",
         "employee",
         "contractor",
         "emergency"
       ],
+      "accessible": true,
       "approved": true
     },
     {
-      "kind": "sidewalk",
-      "accessible": true,
       "id": "draft-edge-237",
       "from": "draft-node-253",
       "to": "draft-node-255",
@@ -10187,17 +10020,17 @@
       "modes": [
         "walking"
       ],
+      "kind": "sidewalk",
       "access": [
         "visitor",
         "employee",
         "contractor",
         "emergency"
       ],
+      "accessible": true,
       "approved": true
     },
     {
-      "kind": "sidewalk",
-      "accessible": true,
       "id": "draft-edge-238",
       "from": "draft-node-255",
       "to": "draft-node-256",
@@ -10205,17 +10038,17 @@
       "modes": [
         "walking"
       ],
+      "kind": "sidewalk",
       "access": [
         "visitor",
         "employee",
         "contractor",
         "emergency"
       ],
+      "accessible": true,
       "approved": true
     },
     {
-      "kind": "sidewalk",
-      "accessible": true,
       "id": "draft-edge-239",
       "from": "draft-node-256",
       "to": "draft-node-254",
@@ -10223,17 +10056,17 @@
       "modes": [
         "walking"
       ],
+      "kind": "sidewalk",
       "access": [
         "visitor",
         "employee",
         "contractor",
         "emergency"
       ],
+      "accessible": true,
       "approved": true
     },
     {
-      "kind": "sidewalk",
-      "accessible": true,
       "id": "draft-edge-240",
       "from": "draft-node-257",
       "to": "draft-node-258",
@@ -10241,17 +10074,17 @@
       "modes": [
         "walking"
       ],
+      "kind": "sidewalk",
       "access": [
         "visitor",
         "employee",
         "contractor",
         "emergency"
       ],
+      "accessible": true,
       "approved": true
     },
     {
-      "kind": "sidewalk",
-      "accessible": true,
       "id": "draft-edge-241",
       "from": "draft-node-255",
       "to": "draft-node-259",
@@ -10259,17 +10092,17 @@
       "modes": [
         "walking"
       ],
+      "kind": "sidewalk",
       "access": [
         "visitor",
         "employee",
         "contractor",
         "emergency"
       ],
+      "accessible": true,
       "approved": true
     },
     {
-      "kind": "sidewalk",
-      "accessible": true,
       "id": "draft-edge-242",
       "from": "draft-node-259",
       "to": "draft-node-256",
@@ -10277,17 +10110,17 @@
       "modes": [
         "walking"
       ],
+      "kind": "sidewalk",
       "access": [
         "visitor",
         "employee",
         "contractor",
         "emergency"
       ],
+      "accessible": true,
       "approved": true
     },
     {
-      "kind": "sidewalk",
-      "accessible": true,
       "id": "draft-edge-243",
       "from": "draft-node-258",
       "to": "draft-node-260",
@@ -10295,17 +10128,17 @@
       "modes": [
         "walking"
       ],
+      "kind": "sidewalk",
       "access": [
         "visitor",
         "employee",
         "contractor",
         "emergency"
       ],
+      "accessible": true,
       "approved": true
     },
     {
-      "kind": "sidewalk",
-      "accessible": true,
       "id": "draft-edge-244",
       "from": "draft-node-260",
       "to": "draft-node-261",
@@ -10313,17 +10146,17 @@
       "modes": [
         "walking"
       ],
+      "kind": "sidewalk",
       "access": [
         "visitor",
         "employee",
         "contractor",
         "emergency"
       ],
+      "accessible": true,
       "approved": true
     },
     {
-      "kind": "sidewalk",
-      "accessible": true,
       "id": "draft-edge-245",
       "from": "draft-node-261",
       "to": "draft-node-262",
@@ -10331,17 +10164,17 @@
       "modes": [
         "walking"
       ],
+      "kind": "sidewalk",
       "access": [
         "visitor",
         "employee",
         "contractor",
         "emergency"
       ],
+      "accessible": true,
       "approved": true
     },
     {
-      "kind": "sidewalk",
-      "accessible": true,
       "id": "draft-edge-246",
       "from": "draft-node-262",
       "to": "draft-node-263",
@@ -10349,17 +10182,17 @@
       "modes": [
         "walking"
       ],
+      "kind": "sidewalk",
       "access": [
         "visitor",
         "employee",
         "contractor",
         "emergency"
       ],
+      "accessible": true,
       "approved": true
     },
     {
-      "kind": "sidewalk",
-      "accessible": true,
       "id": "draft-edge-247",
       "from": "draft-node-263",
       "to": "draft-node-264",
@@ -10367,17 +10200,17 @@
       "modes": [
         "walking"
       ],
+      "kind": "sidewalk",
       "access": [
         "visitor",
         "employee",
         "contractor",
         "emergency"
       ],
+      "accessible": true,
       "approved": true
     },
     {
-      "kind": "sidewalk",
-      "accessible": true,
       "id": "draft-edge-248",
       "from": "draft-node-264",
       "to": "draft-node-16",
@@ -10385,17 +10218,17 @@
       "modes": [
         "walking"
       ],
+      "kind": "sidewalk",
       "access": [
         "visitor",
         "employee",
         "contractor",
         "emergency"
       ],
+      "accessible": true,
       "approved": true
     },
     {
-      "kind": "entrance",
-      "accessible": true,
       "id": "draft-edge-249",
       "from": "draft-node-16",
       "to": "draft-node-265",
@@ -10403,17 +10236,17 @@
       "modes": [
         "walking"
       ],
+      "kind": "entrance",
       "access": [
         "visitor",
         "employee",
         "contractor",
         "emergency"
       ],
+      "accessible": true,
       "approved": true
     },
     {
-      "kind": "sidewalk",
-      "accessible": true,
       "id": "draft-edge-250",
       "from": "draft-node-265",
       "to": "draft-node-264",
@@ -10421,17 +10254,17 @@
       "modes": [
         "walking"
       ],
+      "kind": "sidewalk",
       "access": [
         "visitor",
         "employee",
         "contractor",
         "emergency"
       ],
+      "accessible": true,
       "approved": true
     },
     {
-      "kind": "sidewalk",
-      "accessible": true,
       "id": "draft-edge-251",
       "from": "draft-node-264",
       "to": "draft-node-266",
@@ -10439,17 +10272,17 @@
       "modes": [
         "walking"
       ],
+      "kind": "sidewalk",
       "access": [
         "visitor",
         "employee",
         "contractor",
         "emergency"
       ],
+      "accessible": true,
       "approved": true
     },
     {
-      "kind": "sidewalk",
-      "accessible": true,
       "id": "draft-edge-252",
       "from": "draft-node-266",
       "to": "draft-node-267",
@@ -10457,17 +10290,17 @@
       "modes": [
         "walking"
       ],
+      "kind": "sidewalk",
       "access": [
         "visitor",
         "employee",
         "contractor",
         "emergency"
       ],
+      "accessible": true,
       "approved": true
     },
     {
-      "kind": "sidewalk",
-      "accessible": true,
       "id": "draft-edge-253",
       "from": "draft-node-267",
       "to": "draft-node-268",
@@ -10475,17 +10308,17 @@
       "modes": [
         "walking"
       ],
+      "kind": "sidewalk",
       "access": [
         "visitor",
         "employee",
         "contractor",
         "emergency"
       ],
+      "accessible": true,
       "approved": true
     },
     {
-      "kind": "sidewalk",
-      "accessible": true,
       "id": "draft-edge-254",
       "from": "draft-node-268",
       "to": "draft-node-172",
@@ -10493,17 +10326,17 @@
       "modes": [
         "walking"
       ],
+      "kind": "sidewalk",
       "access": [
         "visitor",
         "employee",
         "contractor",
         "emergency"
       ],
+      "accessible": true,
       "approved": true
     },
     {
-      "kind": "sidewalk",
-      "accessible": true,
       "id": "draft-edge-255",
       "from": "draft-node-268",
       "to": "draft-node-171",
@@ -10511,17 +10344,17 @@
       "modes": [
         "walking"
       ],
+      "kind": "sidewalk",
       "access": [
         "visitor",
         "employee",
         "contractor",
         "emergency"
       ],
+      "accessible": true,
       "approved": true
     },
     {
-      "kind": "sidewalk",
-      "accessible": true,
       "id": "draft-edge-256",
       "from": "draft-node-171",
       "to": "draft-node-172",
@@ -10529,17 +10362,17 @@
       "modes": [
         "walking"
       ],
+      "kind": "sidewalk",
       "access": [
         "visitor",
         "employee",
         "contractor",
         "emergency"
       ],
+      "accessible": true,
       "approved": true
     },
     {
-      "kind": "sidewalk",
-      "accessible": true,
       "id": "draft-edge-257",
       "from": "draft-node-268",
       "to": "draft-node-269",
@@ -10547,17 +10380,17 @@
       "modes": [
         "walking"
       ],
+      "kind": "sidewalk",
       "access": [
         "visitor",
         "employee",
         "contractor",
         "emergency"
       ],
+      "accessible": true,
       "approved": true
     },
     {
-      "kind": "sidewalk",
-      "accessible": true,
       "id": "draft-edge-258",
       "from": "draft-node-269",
       "to": "draft-node-202",
@@ -10565,17 +10398,17 @@
       "modes": [
         "walking"
       ],
+      "kind": "sidewalk",
       "access": [
         "visitor",
         "employee",
         "contractor",
         "emergency"
       ],
+      "accessible": true,
       "approved": true
     },
     {
-      "kind": "crosswalk",
-      "accessible": true,
       "id": "draft-edge-259",
       "from": "draft-node-262",
       "to": "draft-node-270",
@@ -10583,17 +10416,17 @@
       "modes": [
         "walking"
       ],
+      "kind": "crosswalk",
       "access": [
         "visitor",
         "employee",
         "contractor",
         "emergency"
       ],
+      "accessible": true,
       "approved": true
     },
     {
-      "kind": "crosswalk",
-      "accessible": true,
       "id": "draft-edge-260",
       "from": "draft-node-271",
       "to": "draft-node-272",
@@ -10601,17 +10434,17 @@
       "modes": [
         "walking"
       ],
+      "kind": "crosswalk",
       "access": [
         "visitor",
         "employee",
         "contractor",
         "emergency"
       ],
+      "accessible": true,
       "approved": true
     },
     {
-      "kind": "sidewalk",
-      "accessible": true,
       "id": "draft-edge-262",
       "from": "draft-node-257",
       "to": "draft-node-275",
@@ -10619,17 +10452,17 @@
       "modes": [
         "walking"
       ],
+      "kind": "sidewalk",
       "access": [
         "visitor",
         "employee",
         "contractor",
         "emergency"
       ],
+      "accessible": true,
       "approved": true
     },
     {
-      "kind": "sidewalk",
-      "accessible": true,
       "id": "draft-edge-263",
       "from": "draft-node-275",
       "to": "draft-node-276",
@@ -10637,17 +10470,17 @@
       "modes": [
         "walking"
       ],
+      "kind": "sidewalk",
       "access": [
         "visitor",
         "employee",
         "contractor",
         "emergency"
       ],
+      "accessible": true,
       "approved": true
     },
     {
-      "kind": "sidewalk",
-      "accessible": true,
       "id": "draft-edge-264",
       "from": "draft-node-276",
       "to": "draft-node-17",
@@ -10655,17 +10488,17 @@
       "modes": [
         "walking"
       ],
+      "kind": "sidewalk",
       "access": [
         "visitor",
         "employee",
         "contractor",
         "emergency"
       ],
+      "accessible": true,
       "approved": true
     },
     {
-      "kind": "crosswalk",
-      "accessible": true,
       "id": "draft-edge-265",
       "from": "draft-node-273",
       "to": "draft-node-277",
@@ -10673,17 +10506,17 @@
       "modes": [
         "walking"
       ],
+      "kind": "crosswalk",
       "access": [
         "visitor",
         "employee",
         "contractor",
         "emergency"
       ],
+      "accessible": true,
       "approved": true
     },
     {
-      "kind": "sidewalk",
-      "accessible": true,
       "id": "draft-edge-266",
       "from": "draft-node-277",
       "to": "draft-node-278",
@@ -10691,17 +10524,17 @@
       "modes": [
         "walking"
       ],
+      "kind": "sidewalk",
       "access": [
         "visitor",
         "employee",
         "contractor",
         "emergency"
       ],
+      "accessible": true,
       "approved": true
     },
     {
-      "kind": "sidewalk",
-      "accessible": true,
       "id": "draft-edge-267",
       "from": "draft-node-278",
       "to": "draft-node-279",
@@ -10709,17 +10542,17 @@
       "modes": [
         "walking"
       ],
+      "kind": "sidewalk",
       "access": [
         "visitor",
         "employee",
         "contractor",
         "emergency"
       ],
+      "accessible": true,
       "approved": true
     },
     {
-      "kind": "sidewalk",
-      "accessible": true,
       "id": "draft-edge-268",
       "from": "draft-node-279",
       "to": "draft-node-280",
@@ -10727,17 +10560,17 @@
       "modes": [
         "walking"
       ],
+      "kind": "sidewalk",
       "access": [
         "visitor",
         "employee",
         "contractor",
         "emergency"
       ],
+      "accessible": true,
       "approved": true
     },
     {
-      "kind": "sidewalk",
-      "accessible": true,
       "id": "draft-edge-269",
       "from": "draft-node-279",
       "to": "draft-node-281",
@@ -10745,17 +10578,17 @@
       "modes": [
         "walking"
       ],
+      "kind": "sidewalk",
       "access": [
         "visitor",
         "employee",
         "contractor",
         "emergency"
       ],
+      "accessible": true,
       "approved": true
     },
     {
-      "kind": "entrance",
-      "accessible": true,
       "id": "draft-edge-270",
       "from": "draft-node-281",
       "to": "draft-node-282",
@@ -10763,17 +10596,17 @@
       "modes": [
         "walking"
       ],
+      "kind": "entrance",
       "access": [
         "visitor",
         "employee",
         "contractor",
         "emergency"
       ],
+      "accessible": true,
       "approved": true
     },
     {
-      "kind": "entrance",
-      "accessible": true,
       "id": "draft-edge-271",
       "from": "draft-node-280",
       "to": "draft-node-283",
@@ -10781,17 +10614,17 @@
       "modes": [
         "walking"
       ],
+      "kind": "entrance",
       "access": [
         "visitor",
         "employee",
         "contractor",
         "emergency"
       ],
+      "accessible": true,
       "approved": true
     },
     {
-      "kind": "crosswalk",
-      "accessible": true,
       "id": "draft-edge-272",
       "from": "draft-node-284",
       "to": "draft-node-285",
@@ -10799,17 +10632,17 @@
       "modes": [
         "walking"
       ],
+      "kind": "crosswalk",
       "access": [
         "visitor",
         "employee",
         "contractor",
         "emergency"
       ],
+      "accessible": true,
       "approved": true
     },
     {
-      "kind": "sidewalk",
-      "accessible": true,
       "id": "draft-edge-273",
       "from": "draft-node-285",
       "to": "draft-node-286",
@@ -10817,17 +10650,17 @@
       "modes": [
         "walking"
       ],
+      "kind": "sidewalk",
       "access": [
         "visitor",
         "employee",
         "contractor",
         "emergency"
       ],
+      "accessible": true,
       "approved": true
     },
     {
-      "kind": "sidewalk",
-      "accessible": true,
       "id": "draft-edge-274",
       "from": "draft-node-286",
       "to": "draft-node-287",
@@ -10835,17 +10668,17 @@
       "modes": [
         "walking"
       ],
+      "kind": "sidewalk",
       "access": [
         "visitor",
         "employee",
         "contractor",
         "emergency"
       ],
+      "accessible": true,
       "approved": true
     },
     {
-      "kind": "sidewalk",
-      "accessible": true,
       "id": "draft-edge-275",
       "from": "draft-node-287",
       "to": "draft-node-288",
@@ -10853,17 +10686,17 @@
       "modes": [
         "walking"
       ],
+      "kind": "sidewalk",
       "access": [
         "visitor",
         "employee",
         "contractor",
         "emergency"
       ],
+      "accessible": true,
       "approved": true
     },
     {
-      "kind": "sidewalk",
-      "accessible": true,
       "id": "draft-edge-276",
       "from": "draft-node-288",
       "to": "draft-node-289",
@@ -10871,17 +10704,17 @@
       "modes": [
         "walking"
       ],
+      "kind": "sidewalk",
       "access": [
         "visitor",
         "employee",
         "contractor",
         "emergency"
       ],
+      "accessible": true,
       "approved": true
     },
     {
-      "kind": "sidewalk",
-      "accessible": true,
       "id": "draft-edge-277",
       "from": "draft-node-289",
       "to": "draft-node-290",
@@ -10889,17 +10722,17 @@
       "modes": [
         "walking"
       ],
+      "kind": "sidewalk",
       "access": [
         "visitor",
         "employee",
         "contractor",
         "emergency"
       ],
+      "accessible": true,
       "approved": true
     },
     {
-      "kind": "sidewalk",
-      "accessible": true,
       "id": "draft-edge-278",
       "from": "draft-node-290",
       "to": "draft-node-291",
@@ -10907,17 +10740,17 @@
       "modes": [
         "walking"
       ],
+      "kind": "sidewalk",
       "access": [
         "visitor",
         "employee",
         "contractor",
         "emergency"
       ],
+      "accessible": true,
       "approved": true
     },
     {
-      "kind": "sidewalk",
-      "accessible": true,
       "id": "draft-edge-279",
       "from": "draft-node-291",
       "to": "draft-node-292",
@@ -10925,17 +10758,17 @@
       "modes": [
         "walking"
       ],
+      "kind": "sidewalk",
       "access": [
         "visitor",
         "employee",
         "contractor",
         "emergency"
       ],
+      "accessible": true,
       "approved": true
     },
     {
-      "kind": "sidewalk",
-      "accessible": true,
       "id": "draft-edge-280",
       "from": "draft-node-292",
       "to": "draft-node-293",
@@ -10943,17 +10776,17 @@
       "modes": [
         "walking"
       ],
+      "kind": "sidewalk",
       "access": [
         "visitor",
         "employee",
         "contractor",
         "emergency"
       ],
+      "accessible": true,
       "approved": true
     },
     {
-      "kind": "sidewalk",
-      "accessible": true,
       "id": "draft-edge-281",
       "from": "draft-node-293",
       "to": "draft-node-294",
@@ -10961,17 +10794,17 @@
       "modes": [
         "walking"
       ],
+      "kind": "sidewalk",
       "access": [
         "visitor",
         "employee",
         "contractor",
         "emergency"
       ],
+      "accessible": true,
       "approved": true
     },
     {
-      "kind": "sidewalk",
-      "accessible": true,
       "id": "draft-edge-282",
       "from": "draft-node-294",
       "to": "draft-node-295",
@@ -10979,17 +10812,17 @@
       "modes": [
         "walking"
       ],
+      "kind": "sidewalk",
       "access": [
         "visitor",
         "employee",
         "contractor",
         "emergency"
       ],
+      "accessible": true,
       "approved": true
     },
     {
-      "kind": "sidewalk",
-      "accessible": true,
       "id": "draft-edge-283",
       "from": "draft-node-295",
       "to": "draft-node-296",
@@ -10997,17 +10830,17 @@
       "modes": [
         "walking"
       ],
+      "kind": "sidewalk",
       "access": [
         "visitor",
         "employee",
         "contractor",
         "emergency"
       ],
+      "accessible": true,
       "approved": true
     },
     {
-      "kind": "sidewalk",
-      "accessible": true,
       "id": "draft-edge-284",
       "from": "draft-node-296",
       "to": "draft-node-297",
@@ -11015,17 +10848,17 @@
       "modes": [
         "walking"
       ],
+      "kind": "sidewalk",
       "access": [
         "visitor",
         "employee",
         "contractor",
         "emergency"
       ],
+      "accessible": true,
       "approved": true
     },
     {
-      "kind": "sidewalk",
-      "accessible": true,
       "id": "draft-edge-285",
       "from": "draft-node-297",
       "to": "draft-node-298",
@@ -11033,17 +10866,17 @@
       "modes": [
         "walking"
       ],
+      "kind": "sidewalk",
       "access": [
         "visitor",
         "employee",
         "contractor",
         "emergency"
       ],
+      "accessible": true,
       "approved": true
     },
     {
-      "kind": "entrance",
-      "accessible": true,
       "id": "draft-edge-286",
       "from": "draft-node-289",
       "to": "draft-node-300",
@@ -11051,17 +10884,17 @@
       "modes": [
         "walking"
       ],
+      "kind": "entrance",
       "access": [
         "visitor",
         "employee",
         "contractor",
         "emergency"
       ],
+      "accessible": true,
       "approved": true
     },
     {
-      "kind": "entrance",
-      "accessible": true,
       "id": "draft-edge-287",
       "from": "draft-node-290",
       "to": "draft-node-301",
@@ -11069,17 +10902,17 @@
       "modes": [
         "walking"
       ],
+      "kind": "entrance",
       "access": [
         "visitor",
         "employee",
         "contractor",
         "emergency"
       ],
+      "accessible": true,
       "approved": true
     },
     {
-      "kind": "entrance",
-      "accessible": true,
       "id": "draft-edge-288",
       "from": "draft-node-291",
       "to": "draft-node-302",
@@ -11087,17 +10920,17 @@
       "modes": [
         "walking"
       ],
+      "kind": "entrance",
       "access": [
         "visitor",
         "employee",
         "contractor",
         "emergency"
       ],
+      "accessible": true,
       "approved": true
     },
     {
-      "kind": "sidewalk",
-      "accessible": true,
       "id": "draft-edge-289",
       "from": "draft-node-300",
       "to": "draft-node-303",
@@ -11105,17 +10938,17 @@
       "modes": [
         "walking"
       ],
+      "kind": "sidewalk",
       "access": [
         "visitor",
         "employee",
         "contractor",
         "emergency"
       ],
+      "accessible": true,
       "approved": true
     },
     {
-      "kind": "sidewalk",
-      "accessible": true,
       "id": "draft-edge-290",
       "from": "draft-node-303",
       "to": "draft-node-304",
@@ -11123,17 +10956,17 @@
       "modes": [
         "walking"
       ],
+      "kind": "sidewalk",
       "access": [
         "visitor",
         "employee",
         "contractor",
         "emergency"
       ],
+      "accessible": true,
       "approved": true
     },
     {
-      "kind": "sidewalk",
-      "accessible": true,
       "id": "draft-edge-291",
       "from": "draft-node-304",
       "to": "draft-node-305",
@@ -11141,17 +10974,17 @@
       "modes": [
         "walking"
       ],
+      "kind": "sidewalk",
       "access": [
         "visitor",
         "employee",
         "contractor",
         "emergency"
       ],
+      "accessible": true,
       "approved": true
     },
     {
-      "kind": "sidewalk",
-      "accessible": true,
       "id": "draft-edge-292",
       "from": "draft-node-305",
       "to": "draft-node-306",
@@ -11159,17 +10992,17 @@
       "modes": [
         "walking"
       ],
+      "kind": "sidewalk",
       "access": [
         "visitor",
         "employee",
         "contractor",
         "emergency"
       ],
+      "accessible": true,
       "approved": true
     },
     {
-      "kind": "sidewalk",
-      "accessible": true,
       "id": "draft-edge-293",
       "from": "draft-node-306",
       "to": "draft-node-307",
@@ -11177,17 +11010,17 @@
       "modes": [
         "walking"
       ],
+      "kind": "sidewalk",
       "access": [
         "visitor",
         "employee",
         "contractor",
         "emergency"
       ],
+      "accessible": true,
       "approved": true
     },
     {
-      "kind": "sidewalk",
-      "accessible": true,
       "id": "draft-edge-294",
       "from": "draft-node-307",
       "to": "draft-node-301",
@@ -11195,17 +11028,17 @@
       "modes": [
         "walking"
       ],
+      "kind": "sidewalk",
       "access": [
         "visitor",
         "employee",
         "contractor",
         "emergency"
       ],
+      "accessible": true,
       "approved": true
     },
     {
-      "kind": "sidewalk",
-      "accessible": true,
       "id": "draft-edge-295",
       "from": "draft-node-301",
       "to": "draft-node-302",
@@ -11213,17 +11046,17 @@
       "modes": [
         "walking"
       ],
+      "kind": "sidewalk",
       "access": [
         "visitor",
         "employee",
         "contractor",
         "emergency"
       ],
+      "accessible": true,
       "approved": true
     },
     {
-      "kind": "sidewalk",
-      "accessible": true,
       "id": "draft-edge-296",
       "from": "draft-node-308",
       "to": "draft-node-309",
@@ -11231,17 +11064,17 @@
       "modes": [
         "walking"
       ],
+      "kind": "sidewalk",
       "access": [
         "visitor",
         "employee",
         "contractor",
         "emergency"
       ],
+      "accessible": true,
       "approved": true
     },
     {
-      "kind": "sidewalk",
-      "accessible": true,
       "id": "draft-edge-297",
       "from": "draft-node-306",
       "to": "draft-node-303",
@@ -11249,17 +11082,17 @@
       "modes": [
         "walking"
       ],
+      "kind": "sidewalk",
       "access": [
         "visitor",
         "employee",
         "contractor",
         "emergency"
       ],
+      "accessible": true,
       "approved": true
     },
     {
-      "kind": "sidewalk",
-      "accessible": true,
       "id": "draft-edge-298",
       "from": "draft-node-307",
       "to": "draft-node-300",
@@ -11267,17 +11100,17 @@
       "modes": [
         "walking"
       ],
+      "kind": "sidewalk",
       "access": [
         "visitor",
         "employee",
         "contractor",
         "emergency"
       ],
+      "accessible": true,
       "approved": true
     },
     {
-      "kind": "sidewalk",
-      "accessible": true,
       "id": "draft-edge-299",
       "from": "draft-node-302",
       "to": "draft-node-310",
@@ -11285,17 +11118,17 @@
       "modes": [
         "walking"
       ],
+      "kind": "sidewalk",
       "access": [
         "visitor",
         "employee",
         "contractor",
         "emergency"
       ],
+      "accessible": true,
       "approved": true
     },
     {
-      "kind": "sidewalk",
-      "accessible": true,
       "id": "draft-edge-300",
       "from": "draft-node-311",
       "to": "draft-node-272",
@@ -11303,17 +11136,17 @@
       "modes": [
         "walking"
       ],
+      "kind": "sidewalk",
       "access": [
         "visitor",
         "employee",
         "contractor",
         "emergency"
       ],
+      "accessible": true,
       "approved": true
     },
     {
-      "kind": "sidewalk",
-      "accessible": true,
       "id": "draft-edge-301",
       "from": "draft-node-311",
       "to": "draft-node-312",
@@ -11321,17 +11154,17 @@
       "modes": [
         "walking"
       ],
+      "kind": "sidewalk",
       "access": [
         "visitor",
         "employee",
         "contractor",
         "emergency"
       ],
+      "accessible": true,
       "approved": true
     },
     {
-      "kind": "entrance",
-      "accessible": true,
       "id": "draft-edge-302",
       "from": "draft-node-312",
       "to": "draft-node-313",
@@ -11339,17 +11172,17 @@
       "modes": [
         "walking"
       ],
+      "kind": "entrance",
       "access": [
         "visitor",
         "employee",
         "contractor",
         "emergency"
       ],
+      "accessible": true,
       "approved": true
     },
     {
-      "kind": "sidewalk",
-      "accessible": true,
       "id": "draft-edge-303",
       "from": "draft-node-272",
       "to": "draft-node-314",
@@ -11357,17 +11190,17 @@
       "modes": [
         "walking"
       ],
+      "kind": "sidewalk",
       "access": [
         "visitor",
         "employee",
         "contractor",
         "emergency"
       ],
+      "accessible": true,
       "approved": true
     },
     {
-      "kind": "sidewalk",
-      "accessible": true,
       "id": "draft-edge-304",
       "from": "draft-node-315",
       "to": "draft-node-316",
@@ -11375,17 +11208,17 @@
       "modes": [
         "walking"
       ],
+      "kind": "sidewalk",
       "access": [
         "visitor",
         "employee",
         "contractor",
         "emergency"
       ],
+      "accessible": true,
       "approved": true
     },
     {
-      "kind": "sidewalk",
-      "accessible": true,
       "id": "draft-edge-305",
       "from": "draft-node-316",
       "to": "draft-node-317",
@@ -11393,17 +11226,17 @@
       "modes": [
         "walking"
       ],
+      "kind": "sidewalk",
       "access": [
         "visitor",
         "employee",
         "contractor",
         "emergency"
       ],
+      "accessible": true,
       "approved": true
     },
     {
-      "kind": "sidewalk",
-      "accessible": true,
       "id": "draft-edge-306",
       "from": "draft-node-317",
       "to": "draft-node-318",
@@ -11411,17 +11244,17 @@
       "modes": [
         "walking"
       ],
+      "kind": "sidewalk",
       "access": [
         "visitor",
         "employee",
         "contractor",
         "emergency"
       ],
+      "accessible": true,
       "approved": true
     },
     {
-      "kind": "sidewalk",
-      "accessible": true,
       "id": "draft-edge-307",
       "from": "draft-node-314",
       "to": "draft-node-315",
@@ -11429,17 +11262,17 @@
       "modes": [
         "walking"
       ],
+      "kind": "sidewalk",
       "access": [
         "visitor",
         "employee",
         "contractor",
         "emergency"
       ],
+      "accessible": true,
       "approved": true
     },
     {
-      "kind": "sidewalk",
-      "accessible": true,
       "id": "draft-edge-308",
       "from": "draft-node-318",
       "to": "draft-node-319",
@@ -11447,17 +11280,17 @@
       "modes": [
         "walking"
       ],
+      "kind": "sidewalk",
       "access": [
         "visitor",
         "employee",
         "contractor",
         "emergency"
       ],
+      "accessible": true,
       "approved": true
     },
     {
-      "kind": "sidewalk",
-      "accessible": true,
       "id": "draft-edge-309",
       "from": "draft-node-319",
       "to": "draft-node-320",
@@ -11465,17 +11298,17 @@
       "modes": [
         "walking"
       ],
+      "kind": "sidewalk",
       "access": [
         "visitor",
         "employee",
         "contractor",
         "emergency"
       ],
+      "accessible": true,
       "approved": true
     },
     {
-      "kind": "entrance",
-      "accessible": true,
       "id": "draft-edge-310",
       "from": "draft-node-320",
       "to": "draft-node-321",
@@ -11483,17 +11316,17 @@
       "modes": [
         "walking"
       ],
+      "kind": "entrance",
       "access": [
         "visitor",
         "employee",
         "contractor",
         "emergency"
       ],
+      "accessible": true,
       "approved": true
     },
     {
-      "kind": "entrance",
-      "accessible": true,
       "id": "draft-edge-311",
       "from": "draft-node-322",
       "to": "draft-node-323",
@@ -11501,17 +11334,17 @@
       "modes": [
         "walking"
       ],
+      "kind": "entrance",
       "access": [
         "visitor",
         "employee",
         "contractor",
         "emergency"
       ],
+      "accessible": true,
       "approved": true
     },
     {
-      "kind": "entrance",
-      "accessible": true,
       "id": "draft-edge-312",
       "from": "draft-node-324",
       "to": "draft-node-325",
@@ -11519,17 +11352,17 @@
       "modes": [
         "walking"
       ],
+      "kind": "entrance",
       "access": [
         "visitor",
         "employee",
         "contractor",
         "emergency"
       ],
+      "accessible": true,
       "approved": true
     },
     {
-      "kind": "entrance",
-      "accessible": true,
       "id": "draft-edge-313",
       "from": "draft-node-316",
       "to": "draft-node-326",
@@ -11537,17 +11370,17 @@
       "modes": [
         "walking"
       ],
+      "kind": "entrance",
       "access": [
         "visitor",
         "employee",
         "contractor",
         "emergency"
       ],
+      "accessible": true,
       "approved": true
     },
     {
-      "kind": "hallway",
-      "accessible": true,
       "id": "draft-edge-314",
       "from": "draft-node-327",
       "to": "draft-node-328",
@@ -11555,17 +11388,17 @@
       "modes": [
         "walking"
       ],
+      "kind": "hallway",
       "access": [
         "visitor",
         "employee",
         "contractor",
         "emergency"
       ],
+      "accessible": true,
       "approved": true
     },
     {
-      "kind": "hallway",
-      "accessible": true,
       "id": "draft-edge-315",
       "from": "draft-node-328",
       "to": "draft-node-329",
@@ -11573,17 +11406,17 @@
       "modes": [
         "walking"
       ],
+      "kind": "hallway",
       "access": [
         "visitor",
         "employee",
         "contractor",
         "emergency"
       ],
+      "accessible": true,
       "approved": true
     },
     {
-      "kind": "hallway",
-      "accessible": true,
       "id": "draft-edge-316",
       "from": "draft-node-329",
       "to": "draft-node-330",
@@ -11591,17 +11424,17 @@
       "modes": [
         "walking"
       ],
+      "kind": "hallway",
       "access": [
         "visitor",
         "employee",
         "contractor",
         "emergency"
       ],
+      "accessible": true,
       "approved": true
     },
     {
-      "kind": "hallway",
-      "accessible": true,
       "id": "draft-edge-317",
       "from": "draft-node-330",
       "to": "draft-node-331",
@@ -11609,17 +11442,17 @@
       "modes": [
         "walking"
       ],
+      "kind": "hallway",
       "access": [
         "visitor",
         "employee",
         "contractor",
         "emergency"
       ],
+      "accessible": true,
       "approved": true
     },
     {
-      "kind": "hallway",
-      "accessible": true,
       "id": "draft-edge-318",
       "from": "draft-node-331",
       "to": "draft-node-327",
@@ -11627,17 +11460,17 @@
       "modes": [
         "walking"
       ],
+      "kind": "hallway",
       "access": [
         "visitor",
         "employee",
         "contractor",
         "emergency"
       ],
+      "accessible": true,
       "approved": true
     },
     {
-      "kind": "hallway",
-      "accessible": true,
       "id": "draft-edge-319",
       "from": "draft-node-327",
       "to": "draft-node-332",
@@ -11645,17 +11478,17 @@
       "modes": [
         "walking"
       ],
+      "kind": "hallway",
       "access": [
         "visitor",
         "employee",
         "contractor",
         "emergency"
       ],
+      "accessible": true,
       "approved": true
     },
     {
-      "kind": "hallway",
-      "accessible": true,
       "id": "draft-edge-320",
       "from": "draft-node-332",
       "to": "draft-node-333",
@@ -11663,17 +11496,17 @@
       "modes": [
         "walking"
       ],
+      "kind": "hallway",
       "access": [
         "visitor",
         "employee",
         "contractor",
         "emergency"
       ],
+      "accessible": true,
       "approved": true
     },
     {
-      "kind": "hallway",
-      "accessible": true,
       "id": "draft-edge-321",
       "from": "draft-node-333",
       "to": "draft-node-334",
@@ -11681,17 +11514,17 @@
       "modes": [
         "walking"
       ],
+      "kind": "hallway",
       "access": [
         "visitor",
         "employee",
         "contractor",
         "emergency"
       ],
+      "accessible": true,
       "approved": true
     },
     {
-      "kind": "hallway",
-      "accessible": true,
       "id": "draft-edge-322",
       "from": "draft-node-334",
       "to": "draft-node-327",
@@ -11699,17 +11532,17 @@
       "modes": [
         "walking"
       ],
+      "kind": "hallway",
       "access": [
         "visitor",
         "employee",
         "contractor",
         "emergency"
       ],
+      "accessible": true,
       "approved": true
     },
     {
-      "kind": "entrance",
-      "accessible": true,
       "id": "draft-edge-323",
       "from": "draft-node-333",
       "to": "draft-node-335",
@@ -11717,17 +11550,17 @@
       "modes": [
         "walking"
       ],
+      "kind": "entrance",
       "access": [
         "visitor",
         "employee",
         "contractor",
         "emergency"
       ],
+      "accessible": true,
       "approved": true
     },
     {
-      "kind": "hallway",
-      "accessible": true,
       "id": "draft-edge-326",
       "from": "draft-node-338",
       "to": "draft-node-339",
@@ -11735,17 +11568,17 @@
       "modes": [
         "walking"
       ],
+      "kind": "hallway",
       "access": [
         "visitor",
         "employee",
         "contractor",
         "emergency"
       ],
+      "accessible": true,
       "approved": true
     },
     {
-      "kind": "hallway",
-      "accessible": true,
       "id": "draft-edge-327",
       "from": "draft-node-340",
       "to": "draft-node-341",
@@ -11753,17 +11586,17 @@
       "modes": [
         "walking"
       ],
+      "kind": "hallway",
       "access": [
         "visitor",
         "employee",
         "contractor",
         "emergency"
       ],
+      "accessible": true,
       "approved": true
     },
     {
-      "kind": "hallway",
-      "accessible": true,
       "id": "draft-edge-328",
       "from": "draft-node-341",
       "to": "draft-node-339",
@@ -11771,17 +11604,17 @@
       "modes": [
         "walking"
       ],
+      "kind": "hallway",
       "access": [
         "visitor",
         "employee",
         "contractor",
         "emergency"
       ],
+      "accessible": true,
       "approved": true
     },
     {
-      "kind": "hallway",
-      "accessible": true,
       "id": "draft-edge-329",
       "from": "draft-node-339",
       "to": "draft-node-340",
@@ -11789,17 +11622,17 @@
       "modes": [
         "walking"
       ],
+      "kind": "hallway",
       "access": [
         "visitor",
         "employee",
         "contractor",
         "emergency"
       ],
+      "accessible": true,
       "approved": true
     },
     {
-      "kind": "hallway",
-      "accessible": true,
       "id": "draft-edge-330",
       "from": "draft-node-340",
       "to": "draft-node-342",
@@ -11807,17 +11640,17 @@
       "modes": [
         "walking"
       ],
+      "kind": "hallway",
       "access": [
         "visitor",
         "employee",
         "contractor",
         "emergency"
       ],
+      "accessible": true,
       "approved": true
     },
     {
-      "kind": "hallway",
-      "accessible": true,
       "id": "draft-edge-331",
       "from": "draft-node-342",
       "to": "draft-node-343",
@@ -11825,17 +11658,17 @@
       "modes": [
         "walking"
       ],
+      "kind": "hallway",
       "access": [
         "visitor",
         "employee",
         "contractor",
         "emergency"
       ],
+      "accessible": true,
       "approved": true
     },
     {
-      "kind": "entrance",
-      "accessible": true,
       "id": "draft-edge-332",
       "from": "draft-node-343",
       "to": "draft-node-314",
@@ -11843,17 +11676,17 @@
       "modes": [
         "walking"
       ],
+      "kind": "entrance",
       "access": [
         "visitor",
         "employee",
         "contractor",
         "emergency"
       ],
+      "accessible": true,
       "approved": true
     },
     {
-      "kind": "entrance",
-      "accessible": true,
       "id": "draft-edge-333",
       "from": "draft-node-344",
       "to": "draft-node-345",
@@ -11861,17 +11694,17 @@
       "modes": [
         "walking"
       ],
+      "kind": "entrance",
       "access": [
         "visitor",
         "employee",
         "contractor",
         "emergency"
       ],
+      "accessible": true,
       "approved": true
     },
     {
-      "kind": "entrance",
-      "accessible": true,
       "id": "draft-edge-334",
       "from": "draft-node-346",
       "to": "draft-node-347",
@@ -11879,17 +11712,17 @@
       "modes": [
         "walking"
       ],
+      "kind": "entrance",
       "access": [
         "visitor",
         "employee",
         "contractor",
         "emergency"
       ],
+      "accessible": true,
       "approved": true
     },
     {
-      "kind": "entrance",
-      "accessible": true,
       "id": "draft-edge-335",
       "from": "draft-node-348",
       "to": "draft-node-349",
@@ -11897,17 +11730,17 @@
       "modes": [
         "walking"
       ],
+      "kind": "entrance",
       "access": [
         "visitor",
         "employee",
         "contractor",
         "emergency"
       ],
+      "accessible": true,
       "approved": true
     },
     {
-      "kind": "entrance",
-      "accessible": true,
       "id": "draft-edge-336",
       "from": "draft-node-338",
       "to": "draft-node-350",
@@ -11915,17 +11748,17 @@
       "modes": [
         "walking"
       ],
+      "kind": "entrance",
       "access": [
         "visitor",
         "employee",
         "contractor",
         "emergency"
       ],
+      "accessible": true,
       "approved": true
     },
     {
-      "kind": "entrance",
-      "accessible": true,
       "id": "draft-edge-337",
       "from": "draft-node-350",
       "to": "draft-node-351",
@@ -11933,17 +11766,17 @@
       "modes": [
         "walking"
       ],
+      "kind": "entrance",
       "access": [
         "visitor",
         "employee",
         "contractor",
         "emergency"
       ],
+      "accessible": true,
       "approved": true
     },
     {
-      "kind": "sidewalk",
-      "accessible": true,
       "id": "draft-edge-338",
       "from": "draft-node-352",
       "to": "draft-node-353",
@@ -11951,17 +11784,17 @@
       "modes": [
         "walking"
       ],
+      "kind": "sidewalk",
       "access": [
         "visitor",
         "employee",
         "contractor",
         "emergency"
       ],
+      "accessible": true,
       "approved": true
     },
     {
-      "kind": "sidewalk",
-      "accessible": true,
       "id": "draft-edge-339",
       "from": "draft-node-353",
       "to": "draft-node-354",
@@ -11969,17 +11802,17 @@
       "modes": [
         "walking"
       ],
+      "kind": "sidewalk",
       "access": [
         "visitor",
         "employee",
         "contractor",
         "emergency"
       ],
+      "accessible": true,
       "approved": true
     },
     {
-      "kind": "sidewalk",
-      "accessible": true,
       "id": "draft-edge-340",
       "from": "draft-node-354",
       "to": "draft-node-312",
@@ -11987,17 +11820,17 @@
       "modes": [
         "walking"
       ],
+      "kind": "sidewalk",
       "access": [
         "visitor",
         "employee",
         "contractor",
         "emergency"
       ],
+      "accessible": true,
       "approved": true
     },
     {
-      "kind": "sidewalk",
-      "accessible": true,
       "id": "draft-edge-341",
       "from": "draft-node-348",
       "to": "draft-node-355",
@@ -12005,17 +11838,17 @@
       "modes": [
         "walking"
       ],
+      "kind": "sidewalk",
       "access": [
         "visitor",
         "employee",
         "contractor",
         "emergency"
       ],
+      "accessible": true,
       "approved": true
     },
     {
-      "kind": "sidewalk",
-      "accessible": true,
       "id": "draft-edge-342",
       "from": "draft-node-346",
       "to": "draft-node-356",
@@ -12023,17 +11856,17 @@
       "modes": [
         "walking"
       ],
+      "kind": "sidewalk",
       "access": [
         "visitor",
         "employee",
         "contractor",
         "emergency"
       ],
+      "accessible": true,
       "approved": true
     },
     {
-      "kind": "sidewalk",
-      "accessible": true,
       "id": "draft-edge-343",
       "from": "draft-node-345",
       "to": "draft-node-357",
@@ -12041,17 +11874,17 @@
       "modes": [
         "walking"
       ],
+      "kind": "sidewalk",
       "access": [
         "visitor",
         "employee",
         "contractor",
         "emergency"
       ],
+      "accessible": true,
       "approved": true
     },
     {
-      "kind": "sidewalk",
-      "accessible": true,
       "id": "draft-edge-344",
       "from": "draft-node-270",
       "to": "draft-node-358",
@@ -12059,17 +11892,17 @@
       "modes": [
         "walking"
       ],
+      "kind": "sidewalk",
       "access": [
         "visitor",
         "employee",
         "contractor",
         "emergency"
       ],
+      "accessible": true,
       "approved": true
     },
     {
-      "kind": "sidewalk",
-      "accessible": true,
       "id": "draft-edge-345",
       "from": "draft-node-358",
       "to": "draft-node-359",
@@ -12077,17 +11910,17 @@
       "modes": [
         "walking"
       ],
+      "kind": "sidewalk",
       "access": [
         "visitor",
         "employee",
         "contractor",
         "emergency"
       ],
+      "accessible": true,
       "approved": true
     },
     {
-      "kind": "sidewalk",
-      "accessible": true,
       "id": "draft-edge-346",
       "from": "draft-node-359",
       "to": "draft-node-360",
@@ -12095,17 +11928,17 @@
       "modes": [
         "walking"
       ],
+      "kind": "sidewalk",
       "access": [
         "visitor",
         "employee",
         "contractor",
         "emergency"
       ],
+      "accessible": true,
       "approved": true
     },
     {
-      "kind": "sidewalk",
-      "accessible": true,
       "id": "draft-edge-347",
       "from": "draft-node-360",
       "to": "draft-node-361",
@@ -12113,17 +11946,17 @@
       "modes": [
         "walking"
       ],
+      "kind": "sidewalk",
       "access": [
         "visitor",
         "employee",
         "contractor",
         "emergency"
       ],
+      "accessible": true,
       "approved": true
     },
     {
-      "kind": "entrance",
-      "accessible": true,
       "id": "draft-edge-348",
       "from": "draft-node-362",
       "to": "draft-node-363",
@@ -12131,17 +11964,17 @@
       "modes": [
         "walking"
       ],
+      "kind": "entrance",
       "access": [
         "visitor",
         "employee",
         "contractor",
         "emergency"
       ],
+      "accessible": true,
       "approved": true
     },
     {
-      "kind": "entrance",
-      "accessible": true,
       "id": "draft-edge-349",
       "from": "draft-node-359",
       "to": "draft-node-364",
@@ -12149,769 +11982,15 @@
       "modes": [
         "walking"
       ],
+      "kind": "entrance",
       "access": [
         "visitor",
         "employee",
         "contractor",
         "emergency"
       ],
+      "accessible": true,
       "approved": true
-    },
-    {
-      "kind": "hallway",
-      "accessible": true,
-      "id": "draft-edge-350",
-      "from": "draft-node-235",
-      "to": "draft-node-38",
-      "bidirectional": true,
-      "modes": [
-        "walking"
-      ],
-      "access": [
-        "visitor",
-        "employee",
-        "contractor",
-        "emergency"
-      ],
-      "approved": false
-    },
-    {
-      "id": "draft-edge-351",
-      "from": "draft-node-3",
-      "to": "draft-node-365",
-      "bidirectional": true,
-      "modes": [
-        "walking"
-      ],
-      "kind": "hallway",
-      "access": [
-        "visitor",
-        "employee",
-        "contractor",
-        "emergency"
-      ],
-      "accessible": true,
-      "approved": false
-    },
-    {
-      "id": "draft-edge-352",
-      "from": "draft-node-252",
-      "to": "draft-node-365",
-      "bidirectional": true,
-      "modes": [
-        "walking"
-      ],
-      "kind": "hallway",
-      "access": [
-        "visitor",
-        "employee",
-        "contractor",
-        "emergency"
-      ],
-      "accessible": true,
-      "approved": false
-    },
-    {
-      "id": "draft-edge-353",
-      "from": "draft-node-3",
-      "to": "draft-node-8",
-      "bidirectional": true,
-      "modes": [
-        "walking"
-      ],
-      "kind": "hallway",
-      "access": [
-        "visitor",
-        "employee",
-        "contractor",
-        "emergency"
-      ],
-      "accessible": true,
-      "approved": false
-    },
-    {
-      "id": "draft-edge-354",
-      "from": "draft-node-8",
-      "to": "draft-node-252",
-      "bidirectional": true,
-      "modes": [
-        "walking"
-      ],
-      "kind": "hallway",
-      "access": [
-        "visitor",
-        "employee",
-        "contractor",
-        "emergency"
-      ],
-      "accessible": true,
-      "approved": false
-    },
-    {
-      "id": "draft-edge-355",
-      "from": "draft-node-365",
-      "to": "draft-node-366",
-      "bidirectional": true,
-      "modes": [
-        "walking"
-      ],
-      "kind": "hallway",
-      "access": [
-        "visitor",
-        "employee",
-        "contractor",
-        "emergency"
-      ],
-      "accessible": true,
-      "approved": false
-    },
-    {
-      "id": "draft-edge-356",
-      "from": "draft-node-366",
-      "to": "draft-node-251",
-      "bidirectional": true,
-      "modes": [
-        "walking"
-      ],
-      "kind": "hallway",
-      "access": [
-        "visitor",
-        "employee",
-        "contractor",
-        "emergency"
-      ],
-      "accessible": true,
-      "approved": false
-    },
-    {
-      "id": "draft-edge-357",
-      "from": "draft-node-251",
-      "to": "draft-node-367",
-      "bidirectional": true,
-      "modes": [
-        "walking"
-      ],
-      "kind": "hallway",
-      "access": [
-        "visitor",
-        "employee",
-        "contractor",
-        "emergency"
-      ],
-      "accessible": true,
-      "approved": false
-    },
-    {
-      "id": "draft-edge-358",
-      "from": "draft-node-367",
-      "to": "draft-node-10",
-      "bidirectional": true,
-      "modes": [
-        "walking"
-      ],
-      "kind": "hallway",
-      "access": [
-        "visitor",
-        "employee",
-        "contractor",
-        "emergency"
-      ],
-      "accessible": true,
-      "approved": false
-    },
-    {
-      "id": "draft-edge-359",
-      "from": "draft-node-10",
-      "to": "draft-node-39",
-      "bidirectional": true,
-      "modes": [
-        "walking"
-      ],
-      "kind": "hallway",
-      "access": [
-        "visitor",
-        "employee",
-        "contractor",
-        "emergency"
-      ],
-      "accessible": true,
-      "approved": false
-    },
-    {
-      "id": "draft-edge-360",
-      "from": "draft-node-39",
-      "to": "draft-node-95",
-      "bidirectional": true,
-      "modes": [
-        "walking"
-      ],
-      "kind": "hallway",
-      "access": [
-        "visitor",
-        "employee",
-        "contractor",
-        "emergency"
-      ],
-      "accessible": true,
-      "approved": false
-    },
-    {
-      "id": "draft-edge-361",
-      "from": "draft-node-95",
-      "to": "draft-node-87",
-      "bidirectional": true,
-      "modes": [
-        "walking"
-      ],
-      "kind": "hallway",
-      "access": [
-        "visitor",
-        "employee",
-        "contractor",
-        "emergency"
-      ],
-      "accessible": true,
-      "approved": false
-    },
-    {
-      "id": "draft-edge-362",
-      "from": "draft-node-87",
-      "to": "draft-node-38",
-      "bidirectional": true,
-      "modes": [
-        "walking"
-      ],
-      "kind": "hallway",
-      "access": [
-        "visitor",
-        "employee",
-        "contractor",
-        "emergency"
-      ],
-      "accessible": true,
-      "approved": false
-    },
-    {
-      "id": "draft-edge-363",
-      "from": "draft-node-235",
-      "to": "draft-node-231",
-      "bidirectional": true,
-      "modes": [
-        "walking"
-      ],
-      "kind": "hallway",
-      "access": [
-        "visitor",
-        "employee",
-        "contractor",
-        "emergency"
-      ],
-      "accessible": true,
-      "approved": false
-    },
-    {
-      "id": "draft-edge-364",
-      "from": "draft-node-231",
-      "to": "draft-node-34",
-      "bidirectional": true,
-      "modes": [
-        "walking"
-      ],
-      "kind": "hallway",
-      "access": [
-        "visitor",
-        "employee",
-        "contractor",
-        "emergency"
-      ],
-      "accessible": true,
-      "approved": false
-    },
-    {
-      "id": "draft-edge-365",
-      "from": "draft-node-34",
-      "to": "draft-node-110",
-      "bidirectional": true,
-      "modes": [
-        "walking"
-      ],
-      "kind": "hallway",
-      "access": [
-        "visitor",
-        "employee",
-        "contractor",
-        "emergency"
-      ],
-      "accessible": true,
-      "approved": false
-    },
-    {
-      "id": "draft-edge-366",
-      "from": "draft-node-110",
-      "to": "draft-node-116",
-      "bidirectional": true,
-      "modes": [
-        "walking"
-      ],
-      "kind": "hallway",
-      "access": [
-        "visitor",
-        "employee",
-        "contractor",
-        "emergency"
-      ],
-      "accessible": true,
-      "approved": false
-    },
-    {
-      "id": "draft-edge-367",
-      "from": "draft-node-116",
-      "to": "draft-node-11",
-      "bidirectional": true,
-      "modes": [
-        "walking"
-      ],
-      "kind": "hallway",
-      "access": [
-        "visitor",
-        "employee",
-        "contractor",
-        "emergency"
-      ],
-      "accessible": true,
-      "approved": false
-    },
-    {
-      "id": "draft-edge-368",
-      "from": "draft-node-11",
-      "to": "draft-node-30",
-      "bidirectional": true,
-      "modes": [
-        "walking"
-      ],
-      "kind": "hallway",
-      "access": [
-        "visitor",
-        "employee",
-        "contractor",
-        "emergency"
-      ],
-      "accessible": true,
-      "approved": false
-    },
-    {
-      "id": "draft-edge-369",
-      "from": "draft-node-30",
-      "to": "draft-node-27",
-      "bidirectional": true,
-      "modes": [
-        "walking"
-      ],
-      "kind": "hallway",
-      "access": [
-        "visitor",
-        "employee",
-        "contractor",
-        "emergency"
-      ],
-      "accessible": true,
-      "approved": false
-    },
-    {
-      "id": "draft-edge-370",
-      "from": "draft-node-27",
-      "to": "draft-node-47",
-      "bidirectional": true,
-      "modes": [
-        "walking"
-      ],
-      "kind": "hallway",
-      "access": [
-        "visitor",
-        "employee",
-        "contractor",
-        "emergency"
-      ],
-      "accessible": true,
-      "approved": false
-    },
-    {
-      "id": "draft-edge-371",
-      "from": "draft-node-47",
-      "to": "draft-node-146",
-      "bidirectional": true,
-      "modes": [
-        "walking"
-      ],
-      "kind": "hallway",
-      "access": [
-        "visitor",
-        "employee",
-        "contractor",
-        "emergency"
-      ],
-      "accessible": true,
-      "approved": false
-    },
-    {
-      "id": "draft-edge-372",
-      "from": "draft-node-146",
-      "to": "draft-node-147",
-      "bidirectional": true,
-      "modes": [
-        "walking"
-      ],
-      "kind": "hallway",
-      "access": [
-        "visitor",
-        "employee",
-        "contractor",
-        "emergency"
-      ],
-      "accessible": true,
-      "approved": false
-    },
-    {
-      "id": "draft-edge-373",
-      "from": "draft-node-147",
-      "to": "draft-node-154",
-      "bidirectional": true,
-      "modes": [
-        "walking"
-      ],
-      "kind": "hallway",
-      "access": [
-        "visitor",
-        "employee",
-        "contractor",
-        "emergency"
-      ],
-      "accessible": true,
-      "approved": false
-    },
-    {
-      "id": "draft-edge-374",
-      "from": "draft-node-154",
-      "to": "draft-node-146",
-      "bidirectional": true,
-      "modes": [
-        "walking"
-      ],
-      "kind": "hallway",
-      "access": [
-        "visitor",
-        "employee",
-        "contractor",
-        "emergency"
-      ],
-      "accessible": true,
-      "approved": false
-    },
-    {
-      "id": "draft-edge-375",
-      "from": "draft-node-368",
-      "to": "draft-node-369",
-      "bidirectional": true,
-      "modes": [
-        "walking"
-      ],
-      "kind": "hallway",
-      "access": [
-        "visitor",
-        "employee",
-        "contractor",
-        "emergency"
-      ],
-      "accessible": true,
-      "approved": false
-    },
-    {
-      "id": "draft-edge-376",
-      "from": "draft-node-369",
-      "to": "draft-node-18",
-      "bidirectional": true,
-      "modes": [
-        "walking"
-      ],
-      "kind": "hallway",
-      "access": [
-        "visitor",
-        "employee",
-        "contractor",
-        "emergency"
-      ],
-      "accessible": true,
-      "approved": false
-    },
-    {
-      "id": "draft-edge-377",
-      "from": "draft-node-22",
-      "to": "draft-node-19",
-      "bidirectional": true,
-      "modes": [
-        "walking"
-      ],
-      "kind": "hallway",
-      "access": [
-        "visitor",
-        "employee",
-        "contractor",
-        "emergency"
-      ],
-      "accessible": true,
-      "approved": false
-    },
-    {
-      "id": "draft-edge-378",
-      "from": "draft-node-181",
-      "to": "draft-node-23",
-      "bidirectional": true,
-      "modes": [
-        "walking"
-      ],
-      "kind": "hallway",
-      "access": [
-        "visitor",
-        "employee",
-        "contractor",
-        "emergency"
-      ],
-      "accessible": true,
-      "approved": false
-    },
-    {
-      "id": "draft-edge-379",
-      "from": "draft-node-179",
-      "to": "draft-node-23",
-      "bidirectional": true,
-      "modes": [
-        "walking"
-      ],
-      "kind": "hallway",
-      "access": [
-        "visitor",
-        "employee",
-        "contractor",
-        "emergency"
-      ],
-      "accessible": true,
-      "approved": false
-    },
-    {
-      "id": "draft-edge-380",
-      "from": "draft-node-178",
-      "to": "draft-node-23",
-      "bidirectional": true,
-      "modes": [
-        "walking"
-      ],
-      "kind": "hallway",
-      "access": [
-        "visitor",
-        "employee",
-        "contractor",
-        "emergency"
-      ],
-      "accessible": true,
-      "approved": false
-    },
-    {
-      "id": "draft-edge-381",
-      "from": "draft-node-182",
-      "to": "draft-node-370",
-      "bidirectional": true,
-      "modes": [
-        "walking"
-      ],
-      "kind": "hallway",
-      "access": [
-        "visitor",
-        "employee",
-        "contractor",
-        "emergency"
-      ],
-      "accessible": true,
-      "approved": false
-    },
-    {
-      "id": "draft-edge-382",
-      "from": "draft-node-23",
-      "to": "draft-node-371",
-      "bidirectional": true,
-      "modes": [
-        "walking"
-      ],
-      "kind": "hallway",
-      "access": [
-        "visitor",
-        "employee",
-        "contractor",
-        "emergency"
-      ],
-      "accessible": true,
-      "approved": false
-    },
-    {
-      "id": "draft-edge-383",
-      "from": "draft-node-371",
-      "to": "draft-node-368",
-      "bidirectional": true,
-      "modes": [
-        "walking"
-      ],
-      "kind": "hallway",
-      "access": [
-        "visitor",
-        "employee",
-        "contractor",
-        "emergency"
-      ],
-      "accessible": true,
-      "approved": false
-    },
-    {
-      "id": "draft-edge-384",
-      "from": "draft-node-371",
-      "to": "draft-node-369",
-      "bidirectional": true,
-      "modes": [
-        "walking"
-      ],
-      "kind": "hallway",
-      "access": [
-        "visitor",
-        "employee",
-        "contractor",
-        "emergency"
-      ],
-      "accessible": true,
-      "approved": false
-    },
-    {
-      "id": "draft-edge-385",
-      "from": "draft-node-368",
-      "to": "draft-node-145",
-      "bidirectional": true,
-      "modes": [
-        "walking"
-      ],
-      "kind": "hallway",
-      "access": [
-        "visitor",
-        "employee",
-        "contractor",
-        "emergency"
-      ],
-      "accessible": true,
-      "approved": false
-    },
-    {
-      "id": "draft-edge-386",
-      "from": "draft-node-371",
-      "to": "draft-node-372",
-      "bidirectional": true,
-      "modes": [
-        "walking"
-      ],
-      "kind": "hallway",
-      "access": [
-        "visitor",
-        "employee",
-        "contractor",
-        "emergency"
-      ],
-      "accessible": true,
-      "approved": false
-    },
-    {
-      "id": "draft-edge-387",
-      "from": "draft-node-230",
-      "to": "draft-node-373",
-      "bidirectional": true,
-      "modes": [
-        "walking"
-      ],
-      "kind": "hallway",
-      "access": [
-        "visitor",
-        "employee",
-        "contractor",
-        "emergency"
-      ],
-      "accessible": true,
-      "approved": false
-    },
-    {
-      "id": "draft-edge-388",
-      "from": "draft-node-373",
-      "to": "draft-node-229",
-      "bidirectional": true,
-      "modes": [
-        "walking"
-      ],
-      "kind": "hallway",
-      "access": [
-        "visitor",
-        "employee",
-        "contractor",
-        "emergency"
-      ],
-      "accessible": true,
-      "approved": false
-    },
-    {
-      "id": "draft-edge-389",
-      "from": "draft-node-230",
-      "to": "draft-node-374",
-      "bidirectional": true,
-      "modes": [
-        "walking"
-      ],
-      "kind": "hallway",
-      "access": [
-        "visitor",
-        "employee",
-        "contractor",
-        "emergency"
-      ],
-      "accessible": true,
-      "approved": false
-    },
-    {
-      "id": "draft-edge-390",
-      "from": "draft-node-374",
-      "to": "draft-node-34",
-      "bidirectional": true,
-      "modes": [
-        "walking"
-      ],
-      "kind": "hallway",
-      "access": [
-        "visitor",
-        "employee",
-        "contractor",
-        "emergency"
-      ],
-      "accessible": true,
-      "approved": false
-    },
-    {
-      "id": "draft-edge-391",
-      "from": "draft-node-109",
-      "to": "draft-node-106",
-      "bidirectional": true,
-      "modes": [
-        "walking"
-      ],
-      "kind": "hallway",
-      "access": [
-        "visitor",
-        "employee",
-        "contractor",
-        "emergency"
-      ],
-      "accessible": true,
-      "approved": false
     }
   ]
 }
