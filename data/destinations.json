@@ -10,7 +10,7 @@
   {
     "id": "destination-draft:label:22cc2184-5f3e-59d8-a436-e8e24a8a0745",
     "name": "Security Front Desk",
-    "category": "visitor",
+    "category": "security",
     "access_profile": "all",
     "layer": "ground",
     "network_node_id": "draft-node-7"
@@ -34,7 +34,7 @@
   {
     "id": "destination-draft:label:222b9d09-9051-570c-b576-07087068fc90",
     "name": "ELECTRODE OFFICE K-134",
-    "category": "security",
+    "category": "department",
     "access_profile": "all",
     "layer": "ground",
     "network_node_id": "draft-node-28"

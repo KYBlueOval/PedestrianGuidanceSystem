@@ -310,7 +310,6 @@ function destinationPosition(destObj) {
 
     const cleanId = String(id || "").replace(/^destination-draft:/i, "");
 
-    // 1. Spatial overrides
     const override = (spatialOverrides.destinations || spatialOverrides)[id] || (spatialOverrides.destinations || spatialOverrides)[cleanId];
     if (override) {
         const pos = override.model_position || override;
@@ -319,13 +318,11 @@ function destinationPosition(destObj) {
         }
     }
 
-    // 2. Destination drafts
     const draft = destinationDrafts.find(d => d.source_label_id === cleanId || d.id === id);
     if (draft?.position && [draft.position.x, draft.position.y, draft.position.z].every(Number.isFinite)) {
         return new THREE.Vector3(draft.position.x, Math.max(draft.position.y, 1.5), draft.position.z);
     }
 
-    // 3. Rendered 3D labels
     const label = sourceLabelObjects.get(cleanId) || sourceLabelObjects.get(id);
     if (label) {
         const pos = new THREE.Vector3();
@@ -333,7 +330,6 @@ function destinationPosition(destObj) {
         return new THREE.Vector3(pos.x, Math.max(pos.y, 1.5), pos.z);
     }
 
-    // 4. Name fuzzy lookup
     if (name) {
         const normName = name.toLowerCase().replace(/[^a-z0-9]/g, "");
         for (const [lId, lObj] of sourceLabelObjects.entries()) {
@@ -620,7 +616,9 @@ function rebuildEditorVisuals() {
     if (editorActive) editorNodes.forEach((node, index) => {
         const position = new THREE.Vector3(node.position.x, node.position.y, node.position.z);
         const selected = node.id === editorActiveNodeId;
-        const nodeMarker = marker(position, selected ? 0xffcf3a : 0xef3340, selected ? 2.8 : 2.1);
+        
+        // SLEEK PRECISION NODES: Reduced radii from 2.8/2.1 to 0.6/0.45 for accurate hallway mapping
+        const nodeMarker = marker(position, selected ? 0xffcf3a : 0xef3340, selected ? 0.6 : 0.45);
         nodeMarker.name = node.id;
         nodeMarker.userData.editorNodeId = node.id;
         const element = document.createElement("div");
@@ -628,7 +626,7 @@ function rebuildEditorVisuals() {
         element.dataset.kind = "vertical";
         element.textContent = String(index + 1);
         const numberLabel = new CSS2DObject(element);
-        numberLabel.position.set(0, 5, 0);
+        numberLabel.position.set(0, 2, 0);
         nodeMarker.add(numberLabel);
         editorGroup.add(nodeMarker);
     });
@@ -1049,13 +1047,13 @@ function renderDestinationDrafts() {
     destinationDrafts.forEach(record => {
         if (!record.position) return;
         const position = new THREE.Vector3(record.position.x, record.position.y, record.position.z);
-        const anchor = marker(position, 0x38d8ff, 2.5);
+        const anchor = marker(position, 0x38d8ff, 1.2);
         anchor.className = "three-destination-marker";
         const element = document.createElement("div");
         element.className = "three-label three-destination-label";
         element.textContent = record.name;
         const label = new CSS2DObject(element);
-        label.position.set(0, 5, 0);
+        label.position.set(0, 3, 0);
         anchor.add(label);
         destinationDraftGroup.add(anchor);
         const target = nodes.get(record.network_node_id);

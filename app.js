@@ -11,7 +11,6 @@ const loc = id => destinations.find(d => d.id === id);
 const fetchJson = url => fetch(url, { cache: "no-store" });
 
 async function init() {
-    // Unregister service workers & clear stale PWA cache
     if ('serviceWorker' in navigator) {
         navigator.serviceWorker.getRegistrations().then(regs => { for (let r of regs) r.unregister(); });
     }
@@ -32,7 +31,7 @@ async function init() {
 
     spatialLabelsData = spatialLabelsPayload.labels || [];
 
-    // Prioritize locally saved draft network from localStorage
+    // Prioritize draft network saved in localStorage
     try {
         const savedDraft = JSON.parse(localStorage.getItem(EDITOR_STORAGE_KEY) || "null");
         if (savedDraft && Array.isArray(savedDraft.nodes) && savedDraft.nodes.length > 0) {
@@ -52,8 +51,6 @@ async function init() {
     }
 
     buildPedestrianGraph();
-
-    // DYNAMIC MERGE: Import all individual spatial room labels into destinations list
     destinations = mergeSpatialLabelsIntoDestinations(rawDestinations, spatialLabelsData);
 
     buildGraph();
@@ -67,7 +64,6 @@ async function init() {
 
     setMode("employee");
 
-    // Editor URL handler & Tab Switching setup
     const urlParams = new URLSearchParams(window.location.search);
     if (urlParams.get('editor') === 'true') {
         document.body.classList.add('editor-active');
@@ -88,7 +84,6 @@ async function init() {
     setInterval(updateClock, 30000);
 }
 
-// Merge spatial_labels.json rooms into standard destinations array with 3D coordinates
 function mergeSpatialLabelsIntoDestinations(existingDests, spatialLabels) {
     const map = new Map();
     existingDests.forEach(d => map.set(d.id, d));
@@ -108,7 +103,7 @@ function mergeSpatialLabelsIntoDestinations(existingDests, spatialLabels) {
                 zone: record.floor_id === "FL_MF" ? "Mezzanine" : "Production",
                 access: "Authorized Personnel",
                 position: { x: pos.x || 0, y: pos.y || 0, z: pos.z || 0 },
-                description: `Facility Room Location (${record.review_status || "mapped"})`
+                description: `Facility Room (${record.review_status || "mapped"})`
             });
         } else {
             const existing = map.get(cleanId);
@@ -147,11 +142,11 @@ function buildGraph() {
 }
 
 function destinationGroup(destination) {
-    if (destination.zone === "Visitor" || destination.category === "visitor") return "Visitor / Check-In";
+    if (destination.category === "room" || destination.type === "room") return "Individual Rooms & Offices";
     if (destination.zone === "Security" || destination.category === "security") return "Entrances / Security";
+    if (destination.zone === "Visitor" || destination.category === "visitor") return "Visitor / Check-In";
     if (destination.zone === "Amenities" || destination.category === "amenity") return "Amenities / Services";
     if (destination.zone === "Emergency" || destination.category === "emergency") return "Emergency / Muster";
-    if (destination.category === "room" || destination.type === "room") return "Individual Rooms & Offices";
     return "Department / Key Areas";
 }
 
@@ -198,15 +193,12 @@ function get3DPositionForDestination(targetDestId) {
     return null;
 }
 
-// Snaps a destination to the closest connected node on the red pedestrian network line
 function findNearestPedestrianNode(targetDestId) {
     if (destinationNodeCrosswalk[targetDestId] && pedestrianGraph[destinationNodeCrosswalk[targetDestId]]) {
         return destinationNodeCrosswalk[targetDestId];
     }
 
     const targetPos = get3DPositionForDestination(targetDestId);
-
-    // Only select nodes that have active network connections
     const connectedNodeIds = Object.keys(pedestrianNodes).filter(id => (pedestrianGraph[id] || []).length > 0);
     if (!connectedNodeIds.length) return targetDestId;
     if (!targetPos) return connectedNodeIds[0];
@@ -267,37 +259,83 @@ function populateSelects(category = $("destinationCategory")?.value || "all") {
     if ([...e.options].some(option => option.value === previousEnd)) e.value = previousEnd;
 }
 
-function findMatchingDestinationId(query) {
-    if (!query) return null;
-    const match = destinations.find(d =>
-        d.id === query ||
-        d.name?.toLowerCase() === query.toLowerCase() ||
-        d.label?.toLowerCase() === query.toLowerCase()
-    );
-    return match ? match.id : null;
-}
-
+// -----------------------------------------------------------
+// DYNAMIC QUICK ROUTES FROM CURRENT START LOCATION
+// -----------------------------------------------------------
 function renderQuickRoutes() {
-    const wrap = $("quickRoutes"); if (!wrap) return; wrap.innerHTML = "";
-    quickRoutes.forEach(q => {
+    const wrap = $("quickRoutes");
+    if (!wrap) return;
+    wrap.innerHTML = "";
+
+    const customQuickRoutes = [
+        { label: "Closest Plant Exit", type: "exit" },
+        { label: "Closest Restroom", type: "restroom" },
+        { label: "Closest Break Area", type: "break" },
+        { label: "Closest Emergency / Muster", type: "muster" }
+    ];
+
+    customQuickRoutes.forEach(q => {
         const btn = document.createElement("button");
         btn.className = "quick-route";
-        btn.innerHTML = `<span>${escapeHtml(q.label)}</span><b>→</b>`;
-        btn.onclick = () => {
-            const startId = findMatchingDestinationId(q.start);
-            const endId = findMatchingDestinationId(q.end);
-
-            if (q.mode) setMode(q.mode, false);
-            populateSelects("all");
-
-            if (startId && $("startSelect")) $("startSelect").value = startId;
-            if (endId && $("endSelect")) $("endSelect").value = endId;
-
-            generateRoute();
-            fitRoute();
-        };
+        btn.innerHTML = `<span>⚡ ${escapeHtml(q.label)}</span><b>→</b>`;
+        btn.onclick = () => routeToClosest(q.type);
         wrap.appendChild(btn);
     });
+}
+
+function routeToClosest(targetType) {
+    const startId = $("startSelect")?.value;
+    if (!startId) return;
+
+    let candidates = [];
+
+    if (targetType === "exit") {
+        candidates = destinations.filter(d =>
+            /guard house|turnstile|exit|exterior door|access door/i.test(d.name + " " + d.id + " " + (d.category || ""))
+        );
+    } else if (targetType === "restroom") {
+        candidates = destinations.filter(d =>
+            /restroom|toilet|men|women|locker/i.test(d.name + " " + d.id + " " + (d.category || ""))
+        );
+    } else if (targetType === "break") {
+        candidates = destinations.filter(d =>
+            /break|canteen|kitchen|lounge|amenity/i.test(d.name + " " + d.id + " " + (d.category || ""))
+        );
+    } else if (targetType === "muster") {
+        candidates = destinations.filter(d =>
+            /muster|emergency|evacuation|assembly point/i.test(d.name + " " + d.id + " " + (d.category || ""))
+        );
+    }
+
+    if (!candidates.length) {
+        alert(`No locations found for category: ${targetType}`);
+        return;
+    }
+
+    const startNode = findNearestPedestrianNode(startId);
+    let bestDest = null;
+    let shortestDist = Infinity;
+
+    candidates.forEach(cand => {
+        const candidateNode = findNearestPedestrianNode(cand.id);
+        if (pedestrianGraph[startNode] && pedestrianGraph[candidateNode]) {
+            const res = dijkstra(startNode, candidateNode, pedestrianGraph);
+            if (res && res.distance < shortestDist) {
+                shortestDist = res.distance;
+                bestDest = cand;
+            }
+        }
+    });
+
+    if (!bestDest) {
+        bestDest = candidates[0];
+    }
+
+    populateSelects("all");
+    if ($("endSelect")) $("endSelect").value = bestDest.id;
+
+    generateRoute();
+    fitRoute();
 }
 
 function injectSpatialSearchUI() {
@@ -504,13 +542,14 @@ function dijkstra(start, end, sourceGraph = graph) {
     return { path, distance: dist[end] };
 }
 
+// STRICT WALKPATH ROUTE GENERATION
 function generateRoute() {
     const sSelect = $("startSelect"), eSelect = $("endSelect");
     if (!sSelect || !eSelect) return;
     const start = sSelect.value, end = eSelect.value;
     if (!start || !end || start === end) return;
 
-    // Refresh draft network from localStorage if updated
+    // Reload latest pedestrian draft from localStorage
     try {
         const savedDraft = JSON.parse(localStorage.getItem(EDITOR_STORAGE_KEY) || "null");
         if (savedDraft && Array.isArray(savedDraft.nodes) && savedDraft.nodes.length > 0) {
@@ -527,10 +566,11 @@ function generateRoute() {
         spatialResult = dijkstra(startNode, endNode, pedestrianGraph);
     }
 
-    const hasSpatialPath = spatialResult && Array.isArray(spatialResult.path) && spatialResult.path.length >= 2 && Number.isFinite(spatialResult.distance);
-
-    let result = dijkstra(start, end);
-    lastPath = result.path;
+    const hasSpatialPath = spatialResult &&
+        Array.isArray(spatialResult.path) &&
+        spatialResult.path.length >= 2 &&
+        Number.isFinite(spatialResult.distance) &&
+        spatialResult.distance < Infinity;
 
     const startObj = loc(start) || { id: start, name: start };
     const endObj = loc(end) || { id: end, name: end };
@@ -538,27 +578,28 @@ function generateRoute() {
     let spatialPositions = [];
 
     if (hasSpatialPath) {
-        // STRICT WALKPATH STOP: Route uses ONLY nodes along the red pedestrian walkway network
+        // STRICT WALKPATH: Coordinates are strictly along connected red network edges
         spatialPositions = spatialResult.path.map(id => pedestrianNodes[id]?.position).filter(Boolean);
     } else {
-        const startPos = get3DPositionForDestination(start);
-        const endPos = get3DPositionForDestination(end);
-        if (startPos && endPos) spatialPositions = [startPos, endPos];
+        console.warn("Pedestrian network is disconnected between selected points. Connect red walkway nodes in 3D Editor.");
+        if ($("routeStatus")) $("routeStatus").textContent = "NETWORK GAP - CONNECT NODES IN EDITOR";
+        renderStepInstructions(startObj, endObj, [], 0, false);
+        return; // PREVENT STRAIGHT LINE ACROSS PLANT
     }
 
-    const totalDistMeters = hasSpatialPath ? spatialResult.distance : (result.distance || 50);
+    const totalDistMeters = spatialResult.distance;
 
-    drawRoute(result.path);
-    updateTurnByTurnRoute(startObj, endObj, spatialPositions, totalDistMeters);
+    drawRoute(spatialResult.path);
+    renderStepInstructions(startObj, endObj, spatialPositions, totalDistMeters, true);
     showDestination(end);
 
     const routeDetail = {
-        path: [...result.path],
+        path: [...spatialResult.path],
         destinations: [startObj, endObj],
         distance: totalDistMeters,
-        distanceUnit: hasSpatialPath ? "meters" : "map-units",
+        distanceUnit: "meters",
         certified: true,
-        spatialNodeIds: hasSpatialPath ? [...spatialResult.path] : [],
+        spatialNodeIds: [...spatialResult.path],
         spatialPath: spatialPositions
     };
 
@@ -583,11 +624,12 @@ function drawRoute(path) {
     path.forEach(id => document.querySelector(`.node[data-id="${id}"]`)?.classList.add("selected"));
 }
 
-function updateTurnByTurnRoute(startObj, endObj, positions, totalMeters) {
+// STEP-BY-STEP TURN-BY-TURN INSTRUCTIONS GENERATOR
+function renderStepInstructions(startObj, endObj, positions, totalMeters, isValid) {
     const totalFeet = Math.round(totalMeters * 3.28084);
     const mins = Math.max(1, Math.round(totalFeet / 250));
 
-    if ($("routeStatus")) $("routeStatus").textContent = "PEDESTRIAN NETWORK ROUTE";
+    if ($("routeStatus")) $("routeStatus").textContent = isValid ? "PEDESTRIAN NETWORK ROUTE" : "NETWORK DISCONNECTED";
     if ($("distanceMetric")) $("distanceMetric").textContent = totalFeet + " ft";
     if ($("timeMetric")) $("timeMetric").textContent = mins + " min";
     if ($("sumDistance")) $("sumDistance").textContent = totalFeet + " ft";
@@ -595,12 +637,28 @@ function updateTurnByTurnRoute(startObj, endObj, positions, totalMeters) {
     if ($("sumStart")) $("sumStart").textContent = startObj.name || startObj.id;
     if ($("sumEnd")) $("sumEnd").textContent = endObj.name || endObj.id;
 
-    const steps = $("steps");
-    if (!steps) return;
-    steps.innerHTML = "";
+    let stepsContainer = $("steps") || $("routeSteps");
+    if (!stepsContainer) {
+        // Dynamically inject steps section into sidebar if missing from HTML
+        const statusSec = document.querySelector(".route-status");
+        if (statusSec) {
+            stepsContainer = document.createElement("div");
+            stepsContainer.id = "steps";
+            stepsContainer.className = "turn-instructions-box";
+            statusSec.appendChild(stepsContainer);
+        }
+    }
+
+    if (!stepsContainer) return;
+    stepsContainer.innerHTML = "";
+
+    if (!isValid) {
+        stepsContainer.innerHTML = `<div class="step-error">⚠️ <b>Network Gap Detected:</b> The walkway nodes between ${escapeHtml(startObj.name)} and ${escapeHtml(endObj.name)} are not connected in 3D Editor.</div>`;
+        return;
+    }
 
     const instructions = [];
-    instructions.push(`Begin on pedestrian walkway near <b>${escapeHtml(startObj.name)}</b>.`);
+    instructions.push(`Exit <b>${escapeHtml(startObj.name)}</b> onto the pedestrian walkway network.`);
 
     if (positions.length >= 2) {
         for (let i = 0; i < positions.length - 1; i++) {
@@ -617,28 +675,29 @@ function updateTurnByTurnRoute(startObj, endObj, positions, totalMeters) {
                 const dot = v1.x * v2.x + v1.z * v2.z;
                 const angle = Math.atan2(cross, dot) * (180 / Math.PI);
 
-                if (angle > 30) {
-                    instructions.push(`Proceed ${legDistFeet} ft, then turn <b>right</b> into hallway.`);
-                } else if (angle < -30) {
-                    instructions.push(`Proceed ${legDistFeet} ft, then turn <b>left</b> into hallway.`);
-                } else if (legDistFeet > 40) {
-                    instructions.push(`Continue straight along walkway for ${legDistFeet} ft.`);
+                if (angle > 25) {
+                    instructions.push(`Proceed ${legDistFeet} ft, then turn <b>right</b> into hallway corridor.`);
+                } else if (angle < -25) {
+                    instructions.push(`Proceed ${legDistFeet} ft, then turn <b>left</b> into hallway corridor.`);
+                } else if (legDistFeet > 35) {
+                    instructions.push(`Continue straight along walkway spine for ${legDistFeet} ft.`);
                 }
             } else {
-                instructions.push(`Proceed straight along walkway for ${legDistFeet} ft.`);
+                instructions.push(`Proceed straight along designated walkway for ${legDistFeet} ft.`);
             }
         }
     } else {
-        instructions.push(`Proceed ${totalFeet} ft straight along designated walkway.`);
+        instructions.push(`Proceed ${totalFeet} ft straight along walkway.`);
     }
 
-    instructions.push(`Arrive on walkway at <b>${escapeHtml(endObj.name)}</b> (Destination target directly adjacent).`);
+    instructions.push(`Arrive on walkway at <b>${escapeHtml(endObj.name)}</b> (Destination adjacent).`);
 
     instructions.forEach((stepText, idx) => {
         const el = document.createElement("div");
-        el.className = "step";
-        el.innerHTML = `<b>${idx + 1}.</b> ${stepText}`;
-        steps.appendChild(el);
+        el.className = "step-item";
+        el.style.cssText = "padding: 8px 10px; margin-top: 6px; background: rgba(15, 32, 58, 0.7); border-left: 3px solid #00a8ff; border-radius: 4px; font-size: 12px; color: #e0e0e0;";
+        el.innerHTML = `<b>Step ${idx + 1}:</b> ${stepText}`;
+        stepsContainer.appendChild(el);
     });
 }
 
