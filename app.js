@@ -303,7 +303,7 @@ function findNearestPedestrianNode(targetDestId) {
         }
     } catch { }
 
-    // 4. Look up physical 3D Position (resolves destination-draft:label:...)
+    // 4. Look up physical 3D Position
     let targetPos = get3DPositionForDestination(targetDestId);
 
     if (!targetPos) {
@@ -361,12 +361,9 @@ function initCompassHeading() {
     const handleOrientation = (e) => {
         let heading = null;
 
-        // iOS / Safari
         if (e.webkitCompassHeading !== undefined && e.webkitCompassHeading !== null) {
             heading = e.webkitCompassHeading;
-        }
-        // Android / Chrome (Absolute Alpha)
-        else if (e.alpha !== null && e.alpha !== undefined) {
+        } else if (e.alpha !== null && e.alpha !== undefined) {
             heading = (360 - e.alpha) % 360;
         }
 
@@ -376,12 +373,11 @@ function initCompassHeading() {
     };
 
     if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
-        // iOS Motion Permission request
         DeviceOrientationEvent.requestPermission().then(state => {
             if (state === 'granted') {
                 window.addEventListener('deviceorientation', handleOrientation, true);
             }
-        }).catch(err => console.warn("DeviceOrientation permission error:", err));
+        }).catch(err => console.warn("DeviceOrientation error:", err));
     } else {
         window.addEventListener('deviceorientationabsolute', handleOrientation, true);
         window.addEventListener('deviceorientation', handleOrientation, true);
@@ -427,9 +423,6 @@ function populateSelects(category = $("destinationCategory")?.value || "all") {
     if ([...e.options].some(option => option.value === previousEnd)) e.value = previousEnd;
 }
 
-// -----------------------------------------------------------
-// DYNAMIC QUICK ROUTES FROM CURRENT START LOCATION
-// -----------------------------------------------------------
 function renderQuickRoutes() {
     const wrap = $("quickRoutes");
     if (!wrap) return;
@@ -552,6 +545,12 @@ function wireEvents() {
     if ($("routeBtn")) $("routeBtn").onclick = generateRoute;
     if ($("destinationCategory")) $("destinationCategory").onchange = event => populateSelects(event.target.value);
 
+    if ($("recenterUserBtn")) {
+        $("recenterUserBtn").onclick = () => {
+            window.pgs3d?.toggleCameraFollow(true);
+        };
+    }
+
     document.addEventListener("change", e => {
         const cb = e.target.closest("input[type='checkbox']");
         if (!cb) return;
@@ -658,7 +657,6 @@ function setMode(m, generate = true) {
     mode = m;
     document.querySelectorAll(".mode").forEach(b => b.classList.toggle("active", b.dataset.mode === m));
 
-    // Default to "All Categories" for all modes, including Employee
     if ($("destinationCategory")) $("destinationCategory").value = "all";
     populateSelects("all");
 
@@ -718,7 +716,6 @@ function generateRoute() {
     const start = sSelect.value, end = eSelect.value;
     if (!start || !end || start === end) return;
 
-    // Reload latest pedestrian draft from localStorage if available
     try {
         const savedDraft = JSON.parse(localStorage.getItem(EDITOR_STORAGE_KEY) || "null");
         if (savedDraft && Array.isArray(savedDraft.nodes) && savedDraft.nodes.length > 0) {

@@ -21,6 +21,11 @@ let editorNodes = [], editorEdges = [], editorActiveNodeId = null, editorHistory
 let labelOverrides = [], labelOverrideGroup, labelPlacementActive = false;
 let destinationDrafts = [], destinationDraftGroup, destinationPlacementActive = false;
 
+// Live GPS & Camera Motion Tracking States
+let userMarkerGroup = null;
+let userPulsingRing = null;
+let isCameraFollowingUser = true;
+
 let pointerStart = null;
 let animationFrameCount = 0;
 const raycaster = new THREE.Raycaster();
@@ -395,6 +400,78 @@ function marker(position, color, radius) {
     return group;
 }
 
+// -----------------------------------------------------------
+// LIVE USER POSITIONING & HEADING INDICATOR LOGIC
+// -----------------------------------------------------------
+export function updateUserPosition(pos) {
+    if (!model || !pos || !Number.isFinite(pos.x)) return;
+
+    if (!userMarkerGroup) {
+        userMarkerGroup = new THREE.Group();
+        userMarkerGroup.name = "PGS_LIVE_USER_MARKER";
+
+        const dotGeo = new THREE.SphereGeometry(1.2, 16, 16);
+        const dotMat = new THREE.MeshStandardMaterial({
+            color: 0x00f0ff,
+            emissive: 0x00a8ff,
+            emissiveIntensity: 1.5,
+            roughness: 0.2
+        });
+        const dotMesh = new THREE.Mesh(dotGeo, dotMat);
+        dotMesh.position.y = 1.0;
+        userMarkerGroup.add(dotMesh);
+
+        const coneGeo = new THREE.ConeGeometry(1.0, 2.5, 3);
+        const coneMat = new THREE.MeshBasicMaterial({ color: 0x00f0ff });
+        const coneMesh = new THREE.Mesh(coneGeo, coneMat);
+        coneMesh.rotation.x = Math.PI / 2;
+        coneMesh.position.set(0, 1.0, -2.2);
+        coneMesh.name = "HEADING_CONE";
+        userMarkerGroup.add(coneMesh);
+
+        const ringGeo = new THREE.RingGeometry(1.5, 2.5, 32);
+        const ringMat = new THREE.MeshBasicMaterial({
+            color: 0x00a8ff,
+            side: THREE.DoubleSide,
+            transparent: true,
+            opacity: 0.6
+        });
+        userPulsingRing = new THREE.Mesh(ringGeo, ringMat);
+        userPulsingRing.rotation.x = Math.PI / 2;
+        userPulsingRing.position.y = 0.1;
+        userMarkerGroup.add(userPulsingRing);
+
+        model.add(userMarkerGroup);
+    }
+
+    const targetPos = new THREE.Vector3(pos.x, pos.y || 0.35, pos.z);
+    userMarkerGroup.position.lerp(targetPos, 0.3);
+
+    if (isCameraFollowingUser && controls) {
+        controls.target.lerp(targetPos, 0.1);
+        controls.update();
+    }
+}
+
+export function setCameraHeading(headingDegrees) {
+    if (!userMarkerGroup) return;
+    const rad = THREE.MathUtils.degToRad(headingDegrees);
+    userMarkerGroup.rotation.y = rad;
+}
+
+export function toggleCameraFollow(enable) {
+    isCameraFollowingUser = enable;
+}
+
+function animateUserPulse() {
+    if (userPulsingRing) {
+        const time = Date.now() * 0.003;
+        const scale = 1.0 + Math.sin(time) * 0.3;
+        userPulsingRing.scale.set(scale, scale, 1);
+        userPulsingRing.material.opacity = 0.7 - (scale - 1.0);
+    }
+}
+
 function renderRoute(route) {
     if (!model) return;
     clearRoute();
@@ -408,7 +485,6 @@ function renderRoute(route) {
     routeGroup = new THREE.Group();
     routeGroup.name = "PGS_3D_ROUTE_PREVIEW";
 
-    // STRICT WALKWAY FOLLOWING: Use exact straight line curves between nodes to prevent curve bowing into walls
     routeCurve = new THREE.CurvePath();
     for (let i = 0; i < points.length - 1; i++) {
         routeCurve.add(new THREE.LineCurve3(points[i], points[i + 1]));
@@ -622,8 +698,7 @@ function rebuildEditorVisuals() {
     if (editorActive) editorNodes.forEach((node, index) => {
         const position = new THREE.Vector3(node.position.x, node.position.y, node.position.z);
         const selected = node.id === editorActiveNodeId;
-        
-        // SLEEK PRECISION NODES: Reduced radii from 2.8/2.1 to 0.6/0.45 for accurate hallway mapping
+
         const nodeMarker = marker(position, selected ? 0xffcf3a : 0xef3340, selected ? 0.6 : 0.45);
         nodeMarker.name = node.id;
         nodeMarker.userData.editorNodeId = node.id;
@@ -1163,6 +1238,7 @@ function animate() {
         routeProgress = (routeProgress + delta / routeDuration) % 1;
         tracker.position.copy(routeCurve.getPointAt(routeProgress));
     }
+    animateUserPulse();
     animationFrameCount = (animationFrameCount + 1) % 12;
     if (animationFrameCount === 0) updateSemanticLabelLOD();
     controls.update();
@@ -1170,15 +1246,19 @@ function animate() {
     labelRenderer.render(scene, camera);
 }
 
-// Global API
-window.pgs3d = {
+// Global API Bindings
+window.pgs3d = Object.assign(window.pgs3d || {}, {
     show: async () => { visible = true; initialize(); resize(); await loadModel(); },
     hide: () => { visible = false; },
     reset: () => { if (controls) { controls.reset(); resize(); fitModel(); } },
     setLayerVisibility: (layer, visible) => setLayerVisibility(layer, visible),
     updateSemanticLabels: () => updateSemanticLabelVisibility(),
 
-    // Toggle Destination Points & Pin Labels
+    // Live User Positioning API
+    updateUserPosition,
+    setCameraHeading,
+    toggleCameraFollow,
+
     toggleDestinations: (visible) => {
         if (destinationDraftGroup) destinationDraftGroup.visible = visible;
         document.querySelectorAll('.three-destination-marker, .three-destination-label').forEach(el => {
@@ -1186,7 +1266,6 @@ window.pgs3d = {
         });
     },
 
-    // Native Editor Functions
     toggleRouteEditor: () => toggleRouteEditor(),
     undoEditorNode: () => undoEditorNode(),
     clearEditorDraft: () => clearEditorDraft(),
@@ -1219,4 +1298,4 @@ window.pgs3d = {
         camera.position.set(pos.x + 30, pos.y + 60, pos.z + 40);
         controls.update();
     }
-};
+});
