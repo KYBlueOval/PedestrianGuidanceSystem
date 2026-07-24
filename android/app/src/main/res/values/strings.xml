@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">SiteNav Command</string>
+    <string name="title_activity_main">SiteNav Command</string>
+    <string name="package_name">com.fordenergy.sitenav</string>
+    <string name="custom_url_scheme">com.fordenergy.sitenav</string>
+</resources>

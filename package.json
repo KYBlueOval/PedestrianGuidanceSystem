@@ -1,0 +1,31 @@
+{
+  "name": "pgs-sitenav-command",
+  "version": "1.0.0",
+  "description": "Pedestrian Guidance System web app with the proven v9 2D routing experience and an optional v10 3D digital-twin preview.",
+  "main": "app.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/KYBlueOval/PedestrianGuidanceSystem.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/KYBlueOval/PedestrianGuidanceSystem/issues"
+  },
+  "homepage": "https://github.com/KYBlueOval/PedestrianGuidanceSystem#readme",
+  "dependencies": {
+    "@capacitor/core": "^8.4.2"
+  },
+  "devDependencies": {
+    "@capacitor/android": "^8.4.2",
+    "@capacitor/cli": "^8.4.2"
+  }
+}

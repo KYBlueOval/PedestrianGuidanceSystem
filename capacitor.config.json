@@ -1,0 +1,14 @@
+{
+  "appId": "com.fordenergy.sitenav",
+  "appName": "SiteNav Command",
+  "webDir": "www",
+  "bundledWebRuntime": false,
+  "server": {
+    "androidScheme": "https"
+  },
+  "android": {
+    "allowMixedContent": true,
+    "backgroundColor": "#071629",
+    "hardwareAccelerated": true
+  }
+}

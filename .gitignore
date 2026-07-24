@@ -1,3 +1,17 @@
 assets/models/*.glb
 assets/models/*.gltf
 
+# Dependencies
+node_modules/
+
+# Web Build Output
+www/
+
+# Android Build Artifacts & Caches
+android/.gradle/
+android/app/build/
+android/build/
+android/.idea/
+android/local.properties
+android/captures/
+.DS_Store
