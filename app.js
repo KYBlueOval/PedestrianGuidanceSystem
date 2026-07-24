@@ -164,7 +164,7 @@ function destinationGroup(destination) {
     // 6. Emergency / Muster
     if (zone === "emergency" || cat === "emergency") return "Emergency / Muster";
 
-// Fallback
+    // Fallback
     return "Department / Key Areas";
 }
 
@@ -240,8 +240,8 @@ function findNearestPedestrianNode(targetDestId) {
     const connectedNodeIds = Object.keys(pedestrianNodes).filter(id => (pedestrianGraph[id] || []).length > 0);
     if (!connectedNodeIds.length) return targetDestId;
 
-    // If target position is STILL unknown, return nearest node to world center rather than defaulting everything to node-1
-    if (!targetPos) return connectedNodeIds[0];
+    // DO NOT fallback to connectedNodeIds[0] (draft-node-1) if location coords are missing!
+    if (!targetPos) return targetDestId;
 
     let closestId = connectedNodeIds[0];
     let minDist = Infinity;
@@ -601,6 +601,11 @@ function generateRoute() {
     const startNode = findNearestPedestrianNode(start);
     const endNode = findNearestPedestrianNode(end);
 
+    // Prevent snapping both points to draft-node-1 if unmapped
+    if (startNode === endNode && start !== end) {
+        console.warn(`Start (${start}) and End (${end}) snapped to the same node (${startNode}). Ensure locations have mapped 3D positions.`);
+    }
+
     let spatialResult = null;
     if (pedestrianGraph[startNode] && pedestrianGraph[endNode]) {
         spatialResult = dijkstra(startNode, endNode, pedestrianGraph);
@@ -621,8 +626,8 @@ function generateRoute() {
         // STRICT WALKPATH: Coordinates are strictly along connected red network edges
         spatialPositions = spatialResult.path.map(id => pedestrianNodes[id]?.position).filter(Boolean);
     } else {
-        console.warn("Pedestrian network is disconnected between selected points. Connect red walkway nodes in 3D Editor.");
-        if ($("routeStatus")) $("routeStatus").textContent = "NETWORK GAP - CONNECT NODES IN EDITOR";
+        console.warn(`No spatial path found between ${startNode} and ${endNode}.`);
+        if ($("routeStatus")) $("routeStatus").textContent = "NETWORK GAP DETECTED";
         renderStepInstructions(startObj, endObj, [], 0, false);
         return; // PREVENT STRAIGHT LINE ACROSS PLANT
     }
@@ -679,7 +684,6 @@ function renderStepInstructions(startObj, endObj, positions, totalMeters, isVali
 
     let stepsContainer = $("steps") || $("routeSteps");
     if (!stepsContainer) {
-        // Dynamically inject steps section into sidebar if missing from HTML
         const statusSec = document.querySelector(".route-status");
         if (statusSec) {
             stepsContainer = document.createElement("div");
