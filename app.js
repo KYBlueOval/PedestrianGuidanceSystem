@@ -215,7 +215,7 @@ function get3DPositionForDestination(targetDestId) {
 function findNearestPedestrianNode(targetDestId) {
     if (!targetDestId) return null;
 
-    // 1. Direct match in pedestrian graph (e.g. draft-node-359)
+    // 1. Direct match in pedestrian graph
     if (pedestrianGraph[targetDestId] && pedestrianGraph[targetDestId].length > 0) {
         return targetDestId;
     }
@@ -682,7 +682,7 @@ function drawRoute(path) {
     path.forEach(id => document.querySelector(`.node[data-id="${id}"]`)?.classList.add("selected"));
 }
 
-// STEP-BY-STEP TURN-BY-TURN INSTRUCTIONS GENERATOR
+// SMART VECTOR-COMPACTING TURN-BY-TURN INSTRUCTIONS
 function renderStepInstructions(startObj, endObj, positions, totalMeters, isValid) {
     const totalFeet = Math.round(totalMeters * 3.28084);
     const mins = Math.max(1, Math.round(totalFeet / 250));
@@ -710,7 +710,7 @@ function renderStepInstructions(startObj, endObj, positions, totalMeters, isVali
     stepsContainer.innerHTML = "";
 
     if (!isValid) {
-        stepsContainer.innerHTML = `<div class="step-error">⚠️ <b>Network Gap Detected:</b> The walkway nodes between ${escapeHtml(startObj.name)} and ${escapeHtml(endObj.name)} are not connected in 3D Editor.</div>`;
+        stepsContainer.innerHTML = `<div class="step-error">⚠️ <b>Network Gap Detected:</b> Walkway nodes between ${escapeHtml(startObj.name)} and ${escapeHtml(endObj.name)} are disconnected in 3D Editor.</div>`;
         return;
     }
 
@@ -718,41 +718,56 @@ function renderStepInstructions(startObj, endObj, positions, totalMeters, isVali
     instructions.push(`Exit <b>${escapeHtml(startObj.name)}</b> onto the pedestrian walkway network.`);
 
     if (positions.length >= 2) {
+        let accumulatedFeet = 0;
+
         for (let i = 0; i < positions.length - 1; i++) {
             const p1 = positions[i];
             const p2 = positions[i + 1];
-            const legDistFeet = Math.round(distance3d(p1, p2) * 3.28084);
+            const segDist = Math.round(distance3d(p1, p2) * 3.28084);
+            accumulatedFeet += segDist;
 
-            if (i > 0) {
-                const p0 = positions[i - 1];
-                const v1 = { x: p1.x - p0.x, z: p1.z - p0.z };
-                const v2 = { x: p2.x - p1.x, z: p2.z - p1.z };
+            let isTurn = false;
+            let turnDirection = "";
+
+            if (i < positions.length - 2) {
+                const p3 = positions[i + 2];
+                const v1 = { x: p2.x - p1.x, z: p2.z - p1.z };
+                const v2 = { x: p3.x - p2.x, z: p3.z - p2.z };
 
                 const cross = v1.x * v2.z - v1.z * v2.x;
                 const dot = v1.x * v2.x + v1.z * v2.z;
                 const angle = Math.atan2(cross, dot) * (180 / Math.PI);
 
                 if (angle > 25) {
-                    instructions.push(`Proceed ${legDistFeet} ft, then turn <b>right</b> into hallway corridor.`);
+                    isTurn = true;
+                    turnDirection = "right";
                 } else if (angle < -25) {
-                    instructions.push(`Proceed ${legDistFeet} ft, then turn <b>left</b> into hallway corridor.`);
-                } else if (legDistFeet > 35) {
-                    instructions.push(`Continue straight along walkway spine for ${legDistFeet} ft.`);
+                    isTurn = true;
+                    turnDirection = "left";
                 }
-            } else {
-                instructions.push(`Proceed straight along designated walkway for ${legDistFeet} ft.`);
+            }
+
+            if (isTurn) {
+                if (accumulatedFeet > 0) {
+                    instructions.push(`Proceed straight for <b>${accumulatedFeet} ft</b>, then turn <b>${turnDirection}</b> into the hallway corridor.`);
+                } else {
+                    instructions.push(`Turn <b>${turnDirection}</b> into the hallway corridor.`);
+                }
+                accumulatedFeet = 0;
+            } else if (i === positions.length - 2 && accumulatedFeet > 0) {
+                instructions.push(`Continue straight along walkway for <b>${accumulatedFeet} ft</b> towards destination.`);
             }
         }
     } else {
-        instructions.push(`Proceed ${totalFeet} ft straight along walkway.`);
+        instructions.push(`Proceed straight along walkway for <b>${totalFeet} ft</b>.`);
     }
 
-    instructions.push(`Arrive on walkway at <b>${escapeHtml(endObj.name)}</b> (Destination adjacent).`);
+    instructions.push(`Arrive at <b>${escapeHtml(endObj.name)}</b> (Destination adjacent).`);
 
     instructions.forEach((stepText, idx) => {
         const el = document.createElement("div");
         el.className = "step-item";
-        el.style.cssText = "padding: 8px 10px; margin-top: 6px; background: rgba(15, 32, 58, 0.7); border-left: 3px solid #00a8ff; border-radius: 4px; font-size: 12px; color: #e0e0e0;";
+        el.style.cssText = "padding: 8px 10px; margin-top: 6px; background: rgba(15, 32, 58, 0.75); border-left: 3px solid #00a8ff; border-radius: 4px; font-size: 12px; color: #e0e0e0; line-height: 1.35;";
         el.innerHTML = `<b>Step ${idx + 1}:</b> ${stepText}`;
         stepsContainer.appendChild(el);
     });
