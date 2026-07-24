@@ -31,7 +31,7 @@ async function init() {
 
     spatialLabelsData = spatialLabelsPayload.labels || [];
 
-    // Prioritize draft network saved in localStorage
+    // Prioritize draft network saved in localStorage if available
     try {
         const savedDraft = JSON.parse(localStorage.getItem(EDITOR_STORAGE_KEY) || "null");
         if (savedDraft && Array.isArray(savedDraft.nodes) && savedDraft.nodes.length > 0) {
@@ -211,17 +211,34 @@ function get3DPositionForDestination(targetDestId) {
     return null;
 }
 
-// Robust 3D Node Snapping
+// ROBUST 3D NODE SNAPPING & DRAFT ANCHOR RESOLVER
 function findNearestPedestrianNode(targetDestId) {
-    // 1. Check destination crosswalk override first
+    if (!targetDestId) return null;
+
+    // 1. Direct match in pedestrian graph (e.g. draft-node-359)
+    if (pedestrianGraph[targetDestId] && pedestrianGraph[targetDestId].length > 0) {
+        return targetDestId;
+    }
+
+    // 2. Check destination crosswalk override map
     if (destinationNodeCrosswalk[targetDestId] && pedestrianGraph[destinationNodeCrosswalk[targetDestId]]) {
         return destinationNodeCrosswalk[targetDestId];
     }
 
-    // 2. Look up position from destinations list or spatial labels
+    // 3. Check Destination Drafts (local storage anchors)
+    try {
+        const savedAnchors = JSON.parse(localStorage.getItem("pgs-v10-destination-anchors-draft") || "null");
+        if (savedAnchors && Array.isArray(savedAnchors.destinations)) {
+            const matchAnchor = savedAnchors.destinations.find(a => a.id === targetDestId || a.source_label_id === targetDestId);
+            if (matchAnchor && matchAnchor.network_node_id && pedestrianGraph[matchAnchor.network_node_id]) {
+                return matchAnchor.network_node_id;
+            }
+        }
+    } catch { }
+
+    // 4. Look up physical 3D Position (resolves destination-draft:label:...)
     let targetPos = get3DPositionForDestination(targetDestId);
 
-    // 3. If missing, attempt fuzzy lookup in spatialLabelsData array
     if (!targetPos) {
         const dObj = loc(targetDestId);
         const searchName = (dObj?.name || targetDestId).toLowerCase().trim();
@@ -236,11 +253,9 @@ function findNearestPedestrianNode(targetDestId) {
         }
     }
 
-    // Filter only active connected nodes
+    // 5. Snap 3D Position to nearest connected red node
     const connectedNodeIds = Object.keys(pedestrianNodes).filter(id => (pedestrianGraph[id] || []).length > 0);
     if (!connectedNodeIds.length) return targetDestId;
-
-    // DO NOT fallback to connectedNodeIds[0] (draft-node-1) if location coords are missing!
     if (!targetPos) return targetDestId;
 
     let closestId = connectedNodeIds[0];
@@ -589,7 +604,7 @@ function generateRoute() {
     const start = sSelect.value, end = eSelect.value;
     if (!start || !end || start === end) return;
 
-    // Reload latest pedestrian draft from localStorage
+    // Reload latest pedestrian draft from localStorage if available
     try {
         const savedDraft = JSON.parse(localStorage.getItem(EDITOR_STORAGE_KEY) || "null");
         if (savedDraft && Array.isArray(savedDraft.nodes) && savedDraft.nodes.length > 0) {
@@ -601,9 +616,8 @@ function generateRoute() {
     const startNode = findNearestPedestrianNode(start);
     const endNode = findNearestPedestrianNode(end);
 
-    // Prevent snapping both points to draft-node-1 if unmapped
     if (startNode === endNode && start !== end) {
-        console.warn(`Start (${start}) and End (${end}) snapped to the same node (${startNode}). Ensure locations have mapped 3D positions.`);
+        console.warn(`Start (${start}) and End (${end}) snapped to same node (${startNode}).`);
     }
 
     let spatialResult = null;
@@ -623,13 +637,12 @@ function generateRoute() {
     let spatialPositions = [];
 
     if (hasSpatialPath) {
-        // STRICT WALKPATH: Coordinates are strictly along connected red network edges
         spatialPositions = spatialResult.path.map(id => pedestrianNodes[id]?.position).filter(Boolean);
     } else {
         console.warn(`No spatial path found between ${startNode} and ${endNode}.`);
         if ($("routeStatus")) $("routeStatus").textContent = "NETWORK GAP DETECTED";
         renderStepInstructions(startObj, endObj, [], 0, false);
-        return; // PREVENT STRAIGHT LINE ACROSS PLANT
+        return;
     }
 
     const totalDistMeters = spatialResult.distance;
