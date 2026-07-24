@@ -142,11 +142,29 @@ function buildGraph() {
 }
 
 function destinationGroup(destination) {
-    if (destination.category === "room" || destination.type === "room") return "Individual Rooms & Offices";
-    if (destination.zone === "Security" || destination.category === "security") return "Entrances / Security";
-    if (destination.zone === "Visitor" || destination.category === "visitor") return "Visitor / Check-In";
-    if (destination.zone === "Amenities" || destination.category === "amenity") return "Amenities / Services";
-    if (destination.zone === "Emergency" || destination.category === "emergency") return "Emergency / Muster";
+    const cat = (destination.category || "").toLowerCase();
+    const zone = (destination.zone || "").toLowerCase();
+    const type = (destination.type || "").toLowerCase();
+
+    // 1. Individual Rooms & Offices
+    if (cat === "room" || type === "room" || cat === "office") return "Individual Rooms & Offices";
+
+    // 2. Departments & Production Areas
+    if (cat === "department" || cat === "production" || zone === "production") return "Department / Key Areas";
+
+    // 3. Security & Entrances ONLY if explicitly security or entrance
+    if (zone === "security" || cat === "security" || cat === "entrance") return "Entrances / Security";
+
+    // 4. Visitor / Check-In
+    if (zone === "visitor" || cat === "visitor") return "Visitor / Check-In";
+
+    // 5. Amenities & Employee Services
+    if (zone === "amenities" || cat === "amenity" || cat === "service") return "Amenities / Services";
+
+    // 6. Emergency / Muster
+    if (zone === "emergency" || cat === "emergency") return "Emergency / Muster";
+
+// Fallback
     return "Department / Key Areas";
 }
 
