@@ -45,7 +45,6 @@ async function init() {
 
     setMode("employee");
 
-    // Editor URL Check
     const urlParams = new URLSearchParams(window.location.search);
     if (urlParams.get('editor') === 'true') {
         document.body.classList.add('editor-active');
@@ -106,6 +105,43 @@ function buildPedestrianGraph() {
 function distance3d(a, b) {
     if (!a || !b) return 10;
     return Math.hypot((a.x || 0) - (b.x || 0), (a.y || 0) - (b.y || 0), (a.z || 0) - (b.z || 0));
+}
+
+// Find nearest node on the pedestrian network graph for any unmapped destination
+function findNearestPedestrianNode(targetDestId) {
+    if (destinationNodeCrosswalk[targetDestId] && pedestrianGraph[destinationNodeCrosswalk[targetDestId]]) {
+        return destinationNodeCrosswalk[targetDestId];
+    }
+    const d = loc(targetDestId);
+    let targetPos = null;
+
+    if (d && (d.x !== undefined || d.position)) {
+        targetPos = d.position || { x: d.x, y: 0, z: d.y };
+    }
+
+    const allNodeIds = Object.keys(pedestrianNodes);
+    if (!allNodeIds.length) return targetDestId;
+
+    if (!targetPos) {
+        // Fallback to first available node in network
+        return allNodeIds[0];
+    }
+
+    let closestId = allNodeIds[0];
+    let minDist = Infinity;
+
+    allNodeIds.forEach(id => {
+        const nodePos = pedestrianNodes[id]?.position;
+        if (nodePos) {
+            const dist = distance3d(targetPos, nodePos);
+            if (dist < minDist) {
+                minDist = dist;
+                closestId = id;
+            }
+        }
+    });
+
+    return closestId;
 }
 
 function matchesDestinationCategory(destination, category) {
@@ -364,38 +400,41 @@ function generateRoute() {
     const start = sSelect.value, end = eSelect.value;
     if (!start || !end || start === end) return;
 
-    // Crosswalk Translation
-    const startNode = destinationNodeCrosswalk[start] || start;
-    const endNode = destinationNodeCrosswalk[end] || end;
+    // Dynamically snap start and end to the nearest pedestrian network node
+    const startNode = findNearestPedestrianNode(start);
+    const endNode = findNearestPedestrianNode(end);
 
-    // Run Dijkstra on the pedestrian network graph
     let spatialResult = null;
     if (pedestrianGraph[startNode] && pedestrianGraph[endNode]) {
         spatialResult = dijkstra(startNode, endNode, pedestrianGraph);
     }
 
-    const hasSpatialPath = spatialResult && Array.isArray(spatialResult.path) && spatialResult.path.length >= 2;
+    const hasSpatialPath = spatialResult && Array.isArray(spatialResult.path) && spatialResult.path.length >= 2 && Number.isFinite(spatialResult.distance);
 
     let result = dijkstra(start, end);
     lastPath = result.path;
 
-    drawRoute(result.path);
-    updateRoute(hasSpatialPath ? { ...result, distance: spatialResult.distance, distanceUnit: "meters" } : result);
-    showDestination(end);
-
     const startObj = loc(start) || { id: start, name: start };
     const endObj = loc(end) || { id: end, name: end };
+
+    const spatialPositions = hasSpatialPath
+        ? spatialResult.path.map(id => pedestrianNodes[id]?.position).filter(Boolean)
+        : [];
+
+    const totalDistMeters = hasSpatialPath ? spatialResult.distance : (result.distance || 50);
+
+    drawRoute(result.path);
+    updateTurnByTurnRoute(startObj, endObj, spatialPositions, totalDistMeters);
+    showDestination(end);
 
     const routeDetail = {
         path: [...result.path],
         destinations: [startObj, endObj],
-        distance: hasSpatialPath ? spatialResult.distance : result.distance,
+        distance: totalDistMeters,
         distanceUnit: hasSpatialPath ? "meters" : "map-units",
         certified: true,
         spatialNodeIds: hasSpatialPath ? [...spatialResult.path] : [],
-        spatialPath: hasSpatialPath
-            ? spatialResult.path.map(id => pedestrianNodes[id]?.position).filter(Boolean)
-            : []
+        spatialPath: spatialPositions
     };
 
     window.pgsCurrentRoute = routeDetail;
@@ -419,20 +458,66 @@ function drawRoute(path) {
     path.forEach(id => document.querySelector(`.node[data-id="${id}"]`)?.classList.add("selected"));
 }
 
-function updateRoute(r) {
-    const feet = Math.round(r.distance * (r.distanceUnit === "meters" ? 3.28084 : 1.7)), mins = Math.max(1, Math.round(feet / 250));
+// Generate Detailed Turn-by-Turn Text Instructions in Feet
+function updateTurnByTurnRoute(startObj, endObj, positions, totalMeters) {
+    const totalFeet = Math.round(totalMeters * 3.28084);
+    const mins = Math.max(1, Math.round(totalFeet / 250));
+
     if ($("routeStatus")) $("routeStatus").textContent = "PEDESTRIAN NETWORK ROUTE";
-    if ($("distanceMetric")) $("distanceMetric").textContent = feet + " ft";
+    if ($("distanceMetric")) $("distanceMetric").textContent = totalFeet + " ft";
     if ($("timeMetric")) $("timeMetric").textContent = mins + " min";
-    if ($("sumDistance")) $("sumDistance").textContent = feet + " ft";
+    if ($("sumDistance")) $("sumDistance").textContent = totalFeet + " ft";
     if ($("sumTime")) $("sumTime").textContent = mins + " min";
-    if ($("sumStart")) $("sumStart").textContent = loc(r.path[0])?.name || r.path[0];
-    if ($("sumEnd")) $("sumEnd").textContent = loc(r.path.at(-1))?.name || r.path.at(-1);
-    const steps = $("steps"); if (!steps) return; steps.innerHTML = "";
-    r.path.forEach((id, i) => {
-        const d = loc(id); if (!d) return;
+    if ($("sumStart")) $("sumStart").textContent = startObj.name || startObj.id;
+    if ($("sumEnd")) $("sumEnd").textContent = endObj.name || endObj.id;
+
+    const steps = $("steps");
+    if (!steps) return;
+    steps.innerHTML = "";
+
+    const instructions = [];
+    instructions.push(`Exit <b>${escapeHtml(startObj.name)}</b> and enter the main pedestrian walkway.`);
+
+    if (positions.length >= 2) {
+        let currentDist = 0;
+        for (let i = 0; i < positions.length - 1; i++) {
+            const p1 = positions[i];
+            const p2 = positions[i + 1];
+            const legDistMeters = distance3d(p1, p2);
+            const legDistFeet = Math.round(legDistMeters * 3.28084);
+            currentDist += legDistFeet;
+
+            if (i > 0 && i < positions.length - 1) {
+                const p0 = positions[i - 1];
+                const v1 = { x: p1.x - p0.x, z: p1.z - p0.z };
+                const v2 = { x: p2.x - p1.x, z: p2.z - p1.z };
+
+                // Cross product to determine left vs right turn
+                const cross = v1.x * v2.z - v1.z * v2.x;
+                const dot = v1.x * v2.x + v1.z * v2.z;
+                const angle = Math.atan2(cross, dot) * (180 / Math.PI);
+
+                if (angle > 30) {
+                    instructions.push(`Proceed ${legDistFeet} ft, then turn <b>right</b> at the hallway intersection.`);
+                } else if (angle < -30) {
+                    instructions.push(`Proceed ${legDistFeet} ft, then turn <b>left</b> at the hallway intersection.`);
+                } else if (legDistFeet > 60) {
+                    instructions.push(`Continue straight along the spine corridor for ${legDistFeet} ft.`);
+                }
+            } else if (i === 0) {
+                instructions.push(`Proceed straight along the walkway network for ${legDistFeet} ft.`);
+            }
+        }
+    } else {
+        instructions.push(`Proceed ${totalFeet} ft straight along the designated walkway.`);
+    }
+
+    instructions.push(`Arrive at <b>${escapeHtml(endObj.name)}</b> on your destination side.`);
+
+    instructions.forEach((stepText, idx) => {
         const el = document.createElement("div");
-        el.className = "step"; el.innerHTML = `<b>${i + 1}. ${escapeHtml(d.name)}</b>${escapeHtml(d.description || "")}`;
+        el.className = "step";
+        el.innerHTML = `<b>${idx + 1}.</b> ${stepText}`;
         steps.appendChild(el);
     });
 }
