@@ -26,13 +26,14 @@ async function init() {
 
     config = await fetchJson("data/config.json").then(r => r.ok ? r.json() : {}).catch(() => ({}));
 
-    let rawDestinations = [], spatialLabelsPayload = {}, basePedestrianNetwork = null;
-    [rawDestinations, routes, quickRoutes, basePedestrianNetwork, spatialLabelsPayload] = await Promise.all([
+    let rawDestinations = [], spatialLabelsPayload = {}, basePedestrianNetwork = null, labelOverrides = [];
+    [rawDestinations, routes, quickRoutes, basePedestrianNetwork, spatialLabelsPayload, labelOverrides] = await Promise.all([
         fetchJson("data/destinations.json").then(r => r.json()).catch(() => []),
         fetchJson("data/routes.json").then(r => r.json()).catch(() => []),
         fetchJson("data/quick_routes.json").then(r => r.json()).catch(() => []),
         fetchJson("data/generated/pedestrian_network.json").then(r => r.ok ? r.json() : null).catch(() => null),
-        fetchJson("data/generated/spatial_labels.json").then(r => r.ok ? r.json() : {}).catch(() => ({}))
+        fetchJson("data/generated/spatial_labels.json").then(r => r.ok ? r.json() : {}).catch(() => ({})),
+        fetchJson("data/label_overrides.json").then(r => r.ok ? r.json() : []).catch(() => [])
     ]);
 
     spatialLabelsData = spatialLabelsPayload.labels || [];
@@ -57,7 +58,10 @@ async function init() {
     }
 
     buildPedestrianGraph();
-    destinations = mergeSpatialLabelsIntoDestinations(rawDestinations, spatialLabelsData);
+
+    // Merge Spatial Labels & Overrides into Master Destination Collection
+    const baseMerged = mergeSpatialLabelsIntoDestinations(rawDestinations, spatialLabelsData);
+    destinations = mergeLabelOverridesIntoDestinations(baseMerged, labelOverrides);
 
     buildGraph();
     populateSelects();
@@ -126,6 +130,35 @@ function mergeSpatialLabelsIntoDestinations(existingDests, spatialLabels) {
     return Array.from(map.values());
 }
 
+function mergeLabelOverridesIntoDestinations(existingDests, labelOverridesPayload) {
+    const map = new Map();
+    existingDests.forEach(d => map.set(d.id, d));
+
+    const labelsList = Array.isArray(labelOverridesPayload)
+        ? labelOverridesPayload
+        : (labelOverridesPayload.labels || []);
+
+    labelsList.forEach(rec => {
+        if (!rec.name) return;
+        const cleanId = rec.id || rec.source_label_id;
+        const pos = rec.position || {};
+
+        map.set(cleanId, {
+            id: cleanId,
+            name: rec.name,
+            label: rec.name,
+            type: "room",
+            category: rec.kind || "area",
+            zone: rec.layer === "ground" ? "Production" : "Mezzanine",
+            access: "Authorized Personnel",
+            position: { x: pos.x || 0, y: pos.y || 0, z: pos.z || 0 },
+            description: `Facility Landmark (${rec.kind || "area"})`
+        });
+    });
+
+    return Array.from(map.values());
+}
+
 function setupEditorTabs() {
     document.querySelectorAll('.editor-tab-btn').forEach(btn => {
         btn.onclick = (e) => {
@@ -160,7 +193,7 @@ function destinationGroup(destination) {
     if (cat === "room" || type === "room" || cat === "office") return "Individual Rooms & Offices";
 
     // 2. Departments & Production Areas
-    if (cat === "department" || cat === "production" || zone === "production") return "Department / Key Areas";
+    if (cat === "department" || cat === "production" || cat === "area" || zone === "production") return "Department / Key Areas";
 
     // 3. Security & Entrances ONLY if explicitly security or entrance
     if (zone === "security" || cat === "security" || cat === "entrance") return "Entrances / Security";
@@ -359,7 +392,7 @@ function matchesDestinationCategory(destination, category) {
     if (category === "all") return true;
     if (category === "visitor") return destination.zone === "Visitor" || (destination.category && destination.category.includes("visitor"));
     if (category === "security") return destination.zone === "Security" || destination.category === "security";
-    if (category === "production") return destination.zone === "Production" || destination.category === "department" || destination.category === "room";
+    if (category === "production") return destination.zone === "Production" || destination.category === "department" || destination.category === "area" || destination.category === "room";
     if (category === "amenities") return destination.zone === "Amenities" || destination.category === "amenity";
     if (category === "emergency") return destination.zone === "Emergency" || destination.category === "emergency";
     return true;
@@ -795,7 +828,7 @@ function renderStepInstructions(startObj, endObj, positions, totalMeters, isVali
         return;
     }
 
-    // Helper: Finds all prominent department/zone landmarks passed along a list of 3D positions
+    // Helper: Finds prominent department/zone landmarks passed along a list of 3D positions
     const findPassedLandmarks = (legPositions) => {
         const found = [];
         legPositions.forEach(pos => {
@@ -821,6 +854,23 @@ function renderStepInstructions(startObj, endObj, positions, totalMeters, isVali
         return found;
     };
 
+    // Dynamic Intersection Scanner (Matches custom placed intersection labels)
+    const findNearbyIntersection = (pos) => {
+        if (!pos) return null;
+        let match = null;
+        destinations.forEach(d => {
+            if (d.name && d.position && Number.isFinite(d.position.x)) {
+                if (/intersection/i.test(d.name)) {
+                    const dist = distance3d(pos, d.position);
+                    if (dist <= 10.0) { // Within ~33 feet
+                        match = d.name;
+                    }
+                }
+            }
+        });
+        return match;
+    };
+
     const instructions = [];
     instructions.push(`Exit <b>${escapeHtml(startObj.name)}</b> onto the pedestrian walkway network.`);
 
@@ -841,7 +891,7 @@ function renderStepInstructions(startObj, endObj, positions, totalMeters, isVali
 
             let isTurn = false;
             let turnDirection = "";
-            const hitSpineIntersection = legNodeIds.includes("draft-node-9");
+            const dynamicIntersection = findNearbyIntersection(p2) || (legNodeIds.includes("draft-node-9") ? "Main Spine Intersection" : null);
 
             if (i < positions.length - 2) {
                 const p3 = positions[i + 2];
@@ -861,9 +911,9 @@ function renderStepInstructions(startObj, endObj, positions, totalMeters, isVali
                 }
             }
 
-            // 1. Explicit Spine Intersection Trigger
-            if (hitSpineIntersection && (isTurn || currentNId === "draft-node-9")) {
-                instructions.push(`Proceed straight for <b>${accumulatedFeet} ft</b> to the <b>Main Spine Intersection</b> and turn <b>${turnDirection || "right"}</b> into the Spine corridor.`);
+            // 1. Explicit Intersection Trigger
+            if (dynamicIntersection && (isTurn || currentNId === "draft-node-9")) {
+                instructions.push(`Proceed straight for <b>${accumulatedFeet} ft</b> to the <b>${escapeHtml(dynamicIntersection)}</b> and turn <b>${turnDirection || "right"}</b> into the Spine corridor.`);
                 accumulatedFeet = 0;
                 legPositions = [p2];
                 legNodeIds = [currentNId];

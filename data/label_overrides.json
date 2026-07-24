@@ -1,8 +1,7 @@
 {
   "schema_version": "0.1.0-draft",
   "coordinate_system": "PGS GLB model coordinates",
-  "review_status": "approved",
-  "approved": true,
+  "review_status": "draft_requires_site_approval",
   "labels": [
     {
       "id": "label-override:custom-label:1784492891372",
@@ -599,6 +598,45 @@
         "x": -256.5521,
         "y": 2.0001,
         "z": -403.7591
+      },
+      "approved": true
+    },
+    {
+      "id": "label-override:custom-label:1784917881887",
+      "source_label_id": "custom-label:1784917881887",
+      "name": "Main Guard House Spine Intersection",
+      "kind": "area",
+      "layer": "ground",
+      "position": {
+        "x": -273.7462,
+        "y": 2.3,
+        "z": 77.6809
+      },
+      "approved": true
+    },
+    {
+      "id": "label-override:custom-label:1784917941654",
+      "source_label_id": "custom-label:1784917941654",
+      "name": "North Contractor Spine Intersection",
+      "kind": "area",
+      "layer": "ground",
+      "position": {
+        "x": -275.0714,
+        "y": 2.3,
+        "z": -167.2523
+      },
+      "approved": true
+    },
+    {
+      "id": "label-override:custom-label:1784918016022",
+      "source_label_id": "custom-label:1784918016022",
+      "name": "South Contractor Spine Intersection",
+      "kind": "area",
+      "layer": "ground",
+      "position": {
+        "x": -273.6437,
+        "y": 2.2999,
+        "z": 464.5166
       },
       "approved": true
     }
