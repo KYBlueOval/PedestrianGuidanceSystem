@@ -763,7 +763,7 @@ function drawRoute(path) {
     path.forEach(id => document.querySelector(`.node[data-id="${id}"]`)?.classList.add("selected"));
 }
 
-// SMART VECTOR-COMPACTING, INTERSECTION & LANDMARK-AWARE INSTRUCTIONS
+// SMART VECTOR-COMPACTING, INTERSECTION & CORRIDOR LANDMARK-AWARE INSTRUCTIONS
 function renderStepInstructions(startObj, endObj, positions, totalMeters, isValid, pathNodeIds = []) {
     const totalFeet = Math.round(totalMeters * 3.28084);
     const mins = Math.max(1, Math.round(totalFeet / 250));
@@ -795,24 +795,39 @@ function renderStepInstructions(startObj, endObj, positions, totalMeters, isVali
         return;
     }
 
-    // Helper: Find nearest named landmark/room to a 3D position (within ~20ft / 6 meters)
-    const getNearbyLandmark = (pos) => {
-        if (!pos) return null;
-        let closest = null;
-        let minD = 6.0; // max threshold in meters (~20 ft)
+    // Advanced Landmark Finder: Scans 3D positions for significant nearby locations
+    const findLandmarkForLeg = (legPositions) => {
+        if (!legPositions || !legPositions.length) return null;
+        let bestName = null;
+        let bestScore = -1;
 
-        destinations.forEach(d => {
-            if (d.name && d.position && Number.isFinite(d.position.x)) {
-                // Ignore start/end objects to prevent repetitive callouts
+        legPositions.forEach(pos => {
+            if (!pos) return;
+            destinations.forEach(d => {
+                if (!d.name || !d.position || !Number.isFinite(d.position.x)) return;
                 if (d.id === startObj.id || d.id === endObj.id) return;
+
                 const dist = distance3d(pos, d.position);
-                if (dist < minD) {
-                    minD = dist;
-                    closest = d.name;
+                if (dist <= 10.0) { // Scan within ~33 feet (10m) of walkway path
+                    let score = 100 - dist;
+
+                    const lowerName = d.name.toLowerCase();
+                    const category = (d.category || "").toLowerCase();
+
+                    // Boost score for major pedestrian landmarks vs small storage closets
+                    if (lowerName.includes("break area") || lowerName.includes("office") || lowerName.includes("locker")) score += 50;
+                    if (category.includes("department") || category.includes("room")) score += 20;
+                    if (lowerName.includes("storage") || lowerName.includes("files")) score -= 30;
+
+                    if (score > bestScore) {
+                        bestScore = score;
+                        bestName = d.name;
+                    }
                 }
-            }
+            });
         });
-        return closest;
+
+        return bestName;
     };
 
     const instructions = [];
@@ -820,13 +835,16 @@ function renderStepInstructions(startObj, endObj, positions, totalMeters, isVali
 
     if (positions.length >= 2) {
         let accumulatedFeet = 0;
+        let legPositions = [positions[0]];
 
         for (let i = 0; i < positions.length - 1; i++) {
             const p1 = positions[i];
             const p2 = positions[i + 1];
             const currentNId = pathNodeIds[i + 1];
             const segDist = Math.round(distance3d(p1, p2) * 3.28084);
+
             accumulatedFeet += segDist;
+            legPositions.push(p2);
 
             let isTurn = false;
             let turnDirection = "";
@@ -850,26 +868,22 @@ function renderStepInstructions(startObj, endObj, positions, totalMeters, isVali
                 }
             }
 
-            // Look up nearest landmark at the turn or intersection point
-            const landmarkName = getNearbyLandmark(p2);
+            const landmarkName = findLandmarkForLeg(legPositions);
 
             if (isSpineIntersection && !isTurn) {
                 instructions.push(`Proceed straight for <b>${accumulatedFeet} ft</b> through the <b>Spine Intersection</b>.`);
                 accumulatedFeet = 0;
+                legPositions = [p2];
             } else if (isTurn) {
-                let turnText = `Turn <b>${turnDirection}</b>`;
+                let stepText = `Proceed straight for <b>${accumulatedFeet} ft</b>`;
                 if (landmarkName) {
-                    turnText += ` near <b>${escapeHtml(landmarkName)}</b> into the corridor`;
-                } else {
-                    turnText += ` into the hallway corridor`;
+                    stepText += ` past <b>${escapeHtml(landmarkName)}</b>`;
                 }
+                stepText += `, then turn <b>${turnDirection}</b> into the corridor.`;
 
-                if (accumulatedFeet > 0) {
-                    instructions.push(`Proceed straight for <b>${accumulatedFeet} ft</b>, then ${turnText.toLowerCase()}.`);
-                } else {
-                    instructions.push(`${turnText}.`);
-                }
+                instructions.push(stepText);
                 accumulatedFeet = 0;
+                legPositions = [p2];
             } else if (i === positions.length - 2 && accumulatedFeet > 0) {
                 let endStraightText = `Continue straight along walkway for <b>${accumulatedFeet} ft</b>`;
                 if (landmarkName) {
