@@ -544,10 +544,11 @@ function setWorkspaceView(next) {
 function setMode(m, generate = true) {
     mode = m;
     document.querySelectorAll(".mode").forEach(b => b.classList.toggle("active", b.dataset.mode === m));
-    if (m === "visitor") { if ($("destinationCategory")) $("destinationCategory").value = "visitor"; populateSelects("visitor"); }
-    else if (m === "employee") { if ($("destinationCategory")) $("destinationCategory").value = "production"; populateSelects("production"); }
-    else if (m === "contractor") { if ($("destinationCategory")) $("destinationCategory").value = "production"; populateSelects("production"); }
-    else { if ($("destinationCategory")) $("destinationCategory").value = "emergency"; populateSelects("emergency"); }
+
+    // Default to "All Categories" for all modes, including Employee
+    if ($("destinationCategory")) $("destinationCategory").value = "all";
+    populateSelects("all");
+
     if (generate) generateRoute();
 }
 
@@ -748,11 +749,7 @@ function renderStepInstructions(startObj, endObj, positions, totalMeters, isVali
             }
 
             if (isTurn) {
-                if (accumulatedFeet > 0) {
-                    instructions.push(`Proceed straight for <b>${accumulatedFeet} ft</b>, then turn <b>${turnDirection}</b> into the hallway corridor.`);
-                } else {
-                    instructions.push(`Turn <b>${turnDirection}</b> into the hallway corridor.`);
-                }
+                instructions.push(`Proceed straight for <b>${accumulatedFeet} ft</b>, then turn <b>${turnDirection}</b> into hallway corridor.`);
                 accumulatedFeet = 0;
             } else if (i === positions.length - 2 && accumulatedFeet > 0) {
                 instructions.push(`Continue straight along walkway for <b>${accumulatedFeet} ft</b> towards destination.`);

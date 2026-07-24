@@ -407,15 +407,21 @@ function renderRoute(route) {
 
     routeGroup = new THREE.Group();
     routeGroup.name = "PGS_3D_ROUTE_PREVIEW";
-    routeCurve = new THREE.CatmullRomCurve3(points, false, "centripetal", .35);
+
+    // STRICT WALKWAY FOLLOWING: Use exact straight line curves between nodes to prevent curve bowing into walls
+    routeCurve = new THREE.CurvePath();
+    for (let i = 0; i < points.length - 1; i++) {
+        routeCurve.add(new THREE.LineCurve3(points[i], points[i + 1]));
+    }
+
     const tube = new THREE.Mesh(
-        new THREE.TubeGeometry(routeCurve, Math.max(64, points.length * 28), 1.15, 10, false),
+        new THREE.TubeGeometry(routeCurve, Math.max(64, points.length * 16), 1.0, 8, false),
         new THREE.MeshStandardMaterial({ color: 0x0788ff, emissive: 0x005dff, emissiveIntensity: 1.3, roughness: .25 })
     );
     routeGroup.add(tube);
-    routeGroup.add(marker(points[0], 0x35f59a, 3.2));
-    routeGroup.add(marker(points.at(-1), 0x1687ff, 3.2));
-    tracker = marker(points[0], 0xffcf3a, 2.35);
+    routeGroup.add(marker(points[0], 0x35f59a, 2.5));
+    routeGroup.add(marker(points.at(-1), 0x1687ff, 2.5));
+    tracker = marker(points[0], 0xffcf3a, 2.0);
     tracker.name = "PGS_TRACKED_POSITION_PREVIEW";
     routeGroup.add(tracker);
 
