@@ -763,7 +763,7 @@ function drawRoute(path) {
     path.forEach(id => document.querySelector(`.node[data-id="${id}"]`)?.classList.add("selected"));
 }
 
-// SMART VECTOR-COMPACTING, INTERSECTION & FILTERED LANDMARK-AWARE INSTRUCTIONS
+// SMART VECTOR-COMPACTING, INTERSECTION & DEPT/ZONE LANDMARK-AWARE INSTRUCTIONS
 function renderStepInstructions(startObj, endObj, positions, totalMeters, isValid, pathNodeIds = []) {
     const totalFeet = Math.round(totalMeters * 3.28084);
     const mins = Math.max(1, Math.round(totalFeet / 250));
@@ -795,45 +795,47 @@ function renderStepInstructions(startObj, endObj, positions, totalMeters, isVali
         return;
     }
 
-    // High-Priority Landmark Scorer (Prioritizes Departments, Amenities & Intersections)
-    const findLandmarksForLeg = (legPositions) => {
-        if (!legPositions || !legPositions.length) return { passed: [], turnTarget: null };
-        let bestPassedName = null;
-        let bestPassedScore = -1;
+    // Strict Landmark Scorer: Focuses ONLY on Departments, Major Zones & Amenities
+    const getLandmarkAtPosition = (pos, maxDistMeters = 10.0) => {
+        if (!pos) return null;
+        let bestName = null;
+        let bestScore = -1;
 
-        legPositions.forEach(pos => {
-            if (!pos) return;
-            destinations.forEach(d => {
-                if (!d.name || !d.position || !Number.isFinite(d.position.x)) return;
-                if (d.id === startObj.id || d.id === endObj.id) return;
+        destinations.forEach(d => {
+            if (!d.name || !d.position || !Number.isFinite(d.position.x)) return;
+            if (d.id === startObj.id || d.id === endObj.id) return;
 
-                const name = d.name.trim();
-                const lowerName = name.toLowerCase();
-                const category = (d.category || "").toLowerCase();
-                const dist = distance3d(pos, d.position);
+            const name = d.name.trim();
+            const lowerName = name.toLowerCase();
+            const category = (d.category || "").toLowerCase();
+            const zone = (d.zone || "").toLowerCase();
+            const dist = distance3d(pos, d.position);
 
-                // Ignore technical noise & utility labels
-                if (/mach rm|open l-|storage rm|electrical|utility|jcm rm|files/i.test(lowerName)) return;
+            // Filter out mechanical lifts, stairs numbers, and utility storage tags
+            if (/material lift|stair-|mach rm|open l-|storage|electrical|utility|jcm|vestibule/i.test(lowerName)) return;
 
-                if (dist <= 12.0) { // Scan within ~38 ft of walkway
-                    let score = 100 - dist;
+            if (dist <= maxDistMeters) {
+                let score = 100 - dist;
 
-                    // 1. Departments & Major Zones
-                    if (category.includes("department") || category.includes("production") || /break area|office|locker|assembly|rebuild/i.test(lowerName)) score += 100;
-                    // 2. Amenities & Employee Services
-                    if (category.includes("amenity") || category.includes("service") || /kitchen|toilet|restroom|canteen|lounge/i.test(lowerName)) score += 80;
-                    // 3. Entrances & Stairs
-                    if (category.includes("entrance") || category.includes("stairs") || category.includes("elevator")) score += 60;
-
-                    if (score > bestPassedScore) {
-                        bestPassedScore = score;
-                        bestPassedName = name;
-                    }
+                // Priority 1: Departments, Offices & Production Zones
+                if (category.includes("department") || zone.includes("production") || /office|break area|locker|assembly|rebuild/i.test(lowerName)) {
+                    score += 150;
                 }
-            });
+                // Priority 2: Key Amenities & Services
+                else if (category.includes("amenity") || category.includes("service") || /kitchen|canteen|lounge/i.test(lowerName)) {
+                    score += 90;
+                } else {
+                    return; // Ignore general minor room labels
+                }
+
+                if (score > bestScore) {
+                    bestScore = score;
+                    bestName = name;
+                }
+            }
         });
 
-        return bestPassedName;
+        return bestName;
     };
 
     const instructions = [];
@@ -874,30 +876,32 @@ function renderStepInstructions(startObj, endObj, positions, totalMeters, isVali
                 }
             }
 
-            const landmarkName = findLandmarksForLeg(legPositions);
+            // Find landmarks along leg and at the turn point
+            const turnLandmark = getLandmarkAtPosition(p2, 12.0);
 
-            if (isSpineIntersection && isTurn) {
-                instructions.push(`Proceed straight for <b>${accumulatedFeet} ft</b> to the <b>Main Spine Intersection</b> and turn <b>${turnDirection}</b> into the Spine corridor.`);
-                accumulatedFeet = 0;
-                legPositions = [p2];
-            } else if (isSpineIntersection && !isTurn) {
-                instructions.push(`Proceed straight for <b>${accumulatedFeet} ft</b> through the <b>Main Spine Intersection</b>.`);
+            if (isSpineIntersection) {
+                if (isTurn) {
+                    instructions.push(`Proceed straight for <b>${accumulatedFeet} ft</b> to the <b>Main Spine Intersection</b> and turn <b>${turnDirection}</b> into the Spine corridor.`);
+                } else {
+                    instructions.push(`Proceed straight for <b>${accumulatedFeet} ft</b> through the <b>Main Spine Intersection</b>.`);
+                }
                 accumulatedFeet = 0;
                 legPositions = [p2];
             } else if (isTurn) {
                 let stepText = `Proceed straight for <b>${accumulatedFeet} ft</b>`;
-                if (landmarkName) {
-                    stepText += ` past <b>${escapeHtml(landmarkName)}</b>`;
+                if (turnLandmark) {
+                    stepText += ` toward <b>${escapeHtml(turnLandmark)}</b>, then turn <b>${turnDirection}</b> into the corridor`;
+                } else {
+                    stepText += `, then turn <b>${turnDirection}</b> into the corridor`;
                 }
-                stepText += `, then turn <b>${turnDirection}</b> into the corridor.`;
 
-                instructions.push(stepText);
+                instructions.push(`${stepText}.`);
                 accumulatedFeet = 0;
                 legPositions = [p2];
             } else if (i === positions.length - 2 && accumulatedFeet > 0) {
                 let endStraightText = `Continue straight along walkway for <b>${accumulatedFeet} ft</b>`;
-                if (landmarkName) {
-                    endStraightText += ` past <b>${escapeHtml(landmarkName)}</b> towards destination`;
+                if (turnLandmark) {
+                    endStraightText += ` in the <b>${escapeHtml(turnLandmark)}</b> towards destination`;
                 } else {
                     endStraightText += ` towards destination`;
                 }
