@@ -9,7 +9,7 @@ const loc = id => destinations.find(d => d.id === id);
 const fetchJson = url => fetch(url, { cache: "no-store" });
 
 async function init() {
-    // Service Worker & Cache Wipe
+    // Unregister service workers & clear stale PWA cache
     if ('serviceWorker' in navigator) {
         navigator.serviceWorker.getRegistrations().then(regs => { for (let r of regs) r.unregister(); });
     }
@@ -19,11 +19,13 @@ async function init() {
 
     config = await fetchJson("data/config.json").then(r => r.ok ? r.json() : {}).catch(() => ({}));
 
-    [destinations, routes, quickRoutes, pedestrianNetwork] = await Promise.all([
+    let rawDestinations = [], spatialLabelsPayload = {};
+    [rawDestinations, routes, quickRoutes, pedestrianNetwork, spatialLabelsPayload] = await Promise.all([
         fetchJson("data/destinations.json").then(r => r.json()).catch(() => []),
         fetchJson("data/routes.json").then(r => r.json()).catch(() => []),
         fetchJson("data/quick_routes.json").then(r => r.json()).catch(() => []),
-        fetchJson("data/generated/pedestrian_network.json").then(r => r.ok ? r.json() : null).catch(() => null)
+        fetchJson("data/generated/pedestrian_network.json").then(r => r.ok ? r.json() : null).catch(() => null),
+        fetchJson("data/generated/spatial_labels.json").then(r => r.ok ? r.json() : {}).catch(() => ({}))
     ]);
 
     const crosswalk = await fetchJson("data/generated/destination_node_crosswalk.json").then(r => r.ok ? r.json() : null).catch(() => null);
@@ -33,14 +35,18 @@ async function init() {
         );
     }
 
-    buildGraph();
     buildPedestrianGraph();
-    populateSelects();
-    renderQuickRoutes();
-    drawNetwork();
-    drawNodes();
-    injectSpatialSearchUI();
-    wireEvents();
+
+    // DYNAMIC MERGE: Import all individual room labels into destinations list
+    destinations = mergeSpatialLabelsIntoDestinations(rawDestinations, spatialLabelsPayload.labels || []);
+
+    buildGraph(); 
+    populateSelects(); 
+    renderQuickRoutes(); 
+    drawNetwork(); 
+    drawNodes(); 
+    injectSpatialSearchUI(); 
+    wireEvents(); 
     resetView();
 
     setMode("employee");
@@ -59,36 +65,64 @@ async function init() {
     }
 
     setWorkspaceView("3d");
-    updateClock();
+    updateClock(); 
     setInterval(updateClock, 30000);
 }
 
-function buildGraph() {
-    graph = {};
-    destinations.forEach(d => graph[d.id] = []);
-    routes.forEach(([a, b, w]) => {
-        if (graph[a] && graph[b]) {
-            graph[a].push({ id: b, weight: w });
-            graph[b].push({ id: a, weight: w });
+// Combine spatial_labels.json rooms into standard destinations array
+function mergeSpatialLabelsIntoDestinations(existingDests, spatialLabels) {
+    const map = new Map();
+    existingDests.forEach(d => map.set(d.id, d));
+
+    spatialLabels.forEach(record => {
+        if (!record.id || !record.name) return;
+        const cleanId = record.id;
+        
+        if (!map.has(cleanId)) {
+            const pos = record.model_position || {};
+            map.set(cleanId, {
+                id: cleanId,
+                name: record.name,
+                label: record.name,
+                type: "room",
+                category: record.kind || "room",
+                zone: record.floor_id === "FL_MF" ? "Mezzanine" : "Production",
+                access: "Authorized Personnel",
+                position: { x: pos.x || 0, y: pos.y || 0, z: pos.z || 0 },
+                description: `Individual facility room (${record.review_status || "mapped"})`
+            });
         }
+    });
+
+    return Array.from(map.values());
+}
+
+function buildGraph() {
+    graph = {}; 
+    destinations.forEach(d => graph[d.id] = []);
+    routes.forEach(([a, b, w]) => { 
+        if (graph[a] && graph[b]) { 
+            graph[a].push({ id: b, weight: w }); 
+            graph[b].push({ id: a, weight: w }); 
+        } 
     });
 }
 
 function destinationGroup(destination) {
     if (destination.zone === "Visitor" || destination.category === "visitor") return "Visitor / Check-In";
     if (destination.zone === "Security" || destination.category === "security") return "Entrances / Security";
-    if (destination.zone === "Production" || destination.category === "production") return "Production Areas";
-    if (destination.zone === "Amenities" || destination.category === "amenity") return "Amenities / Employee Services";
+    if (destination.zone === "Amenities" || destination.category === "amenity") return "Amenities / Services";
     if (destination.zone === "Emergency" || destination.category === "emergency") return "Emergency / Muster";
+    if (destination.category === "room" || destination.type === "room") return "Individual Rooms & Offices";
     return "Department / Key Areas";
 }
 
 function buildPedestrianGraph() {
-    pedestrianGraph = {};
+    pedestrianGraph = {}; 
     pedestrianNodes = {};
-    (pedestrianNetwork?.nodes || []).forEach(node => {
-        pedestrianNodes[node.id] = node;
-        pedestrianGraph[node.id] = [];
+    (pedestrianNetwork?.nodes || []).forEach(node => { 
+        pedestrianNodes[node.id] = node; 
+        pedestrianGraph[node.id] = []; 
     });
     (pedestrianNetwork?.edges || []).forEach(edge => {
         if (!pedestrianGraph[edge.from] || !pedestrianGraph[edge.to]) return;
@@ -107,25 +141,26 @@ function distance3d(a, b) {
     return Math.hypot((a.x || 0) - (b.x || 0), (a.y || 0) - (b.y || 0), (a.z || 0) - (b.z || 0));
 }
 
-// Find nearest node on the pedestrian network graph for any unmapped destination
+// Find closest pedestrian node on red network line for any selected location
 function findNearestPedestrianNode(targetDestId) {
     if (destinationNodeCrosswalk[targetDestId] && pedestrianGraph[destinationNodeCrosswalk[targetDestId]]) {
         return destinationNodeCrosswalk[targetDestId];
     }
+
     const d = loc(targetDestId);
     let targetPos = null;
 
-    if (d && (d.x !== undefined || d.position)) {
-        targetPos = d.position || { x: d.x, y: 0, z: d.y };
+    if (d) {
+        if (d.position && Number.isFinite(d.position.x)) {
+            targetPos = d.position;
+        } else if (d.x !== undefined) {
+            targetPos = { x: d.x, y: 0, z: d.y };
+        }
     }
 
     const allNodeIds = Object.keys(pedestrianNodes);
     if (!allNodeIds.length) return targetDestId;
-
-    if (!targetPos) {
-        // Fallback to first available node in network
-        return allNodeIds[0];
-    }
+    if (!targetPos) return allNodeIds[0];
 
     let closestId = allNodeIds[0];
     let minDist = Infinity;
@@ -148,7 +183,7 @@ function matchesDestinationCategory(destination, category) {
     if (category === "all") return true;
     if (category === "visitor") return destination.zone === "Visitor" || (destination.category && destination.category.includes("visitor"));
     if (category === "security") return destination.zone === "Security" || destination.category === "security";
-    if (category === "production") return destination.zone === "Production" || destination.category === "department";
+    if (category === "production") return destination.zone === "Production" || destination.category === "department" || destination.category === "room";
     if (category === "amenities") return destination.zone === "Amenities" || destination.category === "amenity";
     if (category === "emergency") return destination.zone === "Emergency" || destination.category === "emergency";
     return true;
@@ -216,16 +251,20 @@ function injectSpatialSearchUI() {
         resBox.innerHTML = "";
         if (q.length < 2) return;
 
-        const labels = window.pgs3d?.getSpatialLabels() || [];
-        const matches = labels.filter(l => (l.name + " " + l.category).toLowerCase().includes(q)).slice(0, 15);
+        const matches = destinations
+            .filter(d => (d.name + " " + (d.category || "") + " " + (d.id || "")).toLowerCase().includes(q))
+            .slice(0, 15);
 
         matches.forEach(m => {
             const btn = document.createElement("button");
-            btn.innerHTML = `<b>${escapeHtml(m.name)}</b><br><small>${m.category}</small>`;
+            btn.innerHTML = `<b>${escapeHtml(m.name)}</b><br><small>${m.category || "Room"}</small>`;
             btn.onclick = () => {
-                window.pgs3d?.focusSpatialLabel(m.id);
+                $("endSelect").value = m.id;
+                showDestination(m.id);
                 overlay.style.display = "none";
                 $("spatialSearchInput").value = "";
+                window.pgs3d?.focusSpatialLabel(m.id);
+                generateRoute();
             };
             resBox.appendChild(btn);
         });
@@ -376,11 +415,11 @@ function drawNodes() {
 
 function dijkstra(start, end, sourceGraph = graph) {
     const dist = {}, prev = {}, q = new Set(Object.keys(sourceGraph));
-    Object.keys(sourceGraph).forEach(k => dist[k] = Infinity);
+    Object.keys(sourceGraph).forEach(k => dist[k] = Infinity); 
     dist[start] = 0;
 
     while (q.size) {
-        let u = [...q].sort((a, b) => dist[a] - dist[b])[0];
+        let u = [...q].sort((a, b) => dist[a] - dist[b])[0]; 
         q.delete(u);
         if (u === end) break;
         for (const n of sourceGraph[u] || []) {
@@ -400,7 +439,6 @@ function generateRoute() {
     const start = sSelect.value, end = eSelect.value;
     if (!start || !end || start === end) return;
 
-    // Dynamically snap start and end to the nearest pedestrian network node
     const startNode = findNearestPedestrianNode(start);
     const endNode = findNearestPedestrianNode(end);
 
@@ -417,8 +455,8 @@ function generateRoute() {
     const startObj = loc(start) || { id: start, name: start };
     const endObj = loc(end) || { id: end, name: end };
 
-    const spatialPositions = hasSpatialPath
-        ? spatialResult.path.map(id => pedestrianNodes[id]?.position).filter(Boolean)
+    const spatialPositions = hasSpatialPath 
+        ? spatialResult.path.map(id => pedestrianNodes[id]?.position).filter(Boolean) 
         : [];
 
     const totalDistMeters = hasSpatialPath ? spatialResult.distance : (result.distance || 50);
@@ -458,7 +496,6 @@ function drawRoute(path) {
     path.forEach(id => document.querySelector(`.node[data-id="${id}"]`)?.classList.add("selected"));
 }
 
-// Generate Detailed Turn-by-Turn Text Instructions in Feet
 function updateTurnByTurnRoute(startObj, endObj, positions, totalMeters) {
     const totalFeet = Math.round(totalMeters * 3.28084);
     const mins = Math.max(1, Math.round(totalFeet / 250));
@@ -471,12 +508,12 @@ function updateTurnByTurnRoute(startObj, endObj, positions, totalMeters) {
     if ($("sumStart")) $("sumStart").textContent = startObj.name || startObj.id;
     if ($("sumEnd")) $("sumEnd").textContent = endObj.name || endObj.id;
 
-    const steps = $("steps");
-    if (!steps) return;
+    const steps = $("steps"); 
+    if (!steps) return; 
     steps.innerHTML = "";
 
     const instructions = [];
-    instructions.push(`Exit <b>${escapeHtml(startObj.name)}</b> and enter the main pedestrian walkway.`);
+    instructions.push(`Exit <b>${escapeHtml(startObj.name)}</b> and enter the main hallway.`);
 
     if (positions.length >= 2) {
         let currentDist = 0;
@@ -492,27 +529,26 @@ function updateTurnByTurnRoute(startObj, endObj, positions, totalMeters) {
                 const v1 = { x: p1.x - p0.x, z: p1.z - p0.z };
                 const v2 = { x: p2.x - p1.x, z: p2.z - p1.z };
 
-                // Cross product to determine left vs right turn
                 const cross = v1.x * v2.z - v1.z * v2.x;
                 const dot = v1.x * v2.x + v1.z * v2.z;
                 const angle = Math.atan2(cross, dot) * (180 / Math.PI);
 
                 if (angle > 30) {
-                    instructions.push(`Proceed ${legDistFeet} ft, then turn <b>right</b> at the hallway intersection.`);
+                    instructions.push(`Proceed ${legDistFeet} ft, then turn <b>right</b> into corridor.`);
                 } else if (angle < -30) {
-                    instructions.push(`Proceed ${legDistFeet} ft, then turn <b>left</b> at the hallway intersection.`);
+                    instructions.push(`Proceed ${legDistFeet} ft, then turn <b>left</b> into corridor.`);
                 } else if (legDistFeet > 60) {
-                    instructions.push(`Continue straight along the spine corridor for ${legDistFeet} ft.`);
+                    instructions.push(`Continue straight along spine for ${legDistFeet} ft.`);
                 }
             } else if (i === 0) {
-                instructions.push(`Proceed straight along the walkway network for ${legDistFeet} ft.`);
+                instructions.push(`Proceed straight along pedestrian network for ${legDistFeet} ft.`);
             }
         }
     } else {
-        instructions.push(`Proceed ${totalFeet} ft straight along the designated walkway.`);
+        instructions.push(`Proceed ${totalFeet} ft straight along designated walkway.`);
     }
 
-    instructions.push(`Arrive at <b>${escapeHtml(endObj.name)}</b> on your destination side.`);
+    instructions.push(`Arrive at <b>${escapeHtml(endObj.name)}</b>.`);
 
     instructions.forEach((stepText, idx) => {
         const el = document.createElement("div");
@@ -550,7 +586,7 @@ function renderSearch(q) {
         btn.onclick = () => {
             $("endSelect").value = d.id;
             showDestination(d.id);
-            box.style.display = "none";
+            box.style.display = "none"; 
             $("searchBox").value = displayName;
             generateRoute();
         };
