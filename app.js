@@ -10,6 +10,12 @@ const $ = id => document.getElementById(id);
 const loc = id => destinations.find(d => d.id === id);
 const fetchJson = url => fetch(url, { cache: "no-store" });
 
+// GPS Reference Origin Coordinates (Maps GLB 0,0 to Facility Reference Point)
+const ORIGIN_LAT = 37.532810;  // Latitude at GLB origin (0,0)
+const ORIGIN_LNG = -85.820120; // Longitude at GLB origin (0,0)
+const METERS_PER_LAT = 111000;
+const METERS_PER_LNG = 88000;  // Adjusted for local latitude
+
 async function init() {
     if ('serviceWorker' in navigator) {
         navigator.serviceWorker.getRegistrations().then(regs => { for (let r of regs) r.unregister(); });
@@ -82,6 +88,10 @@ async function init() {
     setWorkspaceView("3d");
     updateClock();
     setInterval(updateClock, 30000);
+
+    // Initialize Mobile Location & Orientation Sensors
+    initMobileGPS();
+    initCompassHeading();
 }
 
 function mergeSpatialLabelsIntoDestinations(existingDests, spatialLabels) {
@@ -211,6 +221,30 @@ function get3DPositionForDestination(targetDestId) {
     return null;
 }
 
+// ROBUST 3D NODE SNAPPING BY 3D VECTOR
+function findNearestPedestrianNodeByPos(pos) {
+    if (!pos || !Number.isFinite(pos.x)) return null;
+
+    const connectedNodeIds = Object.keys(pedestrianNodes).filter(id => (pedestrianGraph[id] || []).length > 0);
+    if (!connectedNodeIds.length) return null;
+
+    let closestId = connectedNodeIds[0];
+    let minDist = Infinity;
+
+    connectedNodeIds.forEach(id => {
+        const nodePos = pedestrianNodes[id]?.position;
+        if (nodePos) {
+            const dist = distance3d(pos, nodePos);
+            if (dist < minDist) {
+                minDist = dist;
+                closestId = id;
+            }
+        }
+    });
+
+    return closestId;
+}
+
 // ROBUST 3D NODE SNAPPING & DRAFT ANCHOR RESOLVER
 function findNearestPedestrianNode(targetDestId) {
     if (!targetDestId) return null;
@@ -254,25 +288,71 @@ function findNearestPedestrianNode(targetDestId) {
     }
 
     // 5. Snap 3D Position to nearest connected red node
-    const connectedNodeIds = Object.keys(pedestrianNodes).filter(id => (pedestrianGraph[id] || []).length > 0);
-    if (!connectedNodeIds.length) return targetDestId;
     if (!targetPos) return targetDestId;
+    return findNearestPedestrianNodeByPos(targetPos) || targetDestId;
+}
 
-    let closestId = connectedNodeIds[0];
-    let minDist = Infinity;
+// Real-Time GPS Tracking & 3D Model Snapping
+function initMobileGPS() {
+    if (!navigator.geolocation) return;
 
-    connectedNodeIds.forEach(id => {
-        const nodePos = pedestrianNodes[id]?.position;
-        if (nodePos) {
-            const dist = distance3d(targetPos, nodePos);
-            if (dist < minDist) {
-                minDist = dist;
-                closestId = id;
+    navigator.geolocation.watchPosition(
+        (pos) => {
+            const lat = pos.coords.latitude;
+            const lng = pos.coords.longitude;
+
+            // Convert GPS Delta to 3D Model Coordinates
+            const x3d = (lng - ORIGIN_LNG) * METERS_PER_LNG;
+            const z3d = -(lat - ORIGIN_LAT) * METERS_PER_LAT;
+            const userPos = { x: x3d, y: 0.35, z: z3d };
+
+            // Update user position marker in 3D Scene
+            if (window.pgs3d?.updateUserPosition) {
+                window.pgs3d.updateUserPosition(userPos);
             }
-        }
-    });
 
-    return closestId;
+            // Auto-snap start dropdown to closest node in network
+            const nearestNodeId = findNearestPedestrianNodeByPos(userPos);
+            if (nearestNodeId && $("startSelect") && $("startSelect").value !== nearestNodeId) {
+                $("startSelect").value = nearestNodeId;
+                generateRoute();
+            }
+        },
+        (err) => console.warn("GPS Tracking Error:", err),
+        { enableHighAccuracy: true, maximumAge: 1000, timeout: 5000 }
+    );
+}
+
+// Real-time Digital Compass Heading Rotation
+function initCompassHeading() {
+    const handleOrientation = (e) => {
+        let heading = null;
+
+        // iOS / Safari
+        if (e.webkitCompassHeading !== undefined && e.webkitCompassHeading !== null) {
+            heading = e.webkitCompassHeading;
+        }
+        // Android / Chrome (Absolute Alpha)
+        else if (e.alpha !== null && e.alpha !== undefined) {
+            heading = (360 - e.alpha) % 360;
+        }
+
+        if (heading !== null && window.pgs3d?.setCameraHeading) {
+            window.pgs3d.setCameraHeading(heading);
+        }
+    };
+
+    if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
+        // iOS Motion Permission request
+        DeviceOrientationEvent.requestPermission().then(state => {
+            if (state === 'granted') {
+                window.addEventListener('deviceorientation', handleOrientation, true);
+            }
+        }).catch(err => console.warn("DeviceOrientation permission error:", err));
+    } else {
+        window.addEventListener('deviceorientationabsolute', handleOrientation, true);
+        window.addEventListener('deviceorientation', handleOrientation, true);
+    }
 }
 
 function matchesDestinationCategory(destination, category) {
@@ -724,7 +804,7 @@ function renderStepInstructions(startObj, endObj, positions, totalMeters, isVali
         for (let i = 0; i < positions.length - 1; i++) {
             const p1 = positions[i];
             const p2 = positions[i + 1];
-            const currentNId = pathNodeIds[i + 1]; // Node ID at arrival of this segment
+            const currentNId = pathNodeIds[i + 1];
             const segDist = Math.round(distance3d(p1, p2) * 3.28084);
             accumulatedFeet += segDist;
 
@@ -741,7 +821,6 @@ function renderStepInstructions(startObj, endObj, positions, totalMeters, isVali
                 const dot = v1.x * v2.x + v1.z * v2.z;
                 const angle = Math.atan2(cross, dot) * (180 / Math.PI);
 
-                // Require a sharper angle (> 38 degrees) to trigger an actual turn
                 if (angle > 38) {
                     isTurn = true;
                     turnDirection = "right";
@@ -751,10 +830,9 @@ function renderStepInstructions(startObj, endObj, positions, totalMeters, isVali
                 }
             }
 
-            // Callout for crossing the main Spine Intersection (Node 9)
             if (isSpineIntersection && !isTurn) {
                 instructions.push(`Proceed straight for <b>${accumulatedFeet} ft</b> through the <b>Spine Intersection</b>.`);
-                accumulatedFeet = 0; // Reset accumulator for post-intersection walk
+                accumulatedFeet = 0;
             } else if (isTurn) {
                 if (accumulatedFeet > 0) {
                     instructions.push(`Proceed straight for <b>${accumulatedFeet} ft</b>, then turn <b>${turnDirection}</b> into the hallway corridor.`);
