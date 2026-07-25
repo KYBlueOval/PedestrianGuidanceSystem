@@ -669,7 +669,16 @@ function setWorkspaceView(next) {
         $("threeFrame").hidden = false;
     }
 
-    if (is3d) window.pgs3d?.show(); else { window.pgs3d?.hide(); resetView(); }
+    if (is3d) {
+        if (window.pgs3d?.show) {
+            window.pgs3d.show();
+        } else {
+            window.pgs3dNeedsShow = true; // Queue execution for when viewer3d.js loads
+        }
+    } else {
+        window.pgs3d?.hide?.();
+        resetView();
+    }
 }
 
 function setMode(m, generate = true) {

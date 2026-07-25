@@ -6,7 +6,7 @@ import { CSS2DObject, CSS2DRenderer } from "three/addons/renderers/CSS2DRenderer
 const host = document.getElementById("threeCanvas");
 const frame = document.getElementById("threeFrame");
 let renderer, labelRenderer, scene, camera, controls, model, resizeObserver;
-let initialized = false, loading = false, visible = false;
+let initialized = false, loading = false, visible = true;
 const layerObjects = { site: [], ground: [], mezzanine: [], roof: [] };
 const buildingLabels = [];
 const semanticLabels = [];
@@ -47,23 +47,38 @@ function setStatus(message, { error = false, hidden = false } = {}) {
 function initialize() {
     if (initialized) return;
     initialized = true;
+    
+    if (frame) {
+        frame.style.display = "block";
+        frame.hidden = false;
+    }
+
     scene = new THREE.Scene();
     scene.background = new THREE.Color(0x071629);
     scene.fog = new THREE.Fog(0x071629, 900, 2800);
 
-    camera = new THREE.PerspectiveCamera(45, 1, .1, 10000);
+    const aspect = Math.max(host?.clientWidth || window.innerWidth, 1) / Math.max(host?.clientHeight || window.innerHeight, 1);
+    camera = new THREE.PerspectiveCamera(45, aspect, .1, 10000);
     camera.position.set(500, 420, 500);
 
     renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance" });
     renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.5));
-    renderer.setSize(Math.max(host.clientWidth, 1), Math.max(host.clientHeight, 1), false);
+    renderer.setSize(Math.max(host?.clientWidth || 300, 1), Math.max(host?.clientHeight || 300, 1), false);
     renderer.outputColorSpace = THREE.SRGBColorSpace;
-    host.appendChild(renderer.domElement);
+    
+    if (host) {
+        host.innerHTML = "";
+        host.appendChild(renderer.domElement);
+    }
 
     labelRenderer = new CSS2DRenderer();
-    labelRenderer.setSize(Math.max(host.clientWidth, 1), Math.max(host.clientHeight, 1));
+    labelRenderer.setSize(Math.max(host?.clientWidth || 300, 1), Math.max(host?.clientHeight || 300, 1));
     labelRenderer.domElement.className = "three-label-layer";
-    host.appendChild(labelRenderer.domElement);
+    labelRenderer.domElement.style.position = "absolute";
+    labelRenderer.domElement.style.top = "0";
+    labelRenderer.domElement.style.left = "0";
+    labelRenderer.domElement.style.pointerEvents = "none";
+    if (host) host.appendChild(labelRenderer.domElement);
 
     controls = new OrbitControls(camera, renderer.domElement);
     controls.enableDamping = true;
@@ -80,8 +95,10 @@ function initialize() {
     grid.material.transparent = true;
     scene.add(grid);
 
-    resizeObserver = new ResizeObserver(resize);
-    resizeObserver.observe(frame);
+    if (frame) {
+        resizeObserver = new ResizeObserver(resize);
+        resizeObserver.observe(frame);
+    }
 
     const safeAdd = (id, event, fn) => {
         const el = document.getElementById(id);
@@ -123,6 +140,8 @@ function initialize() {
     renderer.domElement.addEventListener("pointerdown", event => { pointerStart = { x: event.clientX, y: event.clientY }; });
     renderer.domElement.addEventListener("pointerup", handleEditorPointerUp);
     window.addEventListener("pgs:route", event => renderRoute(event.detail));
+    window.addEventListener("resize", resize);
+
     animate();
 }
 
@@ -163,6 +182,7 @@ async function loadModel() {
 
         if (window.pgsCurrentRoute) renderRoute(window.pgsCurrentRoute);
         setStatus("3D twin ready", { hidden: true });
+        resize();
     } catch (error) {
         console.error("PGS 3D viewer:", error);
         setStatus("3D model is not available.", { error: true });
@@ -400,9 +420,7 @@ function marker(position, color, radius) {
     return group;
 }
 
-// -----------------------------------------------------------
-// LIVE USER POSITIONING & HEADING INDICATOR LOGIC
-// -----------------------------------------------------------
+// Live User Positioning API
 export function updateUserPosition(pos) {
     if (!model || !pos || !Number.isFinite(pos.x)) return;
 
@@ -698,7 +716,7 @@ function rebuildEditorVisuals() {
     if (editorActive) editorNodes.forEach((node, index) => {
         const position = new THREE.Vector3(node.position.x, node.position.y, node.position.z);
         const selected = node.id === editorActiveNodeId;
-
+        
         const nodeMarker = marker(position, selected ? 0xffcf3a : 0xef3340, selected ? 0.6 : 0.45);
         nodeMarker.name = node.id;
         nodeMarker.userData.editorNodeId = node.id;
@@ -1221,11 +1239,13 @@ function fitModel() {
 }
 
 function resize() {
-    if (!renderer || frame.hidden) return;
-    camera.aspect = Math.max(host.clientWidth, 1) / Math.max(host.clientHeight, 1);
+    if (!renderer) return;
+    const w = Math.max(host?.clientWidth || window.innerWidth, 100);
+    const h = Math.max(host?.clientHeight || window.innerHeight, 100);
+    camera.aspect = w / h;
     camera.updateProjectionMatrix();
-    renderer.setSize(Math.max(host.clientWidth, 1), Math.max(host.clientHeight, 1), false);
-    labelRenderer.setSize(Math.max(host.clientWidth, 1), Math.max(host.clientHeight, 1));
+    renderer.setSize(w, h, false);
+    if (labelRenderer) labelRenderer.setSize(w, h);
 }
 
 function animate() {
@@ -1243,18 +1263,21 @@ function animate() {
     if (animationFrameCount === 0) updateSemanticLabelLOD();
     controls.update();
     renderer.render(scene, camera);
-    labelRenderer.render(scene, camera);
+    if (labelRenderer) labelRenderer.render(scene, camera);
 }
 
-// Global API Bindings
-window.pgs3d = Object.assign(window.pgs3d || {}, {
-    show: async () => { visible = true; initialize(); resize(); await loadModel(); },
+const pgs3dInterface = {
+    show: async () => { 
+        visible = true; 
+        initialize(); 
+        resize(); 
+        await loadModel(); 
+    },
     hide: () => { visible = false; },
     reset: () => { if (controls) { controls.reset(); resize(); fitModel(); } },
     setLayerVisibility: (layer, visible) => setLayerVisibility(layer, visible),
     updateSemanticLabels: () => updateSemanticLabelVisibility(),
 
-    // Live User Positioning API
     updateUserPosition,
     setCameraHeading,
     toggleCameraFollow,
@@ -1298,4 +1321,14 @@ window.pgs3d = Object.assign(window.pgs3d || {}, {
         camera.position.set(pos.x + 30, pos.y + 60, pos.z + 40);
         controls.update();
     }
-});
+};
+
+// Global API Bindings & Self-Healing Event Sync
+window.pgs3d = Object.assign(window.pgs3d || {}, pgs3dInterface);
+
+// Auto-run startup handshake if app requested initialization prior to module load
+if (window.pgs3dNeedsShow || document.readyState === "complete" || document.readyState === "interactive") {
+    window.pgs3d.show();
+} else {
+    document.addEventListener("DOMContentLoaded", () => window.pgs3d.show());
+}
