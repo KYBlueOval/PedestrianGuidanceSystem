@@ -3,10 +3,10 @@
 <head>
     <meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
-    <title>Ford Energy SiteNav Command v13</title>
+    <title>Ford Energy SiteNav Command v13.5</title>
     <link rel="manifest" href="manifest.json"/>
     <link rel="icon" href="assets/icons/favicon.ico" sizes="any"/>
-    <link rel="stylesheet" href="style.css?v=13.4.0"/>
+    <link rel="stylesheet" href="style.css?v=13.5.0"/>
     <script type="importmap">
     {
       "imports": {
@@ -22,34 +22,34 @@
         .layers-panel.show, .legend-panel.show { display: block !important; }
         .panel-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #1a3a5f; margin-bottom: 10px; }
         
-        /* 3D Core Enforcement */
+        /* 3D Canvas Rigid Constraints */
         #mapFrame { display: none !important; }
         #threeFrame { 
-			display: block !important; 
-			position: absolute !important; 
-			top: 0; 
-			left: 0; 
-			width: 100% !important; 
-			height: 100% !important; 
-			z-index: 10; 
-		}
+            display: block !important; 
+            position: absolute !important; 
+            top: 0; 
+            left: 0; 
+            width: 100% !important; 
+            height: 100% !important; 
+            z-index: 10; 
+        }
 
-		#threeCanvas, .three-canvas {
-			width: 100% !important;
-			height: 100% !important;
-			position: absolute !important;
-			top: 0;
-			left: 0;
-			overflow: hidden;
-		}
+        #threeCanvas, .three-canvas {
+            width: 100% !important;
+            height: 100% !important;
+            position: absolute !important;
+            top: 0;
+            left: 0;
+            overflow: hidden;
+        }
 
-		#threeCanvas canvas {
-			width: 100% !important;
-			height: 100% !important;
-			display: block !important;
-		}
+        #threeCanvas canvas {
+            width: 100% !important;
+            height: 100% !important;
+            display: block !important;
+        }
         
-        /* --- Polished 3D Search Input --- */
+        /* Search Box & Dropdown Container */
         #searchBox {
             background: linear-gradient(145deg, #0b2038, #102e52);
             border: 1px solid #1a4b82;
@@ -69,51 +69,88 @@
             border-color: #00a8ff;
         }
 
-        /* --- Search Results Dropdown Container --- */
-        #searchResults {
-            background: rgba(10, 25, 47, 0.85);
+        /* Typeable Search Combobox UI */
+        .combobox-container { position: relative; width: 100%; margin-bottom: 12px; }
+        .combobox-input {
+            background: linear-gradient(145deg, #0b2038, #102e52);
             border: 1px solid #1a4b82;
-            border-radius: 12px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.8);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            margin-top: 8px;
-            max-height: 350px;
+            border-radius: 8px;
+            color: #ffffff;
+            padding: 10px 14px;
+            font-size: 13px;
+            width: 100%;
+            box-sizing: border-box;
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        .combobox-input:focus { border-color: #00a8ff; box-shadow: 0 0 10px rgba(0, 168, 255, 0.4); }
+        .combobox-dropdown {
+            background: rgba(10, 25, 47, 0.95);
+            border: 1px solid #1a4b82;
+            border-radius: 8px;
+            max-height: 220px;
             overflow-y: auto;
             position: absolute;
-            width: calc(100% - 40px);
-            z-index: 9999;
+            top: 100%;
+            left: 0;
+            right: 0;
+            z-index: 10010;
+            display: none;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.6);
         }
-
-        /* --- 3D Search Result Bubbles --- */
-        #searchResults button {
-            background: linear-gradient(145deg, #112d4e, #183e66);
-            border: 1px solid #23558c;
-            border-radius: 10px;
-            color: #e0e0e0;
-            padding: 12px 16px;
-            margin: 8px;
-            width: calc(100% - 16px);
-            text-align: left;
-            cursor: pointer;
-            box-shadow: 3px 4px 10px rgba(0,0,0,0.4);
-            transition: transform 0.1s, box-shadow 0.1s, filter 0.1s;
+        .combobox-dropdown button {
             display: block;
+            width: 100%;
+            padding: 9px 12px;
+            background: transparent;
+            border: none;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            color: #e0e0e0;
+            text-align: left;
+            font-size: 12px;
+            cursor: pointer;
+        }
+        .combobox-dropdown button:hover { background: #00a8ff; color: #fff; }
+
+        /* Navigation Controls */
+        .route-action-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px; }
+        .btn-cancel-nav { background: rgba(239, 51, 64, 0.2); border: 1px solid #ef3340; color: #ff6b78; padding: 10px; border-radius: 6px; font-weight: bold; cursor: pointer; transition: all 0.2s; }
+        .btn-cancel-nav:hover { background: #ef3340; color: #fff; }
+        .btn-clear-route { background: #15344d; border: 1px solid #23558c; color: #a0c0e0; padding: 10px; border-radius: 6px; font-weight: bold; cursor: pointer; transition: all 0.2s; }
+        .btn-clear-route:hover { background: #23558c; color: #fff; }
+
+        /* 3D "Take Me Here" Tooltip Popup */
+        .take-me-here-popup {
+            position: absolute;
+            top: 80px;
+            right: 30px;
+            background: rgba(7, 22, 41, 0.95);
+            border: 1px solid #00a8ff;
+            border-radius: 10px;
+            padding: 12px 16px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.85);
+            z-index: 10005;
+            color: #fff;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            backdrop-filter: blur(10px);
+        }
+        .take-me-here-btn {
+            background: linear-gradient(135deg, #0077ff, #00a8ff);
+            color: #fff;
+            border: none;
+            padding: 8px 14px;
+            border-radius: 6px;
+            font-weight: bold;
+            font-size: 12px;
+            cursor: pointer;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(0, 168, 255, 0.4);
         }
 
-        #searchResults button b {
-            color: #4da8da;
-            font-size: 15px;
-        }
-
-        #searchResults button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 15px rgba(0, 168, 255, 0.3);
-            filter: brightness(1.2);
-            border-color: #00a8ff;
-        }
-
-        /* --- 3D Map Editor Panel Overlay Styling --- */
+        /* 3D Map Editor Panel Overlay */
         body.editor-active #threeEditorPanel,
         .three-editor-panel {
             display: none;
@@ -135,115 +172,20 @@
             pointer-events: auto !important;
         }
 
-        body.editor-active #threeEditorPanel {
-            display: flex !important;
-        }
-
-        .three-editor-panel .editor-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 12px;
-            border-bottom: 1px solid rgba(0, 168, 255, 0.2);
-            padding-bottom: 8px;
-        }
-
-        .three-editor-panel .editor-header h3 {
-            color: #00a8ff;
-            font-size: 13px;
-            text-transform: uppercase;
-            margin: 0;
-        }
-
-        .three-editor-panel .editor-badge {
-            background: rgba(0, 168, 255, 0.2);
-            color: #00a8ff;
-            font-size: 10px;
-            padding: 2px 6px;
-            border-radius: 4px;
-            border: 1px solid #00a8ff;
-        }
-
-        .three-editor-panel .editor-tabs {
-            display: flex;
-            gap: 4px;
-            margin-bottom: 14px;
-            background: rgba(255, 255, 255, 0.05);
-            padding: 3px;
-            border-radius: 6px;
-        }
-
-        .three-editor-panel .editor-tab-btn {
-            flex: 1;
-            background: transparent;
-            border: none;
-            color: #88a0c0;
-            font-size: 10px;
-            padding: 6px 2px;
-            border-radius: 4px;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .three-editor-panel .editor-tab-btn.active {
-            background: #00a8ff;
-            color: #ffffff;
-            font-weight: bold;
-        }
-
-        .three-editor-panel .editor-field-group {
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-            margin-bottom: 10px;
-        }
-
-        .three-editor-panel .editor-field-group label {
-            font-size: 10px;
-            color: #a0c0e0;
-            text-transform: uppercase;
-        }
-
-        .three-editor-panel input,
-        .three-editor-panel select {
-            background: rgba(15, 32, 58, 0.9);
-            border: 1px solid #23558c;
-            color: #fff;
-            padding: 8px;
-            border-radius: 6px;
-            font-size: 12px;
-            width: 100%;
-            box-sizing: border-box;
-        }
-
-        .three-editor-panel .editor-button-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 8px;
-            margin-top: 10px;
-        }
-
-        .three-editor-panel .editor-btn {
-            background: #15344d;
-            border: 1px solid #23558c;
-            color: #fff;
-            padding: 8px;
-            border-radius: 6px;
-            font-size: 11px;
-            cursor: pointer;
-        }
-
-        .three-editor-panel .editor-btn.primary {
-            background: linear-gradient(135deg, #0077ff, #00a8ff);
-            border: none;
-            font-weight: bold;
-        }
-
-        .three-editor-panel .editor-btn.danger {
-            background: rgba(239, 51, 64, 0.2);
-            border-color: #ef3340;
-            color: #ff6b78;
-        }
+        body.editor-active #threeEditorPanel { display: flex !important; }
+        .three-editor-panel .editor-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; border-bottom: 1px solid rgba(0, 168, 255, 0.2); padding-bottom: 8px; }
+        .three-editor-panel .editor-header h3 { color: #00a8ff; font-size: 13px; text-transform: uppercase; margin: 0; }
+        .three-editor-panel .editor-badge { background: rgba(0, 168, 255, 0.2); color: #00a8ff; font-size: 10px; padding: 2px 6px; border-radius: 4px; border: 1px solid #00a8ff; }
+        .three-editor-panel .editor-tabs { display: flex; gap: 4px; margin-bottom: 14px; background: rgba(255, 255, 255, 0.05); padding: 3px; border-radius: 6px; }
+        .three-editor-panel .editor-tab-btn { flex: 1; background: transparent; border: none; color: #88a0c0; font-size: 10px; padding: 6px 2px; border-radius: 4px; cursor: pointer; transition: all 0.2s; }
+        .three-editor-panel .editor-tab-btn.active { background: #00a8ff; color: #ffffff; font-weight: bold; }
+        .three-editor-panel .editor-field-group { display: flex; flex-direction: column; gap: 4px; margin-bottom: 10px; }
+        .three-editor-panel .editor-field-group label { font-size: 10px; color: #a0c0e0; text-transform: uppercase; }
+        .three-editor-panel input, .three-editor-panel select { background: rgba(15, 32, 58, 0.9); border: 1px solid #23558c; color: #fff; padding: 8px; border-radius: 6px; font-size: 12px; width: 100%; box-sizing: border-box; }
+        .three-editor-panel .editor-button-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px; }
+        .three-editor-panel .editor-btn { background: #15344d; border: 1px solid #23558c; color: #fff; padding: 8px; border-radius: 6px; font-size: 11px; cursor: pointer; }
+        .three-editor-panel .editor-btn.primary { background: linear-gradient(135deg, #0077ff, #00a8ff); border: none; font-weight: bold; }
+        .three-editor-panel .editor-btn.danger { background: rgba(239, 51, 64, 0.2); border-color: #ef3340; color: #ff6b78; }
     </style>
 </head>
 <body>
@@ -252,7 +194,7 @@
         <section class="brand-panel">
             <img class="brand-logo" src="assets/logos/ford-energy-white.png" alt="Ford Energy" onerror="this.src='assets/ford_energy_logo_white.png'"/>
             <div class="app-title"><h1>SiteNav Command</h1><p>Pedestrian Guidance System with Spatial Awareness</p></div>
-            <div class="system-status"><span class="online-dot"></span><div><b>Spatial Engine System Online</b><small>Kentucky ONE • v13.4 Digital-Twin</small></div></div>
+            <div class="system-status"><span class="online-dot"></span><div><b>Spatial Engine System Online</b><small>Kentucky ONE • v13.5 Digital-Twin</small></div></div>
         </section>
 
         <section class="control-section">
@@ -263,27 +205,37 @@
                 <button class="mode" data-mode="contractor"><span>🦺</span>Contractor</button>
                 <button class="mode emergency" data-mode="emergency"><span>🚨</span>Emergency</button>
             </div>
-            <label for="searchBox">Destination Search</label>
-            <input id="searchBox" placeholder="Search..."/>
-            <label for="destinationCategory">Destination Category</label>
-            <select id="destinationCategory">
-                <option value="all">All Categories</option>
-                <option value="visitor">Visitor</option>
-                <option value="production">Production & Departments</option>
-                <option value="security">Security & Entrances</option>
-                <option value="amenity">Amenities</option>
-                <option value="emergency">Emergency</option>
-            </select>
-            <div id="searchResults" class="search-results-box"></div>
-            <label for="startSelect">Start</label><select id="startSelect"></select>
-            <label for="endSelect">Destination</label><select id="endSelect"></select>
+
+            <!-- Typeable Start Location Combobox -->
+            <label for="startSearchInput">Start Location</label>
+            <div class="combobox-container">
+                <input type="text" id="startSearchInput" class="combobox-input" placeholder="Type or auto-detect start..." autocomplete="off"/>
+                <div id="startDropdown" class="combobox-dropdown"></div>
+            </div>
+            <select id="startSelect" style="display: none;"></select>
+
+            <!-- Typeable Destination Combobox -->
+            <label for="endSearchInput">Destination</label>
+            <div class="combobox-container">
+                <input type="text" id="endSearchInput" class="combobox-input" placeholder="Type or select destination..." autocomplete="off"/>
+                <div id="endDropdown" class="combobox-dropdown"></div>
+            </div>
+            <select id="endSelect" style="display: none;"></select>
+
             <button id="routeBtn" class="primary-action">Generate Route</button>
+
+            <!-- Navigation Controls -->
+            <div class="route-action-grid">
+                <button id="cancelNavBtn" class="btn-cancel-nav">🛑 Cancel Nav</button>
+                <button id="clearRouteBtn" class="btn-clear-route">❌ Clear Route</button>
+            </div>
         </section>
 
         <section class="quick-routes"><div class="section-heading">Quick Routes</div><div id="quickRoutes"></div></section>
         <section class="route-status"><div class="route-title"><span>Route Status</span><b id="routeStatus">3D ROUTE</b></div></section>
-        <img class="brand-logo" src="assets/logos/bwrdo.png" alt="RDO" onerror="this.src='assets/bwrdo.png'"/>
-		<footer class="version-footer">PGS v13.4.0 </footer>
+		        <section class="route-status"><div class="route-title"><span>Route Status</span><b id="routeStatus">3D ROUTE</b></div></section>
+        <img class="brand-logo" src="assets/logos/bwrdo.png" alt="RDO" onerror="this.src='assets/bwrdo.png'"/>
+        <footer class="version-footer">PGS v13.5.0 BETA</footer>
     </aside>
 
     <main class="workspace">
@@ -475,15 +427,15 @@
     </main>
 </div>
 
-<script src="app.js?v=13.4.0"></script>
-<script type="module" src="viewer3d.js?v=13.4.0"></script>
+<script src="app.js?v=13.5.0"></script>
+<script type="module" src="viewer3d.js?v=13.5.0"></script>
 
 <script>
     document.addEventListener("DOMContentLoaded", () => {
-        document.getElementById("layersOpen").addEventListener("click", () => document.getElementById("layersPanel").classList.add("show"));
-        document.getElementById("layersClose").addEventListener("click", () => document.getElementById("layersPanel").classList.remove("show"));
-        document.getElementById("legendOpen").addEventListener("click", () => document.getElementById("legendPanel").classList.add("show"));
-        document.getElementById("legendClose").addEventListener("click", () => document.getElementById("legendPanel").classList.remove("show"));
+        document.getElementById("layersOpen")?.addEventListener("click", () => document.getElementById("layersPanel").classList.add("show"));
+        document.getElementById("layersClose")?.addEventListener("click", () => document.getElementById("layersPanel").classList.remove("show"));
+        document.getElementById("legendOpen")?.addEventListener("click", () => document.getElementById("legendPanel").classList.add("show"));
+        document.getElementById("legendClose")?.addEventListener("click", () => document.getElementById("legendPanel").classList.remove("show"));
     });
 </script>
 </body>

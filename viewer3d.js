@@ -47,7 +47,7 @@ function setStatus(message, { error = false, hidden = false } = {}) {
 function initialize() {
     if (initialized) return;
     initialized = true;
-    
+
     if (frame) {
         frame.style.display = "block";
         frame.hidden = false;
@@ -65,7 +65,7 @@ function initialize() {
     renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.5));
     renderer.setSize(Math.max(host?.clientWidth || 300, 1), Math.max(host?.clientHeight || 300, 1), false);
     renderer.outputColorSpace = THREE.SRGBColorSpace;
-    
+
     if (host) {
         host.innerHTML = "";
         host.appendChild(renderer.domElement);
@@ -389,7 +389,7 @@ function routePositions(route) {
     return [startPos, endPos];
 }
 
-function clearRoute() {
+export function clearRoute() {
     if (routeGroup) {
         routeGroup.traverse(child => {
             child.geometry?.dispose?.();
@@ -716,7 +716,7 @@ function rebuildEditorVisuals() {
     if (editorActive) editorNodes.forEach((node, index) => {
         const position = new THREE.Vector3(node.position.x, node.position.y, node.position.z);
         const selected = node.id === editorActiveNodeId;
-        
+
         const nodeMarker = marker(position, selected ? 0xffcf3a : 0xef3340, selected ? 0.6 : 0.45);
         nodeMarker.name = node.id;
         nodeMarker.userData.editorNodeId = node.id;
@@ -1266,12 +1266,45 @@ function animate() {
     if (labelRenderer) labelRenderer.render(scene, camera);
 }
 
+// Show "Take Me Here" Floating Action Popup on Spatial Search / Label Focus
+export function focusSpatialLabel(id) {
+    const label = sourceLabelObjects.get(id);
+    if (!label || !camera || !controls) return;
+
+    const layerToggle = document.querySelector(`[data-3d-layer='${label.userData.layer}']`);
+    if (layerToggle && !layerToggle.checked) {
+        layerToggle.checked = true;
+        setLayerVisibility(label.userData.layer, true);
+    }
+
+    const pos = new THREE.Vector3();
+    label.getWorldPosition(pos);
+    controls.target.copy(pos);
+
+    camera.position.set(pos.x + 30, pos.y + 60, pos.z + 40);
+    controls.update();
+
+    document.querySelectorAll('.take-me-here-popup').forEach(el => el.remove());
+
+    const popup = document.createElement("div");
+    popup.className = "take-me-here-popup";
+    popup.style.top = "100px";
+    popup.style.right = "30px";
+    popup.innerHTML = `
+        <b>${label.userData.displayName || id}</b>
+        <button class="take-me-here-btn" onclick="window.takeMeHere('${id}'); this.parentElement.remove();">
+            📍 Take Me Here
+        </button>
+    `;
+    document.body.appendChild(popup);
+}
+
 const pgs3dInterface = {
-    show: async () => { 
-        visible = true; 
-        initialize(); 
-        resize(); 
-        await loadModel(); 
+    show: async () => {
+        visible = true;
+        initialize();
+        resize();
+        await loadModel();
     },
     hide: () => { visible = false; },
     reset: () => { if (controls) { controls.reset(); resize(); fitModel(); } },
@@ -1281,6 +1314,8 @@ const pgs3dInterface = {
     updateUserPosition,
     setCameraHeading,
     toggleCameraFollow,
+    clearRoute,
+    focusSpatialLabel,
 
     toggleDestinations: (visible) => {
         if (destinationDraftGroup) destinationDraftGroup.visible = visible;
@@ -1302,31 +1337,12 @@ const pgs3dInterface = {
             name: l.userData.displayName,
             category: l.userData.category
         }));
-    },
-
-    focusSpatialLabel: (id) => {
-        const label = sourceLabelObjects.get(id);
-        if (!label || !camera || !controls) return;
-
-        const layerToggle = document.querySelector(`[data-3d-layer='${label.userData.layer}']`);
-        if (layerToggle && !layerToggle.checked) {
-            layerToggle.checked = true;
-            setLayerVisibility(label.userData.layer, true);
-        }
-
-        const pos = new THREE.Vector3();
-        label.getWorldPosition(pos);
-        controls.target.copy(pos);
-
-        camera.position.set(pos.x + 30, pos.y + 60, pos.z + 40);
-        controls.update();
     }
 };
 
 // Global API Bindings & Self-Healing Event Sync
 window.pgs3d = Object.assign(window.pgs3d || {}, pgs3dInterface);
 
-// Auto-run startup handshake if app requested initialization prior to module load
 if (window.pgs3dNeedsShow || document.readyState === "complete" || document.readyState === "interactive") {
     window.pgs3d.show();
 } else {

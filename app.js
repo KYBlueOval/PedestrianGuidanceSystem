@@ -348,23 +348,22 @@ function initMobileGPS() {
         const nearestNodeId = findNearestPedestrianNodeByPos(userPos);
         if (nearestNodeId && $("startSelect") && $("startSelect").value !== nearestNodeId) {
             $("startSelect").value = nearestNodeId;
+            const nodeName = loc(nearestNodeId)?.name || nearestNodeId;
+            if ($("startSearchInput")) $("startSearchInput").value = nodeName;
             generateRoute();
         }
     };
 
-    // Immediate Location Probe
     navigator.geolocation.getCurrentPosition(
         handlePos,
         (err) => console.warn("Initial GPS Quick Probe Warning:", err.message),
         { enableHighAccuracy: false, timeout: 6000, maximumAge: 10000 }
     );
 
-    // Continuous Watch Listener
     navigator.geolocation.watchPosition(
         handlePos,
         (err) => {
             console.warn("GPS Tracking High Accuracy Failed, falling back:", err.message);
-            // Fallback for Windows Surface Wi-Fi positioning without high-accuracy hardware
             navigator.geolocation.watchPosition(
                 handlePos,
                 (e) => console.warn("Fallback GPS Tracking Error:", e.message),
@@ -440,7 +439,89 @@ function populateSelects(category = $("destinationCategory")?.value || "all") {
     addGroupedOptions(e, selectable.filter(destination => matchesDestinationCategory(destination, category)));
     if ([...s.options].some(option => option.value === previousStart)) s.value = previousStart;
     if ([...e.options].some(option => option.value === previousEnd)) e.value = previousEnd;
+
+    if (s.value && $("startSearchInput") && !$("startSearchInput").value) {
+        $("startSearchInput").value = loc(s.value)?.name || "";
+    }
+    if (e.value && $("endSearchInput") && !$("endSearchInput").value) {
+        $("endSearchInput").value = loc(e.value)?.name || "";
+    }
 }
+
+// Typeable Search Combobox Controller
+function setupTypeableCombobox(inputId, dropdownId, selectId, onSelectCallback) {
+    const input = $(inputId);
+    const dropdown = $(dropdownId);
+    const select = $(selectId);
+    if (!input || !dropdown || !select) return;
+
+    input.oninput = (e) => {
+        const q = e.target.value.toLowerCase().trim();
+        dropdown.innerHTML = "";
+        if (q.length < 1) {
+            dropdown.style.display = "none";
+            return;
+        }
+
+        const matches = destinations
+            .filter(d => !["junction", "corridor"].includes(d.type))
+            .filter(d => (d.name + " " + (d.category || "") + " " + (d.id || "")).toLowerCase().includes(q))
+            .slice(0, 12);
+
+        matches.forEach(m => {
+            const btn = document.createElement("button");
+            btn.innerHTML = `<b>${escapeHtml(m.name)}</b> <small style="opacity:0.7;">(${escapeHtml(m.category || "Room")})</small>`;
+            btn.onclick = () => {
+                select.value = m.id;
+                input.value = m.name;
+                dropdown.style.display = "none";
+                if (onSelectCallback) onSelectCallback(m.id);
+            };
+            dropdown.appendChild(btn);
+        });
+
+        dropdown.style.display = matches.length > 0 ? "block" : "none";
+    };
+
+    input.onfocus = () => {
+        if (input.value.length > 0) input.dispatchEvent(new Event('input'));
+    };
+
+    document.addEventListener("click", (e) => {
+        if (!e.target.closest(`#${inputId}`) && !e.target.closest(`#${dropdownId}`)) {
+            dropdown.style.display = "none";
+        }
+    });
+}
+
+function clearRouteAndNavigation() {
+    if (window.pgs3d?.clearRoute) {
+        window.pgs3d.clearRoute();
+    }
+    if (window.pgs3d?.toggleCameraFollow) {
+        window.pgs3d.toggleCameraFollow(false);
+    }
+
+    let stepsContainer = $("steps") || $("routeSteps");
+    if (stepsContainer) stepsContainer.innerHTML = "";
+
+    if ($("routeStatus")) $("routeStatus").textContent = "3D ROUTE";
+    if ($("distanceMetric")) $("distanceMetric").textContent = "0 ft";
+    if ($("timeMetric")) $("timeMetric").textContent = "0 min";
+
+    window.pgsCurrentRoute = null;
+}
+
+// Global "Take Me Here" Routing Bridge
+window.takeMeHere = function (destId) {
+    const dObj = loc(destId);
+    if (!dObj) return;
+
+    if ($("endSelect")) $("endSelect").value = dObj.id;
+    if ($("endSearchInput")) $("endSearchInput").value = dObj.name;
+
+    generateRoute();
+};
 
 function renderQuickRoutes() {
     const wrap = $("quickRoutes");
@@ -513,6 +594,7 @@ function routeToClosest(targetType) {
 
     populateSelects("all");
     if ($("endSelect")) $("endSelect").value = bestDest.id;
+    if ($("endSearchInput")) $("endSearchInput").value = bestDest.name;
 
     generateRoute();
     fitRoute();
@@ -549,6 +631,7 @@ function injectSpatialSearchUI() {
             btn.innerHTML = `<b>${escapeHtml(m.name)}</b><br><small>${m.category || "Room"}</small>`;
             btn.onclick = () => {
                 $("endSelect").value = m.id;
+                if ($("endSearchInput")) $("endSearchInput").value = m.name;
                 showDestination(m.id);
                 overlay.style.display = "none";
                 $("spatialSearchInput").value = "";
@@ -562,7 +645,13 @@ function injectSpatialSearchUI() {
 
 function wireEvents() {
     if ($("routeBtn")) $("routeBtn").onclick = generateRoute;
+    if ($("clearRouteBtn")) $("clearRouteBtn").onclick = clearRouteAndNavigation;
+    if ($("cancelNavBtn")) $("cancelNavBtn").onclick = clearRouteAndNavigation;
     if ($("destinationCategory")) $("destinationCategory").onchange = event => populateSelects(event.target.value);
+
+    // Wire Up Typeable Comboboxes
+    setupTypeableCombobox("startSearchInput", "startDropdown", "startSelect", () => generateRoute());
+    setupTypeableCombobox("endSearchInput", "endDropdown", "endSelect", () => generateRoute());
 
     if ($("recenterUserBtn")) {
         $("recenterUserBtn").onclick = () => {
@@ -673,7 +762,7 @@ function setWorkspaceView(next) {
         if (window.pgs3d?.show) {
             window.pgs3d.show();
         } else {
-            window.pgs3dNeedsShow = true; // Queue execution for when viewer3d.js loads
+            window.pgs3dNeedsShow = true;
         }
     } else {
         window.pgs3d?.hide?.();
@@ -853,7 +942,6 @@ function renderStepInstructions(startObj, endObj, positions, totalMeters, isVali
         return;
     }
 
-    // Advanced Landmark Scanner (Filters HVAC/Corridor noise and matches 2D horizontal proximity)
     const findPassedLandmarks = (legPositions, excludeIntersectionName = null) => {
         const candidateScores = [];
 
@@ -866,19 +954,14 @@ function renderStepInstructions(startObj, endObj, positions, totalMeters, isVali
                 const name = d.name.trim();
                 const lower = name.toLowerCase();
 
-                // 1. STRICT NOISE FILTER: Exclude utility tags, technical equipment, stair/corridor numbers
                 if (/pqc|d\/r|mach|stair-|material lift|open l-|storage|electrical|utility|jcm|vestibule|ahu\s*\d+|corridor\s+[a-z0-9-]+|intersection/i.test(lower)) return;
-
-                // 2. Ignore intersection pin that was turned at in previous step
                 if (excludeIntersectionName && name.toLowerCase() === excludeIntersectionName.toLowerCase()) return;
 
-                // 3. 2D Horizontal distance (XZ Plane) to avoidSkews from ceiling heights (y=5.1m)
                 const dist2d = distance2dHorizontal(pos, d.position);
 
-                if (dist2d <= 18.0) { // Scan within ~60ft horizontal radius
+                if (dist2d <= 18.0) {
                     let score = 100 - dist2d;
 
-                    // Priority Weight Boosts
                     if (/break area|office|locker|assembly|rebuild|kitchen/i.test(lower)) score += 150;
                     if ((d.category || "").includes("department") || (d.zone || "").includes("production")) score += 100;
 
@@ -887,7 +970,6 @@ function renderStepInstructions(startObj, endObj, positions, totalMeters, isVali
             });
         });
 
-        // Deduplicate and return highest priority landmark
         candidateScores.sort((a, b) => b.score - a.score);
         const unique = [];
         for (const item of candidateScores) {
@@ -897,7 +979,6 @@ function renderStepInstructions(startObj, endObj, positions, totalMeters, isVali
         return unique;
     };
 
-    // Dynamic Intersection Scanner (Matches custom placed intersection labels)
     const findNearbyIntersection = (pos) => {
         if (!pos) return null;
         let match = null;
@@ -905,7 +986,7 @@ function renderStepInstructions(startObj, endObj, positions, totalMeters, isVali
             if (d.name && d.position && Number.isFinite(d.position.x)) {
                 if (/intersection/i.test(d.name)) {
                     const dist = distance2dHorizontal(pos, d.position);
-                    if (dist <= 10.0) { // Within ~33 feet
+                    if (dist <= 10.0) {
                         match = d.name;
                     }
                 }
@@ -955,16 +1036,13 @@ function renderStepInstructions(startObj, endObj, positions, totalMeters, isVali
                 }
             }
 
-            // 1. Explicit Intersection Trigger
             if (dynamicIntersection && (isTurn || currentNId === "draft-node-9")) {
                 instructions.push(`Proceed straight for <b>${accumulatedFeet} ft</b> to the <b>${escapeHtml(dynamicIntersection)}</b> and turn <b>${turnDirection || "right"}</b> into the Spine corridor.`);
                 lastTurnIntersection = dynamicIntersection;
                 accumulatedFeet = 0;
                 legPositions = [p2];
                 legNodeIds = [currentNId];
-            }
-            // 2. Standard Turn Trigger
-            else if (isTurn) {
+            } else if (isTurn) {
                 const landmarks = findPassedLandmarks(legPositions, lastTurnIntersection);
                 let stepText = `Proceed straight for <b>${accumulatedFeet} ft</b>`;
 
@@ -977,9 +1055,7 @@ function renderStepInstructions(startObj, endObj, positions, totalMeters, isVali
                 accumulatedFeet = 0;
                 legPositions = [p2];
                 legNodeIds = [currentNId];
-            }
-            // 3. Final Straight Leg to Destination
-            else if (i === positions.length - 2 && accumulatedFeet > 0) {
+            } else if (i === positions.length - 2 && accumulatedFeet > 0) {
                 const landmarks = findPassedLandmarks(legPositions, lastTurnIntersection);
                 let endText = `Continue straight along walkway for <b>${accumulatedFeet} ft</b>`;
 
@@ -1033,6 +1109,7 @@ function renderSearch(q) {
         btn.innerHTML = `<b>${displayName}</b><br><small>${escapeHtml(d.category || "Room")} • ${escapeHtml(d.access || "Standard")}</small>`;
         btn.onclick = () => {
             $("endSelect").value = d.id;
+            if ($("endSearchInput")) $("endSearchInput").value = displayName;
             showDestination(d.id);
             box.style.display = "none";
             $("searchBox").value = displayName;
