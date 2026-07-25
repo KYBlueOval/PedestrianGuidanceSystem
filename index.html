@@ -16,7 +16,7 @@
     }
     </script>
     <style>
-        /* Base Reset & Flexible Root Container */
+        /* Base Reset & Flex Container */
         html, body {
             margin: 0;
             padding: 0;
@@ -35,7 +35,7 @@
             position: relative;
         }
 
-        /* LANDSCAPE / DESKTOP / UNFOLDED MODE (Side-by-Side 1/3 Sidebar, 2/3 Map) */
+        /* LANDSCAPE / DESKTOP MODE (Side-by-Side) */
         @media (min-width: 901px) and (orientation: landscape), (min-aspect-ratio: 1/1) {
             .app-shell {
                 flex-direction: row !important;
@@ -60,13 +60,15 @@
 
             .workspace {
                 flex: 1 !important;
+                display: flex !important;
+                flex-direction: column !important;
                 height: 100vh !important;
                 position: relative !important;
                 overflow: hidden !important;
             }
         }
 
-        /* PORTRAIT / FOLDED MOBILE MODE (Vertical Layout) */
+        /* PORTRAIT / MOBILE MODE (Vertical Stacked Layout) */
         @media (max-width: 900px) or (orientation: portrait) {
             .app-shell {
                 flex-direction: column !important;
@@ -88,13 +90,48 @@
             .workspace {
                 width: 100% !important;
                 height: 70vh !important;
-                min-height: 450px !important;
+                min-height: 480px !important;
+                display: flex !important;
+                flex-direction: column !important;
                 position: relative !important;
                 flex-shrink: 0;
             }
         }
 
-        /* Sidebar Control Sections */
+        /* 3D Map Viewport Frame Positioning Fix */
+        .topbar {
+            flex-shrink: 0;
+            z-index: 20;
+            position: relative;
+        }
+
+        .map-shell {
+            flex: 1 !important;
+            width: 100% !important;
+            height: 100% !important;
+            position: relative !important;
+            overflow: hidden !important;
+            z-index: 10;
+        }
+
+        #mapFrame { display: none !important; }
+
+        #threeFrame, #threeCanvas, .three-canvas {
+            width: 100% !important;
+            height: 100% !important;
+            position: absolute !important;
+            top: 0;
+            left: 0;
+            overflow: hidden;
+        }
+
+        #threeCanvas canvas {
+            width: 100% !important;
+            height: 100% !important;
+            display: block !important;
+        }
+
+        /* Sidebar Sections & Footer Logos */
         .control-section, .quick-routes, .route-status {
             flex-shrink: 0;
             margin-bottom: 12px;
@@ -111,20 +148,23 @@
 
         .sidebar-logo-container {
             margin-top: auto !important;
-            padding-top: 14px;
-            padding-bottom: 6px;
+            padding-top: 16px;
+            padding-bottom: 8px;
             display: flex;
+            justify-content: center;
             align-items: center;
+            width: 100%;
             flex-shrink: 0;
         }
 
         .sidebar-footer-logo {
-            max-width: 110px;
+            width: 180px;
+            max-width: 85%;
             height: auto;
-            opacity: 0.85;
+            opacity: 0.92;
+            filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.6));
             transition: opacity 0.2s ease-in-out;
         }
-
         .sidebar-footer-logo:hover { opacity: 1; }
 
         .version-footer {
@@ -138,7 +178,7 @@
             flex-shrink: 0;
         }
 
-        /* FIX: LAYERS & LEGEND OVERFLOW MODAL SCROLLING */
+        /* Layer & Legend Modals */
         .layers-panel, .legend-panel {
             display: none;
             position: absolute;
@@ -159,9 +199,7 @@
             flex-direction: column;
         }
 
-        .layers-panel.show, .legend-panel.show {
-            display: flex !important;
-        }
+        .layers-panel.show, .legend-panel.show { display: flex !important; }
 
         .panel-header {
             display: flex;
@@ -179,42 +217,10 @@
             padding-right: 4px;
         }
 
-        .panel-body::-webkit-scrollbar {
-            width: 5px;
-        }
-        .panel-body::-webkit-scrollbar-thumb {
-            background: #1a4b82;
-            border-radius: 4px;
-        }
+        .panel-body::-webkit-scrollbar { width: 5px; }
+        .panel-body::-webkit-scrollbar-thumb { background: #1a4b82; border-radius: 4px; }
 
-        /* 3D Canvas Rigid Constraints */
-        #mapFrame { display: none !important; }
-        #threeFrame, .map-shell { 
-            display: block !important; 
-            position: absolute !important; 
-            top: 0; 
-            left: 0; 
-            width: 100% !important; 
-            height: 100% !important; 
-            z-index: 10; 
-        }
-
-        #threeCanvas, .three-canvas {
-            width: 100% !important;
-            height: 100% !important;
-            position: absolute !important;
-            top: 0;
-            left: 0;
-            overflow: hidden;
-        }
-
-        #threeCanvas canvas {
-            width: 100% !important;
-            height: 100% !important;
-            display: block !important;
-        }
-
-        /* Field Labels & Input Controls */
+        /* Form Inputs & Combobox Controls */
         .field-label {
             font-size: 11px;
             font-weight: bold;
@@ -290,7 +296,7 @@
         }
         .btn-clear-route:hover { background: #23558c; color: #fff; }
 
-        /* Floating Viewport Buttons */
+        /* Floating Viewport Overlay Buttons */
         #cancelNavBtn {
             position: absolute;
             bottom: 20px;
@@ -307,10 +313,7 @@
             box-shadow: 0 4px 12px rgba(0,0,0,0.5);
             transition: all 0.2s;
         }
-        #cancelNavBtn:hover {
-            background: #ef3340;
-            color: #fff;
-        }
+        #cancelNavBtn:hover { background: #ef3340; color: #fff; }
     </style>
 </head>
 <body>
@@ -370,7 +373,7 @@
         </section>
 
         <div class="sidebar-logo-container">
-            <img class="sidebar-footer-logo" src="assets/logos/bwrdo.png" alt="RDO Logo" onerror="this.src='assets/bwrdo.png'"/>
+            <img class="sidebar-footer-logo" src="assets/logos/bwrdo.png" alt="Developed by RDO" onerror="this.src='assets/bwrdo.png'"/>
         </div>
 
         <footer class="version-footer">PGS v13.5.0 BETA</footer>
