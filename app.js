@@ -38,7 +38,6 @@ async function init() {
 
     spatialLabelsData = spatialLabelsPayload.labels || [];
 
-    // Prioritize draft network saved in localStorage if available
     try {
         const savedDraft = JSON.parse(localStorage.getItem(EDITOR_STORAGE_KEY) || "null");
         if (savedDraft && Array.isArray(savedDraft.nodes) && savedDraft.nodes.length > 0) {
@@ -59,7 +58,6 @@ async function init() {
 
     buildPedestrianGraph();
 
-    // Merge Spatial Labels & Overrides into Master Destination Collection
     const baseMerged = mergeSpatialLabelsIntoDestinations(rawDestinations, spatialLabelsData);
     destinations = mergeLabelOverridesIntoDestinations(baseMerged, labelOverrides);
 
@@ -93,7 +91,6 @@ async function init() {
     updateClock();
     setInterval(updateClock, 30000);
 
-    // Initialize Mobile Location & Orientation Sensors
     initMobileGPS();
     initCompassHeading();
 }
@@ -189,25 +186,13 @@ function destinationGroup(destination) {
     const zone = (destination.zone || "").toLowerCase();
     const type = (destination.type || "").toLowerCase();
 
-    // 1. Individual Rooms & Offices
     if (cat === "room" || type === "room" || cat === "office") return "Individual Rooms & Offices";
-
-    // 2. Departments & Production Areas
     if (cat === "department" || cat === "production" || cat === "area" || zone === "production") return "Department / Key Areas";
-
-    // 3. Security & Entrances ONLY if explicitly security or entrance
     if (zone === "security" || cat === "security" || cat === "entrance") return "Entrances / Security";
-
-    // 4. Visitor / Check-In
     if (zone === "visitor" || cat === "visitor") return "Visitor / Check-In";
-
-    // 5. Amenities & Employee Services
     if (zone === "amenities" || cat === "amenity" || cat === "service") return "Amenities / Services";
-
-    // 6. Emergency / Muster
     if (zone === "emergency" || cat === "emergency") return "Emergency / Muster";
 
-    // Fallback
     return "Department / Key Areas";
 }
 
@@ -235,7 +220,6 @@ function distance3d(a, b) {
     return Math.hypot((a.x || 0) - (b.x || 0), (a.y || 0) - (b.y || 0), (a.z || 0) - (b.z || 0));
 }
 
-// 2D Horizontal Distance (XZ plane only - ignores height offset skews)
 function distance2dHorizontal(a, b) {
     if (!a || !b) return 10;
     return Math.hypot((a.x || 0) - (b.x || 0), (a.z || 0) - (b.z || 0));
@@ -260,7 +244,6 @@ function get3DPositionForDestination(targetDestId) {
     return null;
 }
 
-// ROBUST 3D NODE SNAPPING BY 3D VECTOR
 function findNearestPedestrianNodeByPos(pos) {
     if (!pos || !Number.isFinite(pos.x)) return null;
 
@@ -284,7 +267,6 @@ function findNearestPedestrianNodeByPos(pos) {
     return closestId;
 }
 
-// ROBUST 3D NODE SNAPPING & DRAFT ANCHOR RESOLVER
 function findNearestPedestrianNode(targetDestId) {
     if (!targetDestId) return null;
 
@@ -326,7 +308,34 @@ function findNearestPedestrianNode(targetDestId) {
     return findNearestPedestrianNodeByPos(targetPos) || targetDestId;
 }
 
-// Robust Multi-Strategy GPS Tracking for Surface Laptops & Mobile Phones
+// Convert Raw Node IDs to Human Friendly Name
+function humanReadableLocationName(nodeId) {
+    const d = loc(nodeId);
+    if (d && d.name) return d.name;
+
+    let closestDest = null;
+    let minDist = Infinity;
+    const pos = pedestrianNodes[nodeId]?.position;
+
+    if (pos) {
+        destinations.forEach(candidate => {
+            if (candidate.position && Number.isFinite(candidate.position.x)) {
+                const dist = distance2dHorizontal(pos, candidate.position);
+                if (dist < minDist) {
+                    minDist = dist;
+                    closestDest = candidate;
+                }
+            }
+        });
+    }
+
+    if (closestDest && minDist <= 15.0) {
+        return `Near ${closestDest.name}`;
+    }
+
+    return "Current Live Location";
+}
+
 function initMobileGPS() {
     if (!navigator.geolocation) {
         console.warn("Geolocation API not supported by browser.");
@@ -348,8 +357,8 @@ function initMobileGPS() {
         const nearestNodeId = findNearestPedestrianNodeByPos(userPos);
         if (nearestNodeId && $("startSelect") && $("startSelect").value !== nearestNodeId) {
             $("startSelect").value = nearestNodeId;
-            const nodeName = loc(nearestNodeId)?.name || nearestNodeId;
-            if ($("startSearchInput")) $("startSearchInput").value = nodeName;
+            const displayName = humanReadableLocationName(nearestNodeId);
+            if ($("startSearchInput")) $("startSearchInput").value = displayName;
             generateRoute();
         }
     };
@@ -374,7 +383,6 @@ function initMobileGPS() {
     );
 }
 
-// Real-time Digital Compass Heading Rotation
 function initCompassHeading() {
     const handleOrientation = (e) => {
         let heading = null;
@@ -440,58 +448,44 @@ function populateSelects(category = $("destinationCategory")?.value || "all") {
     if ([...s.options].some(option => option.value === previousStart)) s.value = previousStart;
     if ([...e.options].some(option => option.value === previousEnd)) e.value = previousEnd;
 
-    if (s.value && $("startSearchInput") && !$("startSearchInput").value) {
-        $("startSearchInput").value = loc(s.value)?.name || "";
+    if (s.value && $("startSearchInput")) {
+        $("startSearchInput").value = loc(s.value)?.name || humanReadableLocationName(s.value);
     }
-    if (e.value && $("endSearchInput") && !$("endSearchInput").value) {
-        $("endSearchInput").value = loc(e.value)?.name || "";
+    if (e.value && $("endSearchInput")) {
+        $("endSearchInput").value = loc(e.value)?.name || humanReadableLocationName(e.value);
     }
 }
 
-// Typeable Search Combobox Controller
-function setupTypeableCombobox(inputId, dropdownId, selectId, onSelectCallback) {
+// Bi-Directional Typeable Search & Select Syncing
+function bindSearchAndSelectSync(inputId, selectId) {
     const input = $(inputId);
-    const dropdown = $(dropdownId);
     const select = $(selectId);
-    if (!input || !dropdown || !select) return;
+    if (!input || !select) return;
 
+    // 1. When user selects from Dropdown -> Update Search Input Box
+    select.onchange = () => {
+        const selectedObj = loc(select.value);
+        if (selectedObj) {
+            input.value = selectedObj.name;
+        }
+        generateRoute();
+    };
+
+    // 2. When user types in Search Input Box -> Filter & Select Matching Option
     input.oninput = (e) => {
         const q = e.target.value.toLowerCase().trim();
-        dropdown.innerHTML = "";
-        if (q.length < 1) {
-            dropdown.style.display = "none";
-            return;
+        if (q.length < 1) return;
+
+        const match = destinations.find(d =>
+            !["junction", "corridor"].includes(d.type) &&
+            (d.name + " " + d.id).toLowerCase().includes(q)
+        );
+
+        if (match) {
+            select.value = match.id;
+            generateRoute();
         }
-
-        const matches = destinations
-            .filter(d => !["junction", "corridor"].includes(d.type))
-            .filter(d => (d.name + " " + (d.category || "") + " " + (d.id || "")).toLowerCase().includes(q))
-            .slice(0, 12);
-
-        matches.forEach(m => {
-            const btn = document.createElement("button");
-            btn.innerHTML = `<b>${escapeHtml(m.name)}</b> <small style="opacity:0.7;">(${escapeHtml(m.category || "Room")})</small>`;
-            btn.onclick = () => {
-                select.value = m.id;
-                input.value = m.name;
-                dropdown.style.display = "none";
-                if (onSelectCallback) onSelectCallback(m.id);
-            };
-            dropdown.appendChild(btn);
-        });
-
-        dropdown.style.display = matches.length > 0 ? "block" : "none";
     };
-
-    input.onfocus = () => {
-        if (input.value.length > 0) input.dispatchEvent(new Event('input'));
-    };
-
-    document.addEventListener("click", (e) => {
-        if (!e.target.closest(`#${inputId}`) && !e.target.closest(`#${dropdownId}`)) {
-            dropdown.style.display = "none";
-        }
-    });
 }
 
 function clearRouteAndNavigation() {
@@ -512,7 +506,6 @@ function clearRouteAndNavigation() {
     window.pgsCurrentRoute = null;
 }
 
-// Global "Take Me Here" Routing Bridge
 window.takeMeHere = function (destId) {
     const dObj = loc(destId);
     if (!dObj) return;
@@ -649,9 +642,9 @@ function wireEvents() {
     if ($("cancelNavBtn")) $("cancelNavBtn").onclick = clearRouteAndNavigation;
     if ($("destinationCategory")) $("destinationCategory").onchange = event => populateSelects(event.target.value);
 
-    // Wire Up Typeable Comboboxes
-    setupTypeableCombobox("startSearchInput", "startDropdown", "startSelect", () => generateRoute());
-    setupTypeableCombobox("endSearchInput", "endDropdown", "endSelect", () => generateRoute());
+    // Wire Up Bi-Directional Search Inputs + Select Dropdowns
+    bindSearchAndSelectSync("startSearchInput", "startSelect");
+    bindSearchAndSelectSync("endSearchInput", "endSelect");
 
     if ($("recenterUserBtn")) {
         $("recenterUserBtn").onclick = () => {
@@ -826,7 +819,6 @@ function dijkstra(start, end, sourceGraph = graph) {
     return { path, distance: dist[end] };
 }
 
-// STRICT WALKPATH ROUTE GENERATION
 function generateRoute() {
     const sSelect = $("startSelect"), eSelect = $("endSelect");
     if (!sSelect || !eSelect) return;
@@ -859,8 +851,8 @@ function generateRoute() {
         Number.isFinite(spatialResult.distance) &&
         spatialResult.distance < Infinity;
 
-    const startObj = loc(start) || { id: start, name: start };
-    const endObj = loc(end) || { id: end, name: end };
+    const startObj = loc(start) || { id: start, name: humanReadableLocationName(start) };
+    const endObj = loc(end) || { id: end, name: humanReadableLocationName(end) };
 
     let spatialPositions = [];
 
@@ -910,7 +902,6 @@ function drawRoute(path) {
     path.forEach(id => document.querySelector(`.node[data-id="${id}"]`)?.classList.add("selected"));
 }
 
-// SMART VECTOR-COMPACTING & STRICT NOISE-FILTERED LANDMARK INSTRUCTIONS
 function renderStepInstructions(startObj, endObj, positions, totalMeters, isValid, pathNodeIds = []) {
     const totalFeet = Math.round(totalMeters * 3.28084);
     const mins = Math.max(1, Math.round(totalFeet / 250));

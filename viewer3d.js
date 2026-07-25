@@ -15,13 +15,11 @@ const floorLayerIndex = new Map();
 let spatialOverrides = {}, routeGroup, routeCurve, tracker;
 let routeProgress = 0, trackingPaused = false, routeDuration = 24, lastFrameTime = performance.now();
 
-// Native Editor States
 let editorActive = false, editorGroup;
 let editorNodes = [], editorEdges = [], editorActiveNodeId = null, editorHistory = [];
 let labelOverrides = [], labelOverrideGroup, labelPlacementActive = false;
 let destinationDrafts = [], destinationDraftGroup, destinationPlacementActive = false;
 
-// Live GPS & Camera Motion Tracking States
 let userMarkerGroup = null;
 let userPulsingRing = null;
 let isCameraFollowingUser = true;
@@ -47,7 +45,7 @@ function setStatus(message, { error = false, hidden = false } = {}) {
 function initialize() {
     if (initialized) return;
     initialized = true;
-
+    
     if (frame) {
         frame.style.display = "block";
         frame.hidden = false;
@@ -65,7 +63,7 @@ function initialize() {
     renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.5));
     renderer.setSize(Math.max(host?.clientWidth || 300, 1), Math.max(host?.clientHeight || 300, 1), false);
     renderer.outputColorSpace = THREE.SRGBColorSpace;
-
+    
     if (host) {
         host.innerHTML = "";
         host.appendChild(renderer.domElement);
@@ -105,7 +103,6 @@ function initialize() {
         if (el) el.addEventListener(event, fn);
     };
 
-    // Layer checkboxes
     document.querySelectorAll("#layersPanel input[type='checkbox']").forEach(input => {
         if (input.dataset["3dLayer"]) {
             input.addEventListener("change", () => setLayerVisibility(input.dataset["3dLayer"], input.checked));
@@ -420,7 +417,6 @@ function marker(position, color, radius) {
     return group;
 }
 
-// Live User Positioning API
 export function updateUserPosition(pos) {
     if (!model || !pos || !Number.isFinite(pos.x)) return;
 
@@ -537,7 +533,7 @@ function renderRoute(route) {
 
 function frameRoute(points) {
     const box = new THREE.Box3().setFromPoints(points);
-    const center = box.getCenter(new THREE.Vector3()).add(model.position);
+    const center = box.getCenter(new THREE.Vector3());
     const size = box.getSize(new THREE.Vector3());
     const radius = Math.max(size.x, size.z, 40);
     controls.target.copy(center);
@@ -552,7 +548,6 @@ function toggleWalkPreview() {
     if (wt) wt.textContent = trackingPaused ? "Resume Walk Preview" : "Pause Walk Preview";
 }
 
-// Native 3D Pedestrian Network & Anchor Editor
 function toggleRouteEditor() {
     if (!model) return;
     if (labelPlacementActive) cancelLabelPlacement();
@@ -716,7 +711,7 @@ function rebuildEditorVisuals() {
     if (editorActive) editorNodes.forEach((node, index) => {
         const position = new THREE.Vector3(node.position.x, node.position.y, node.position.z);
         const selected = node.id === editorActiveNodeId;
-
+        
         const nodeMarker = marker(position, selected ? 0xffcf3a : 0xef3340, selected ? 0.6 : 0.45);
         nodeMarker.name = node.id;
         nodeMarker.userData.editorNodeId = node.id;
@@ -1226,16 +1221,18 @@ function disposeObject(object) {
 
 function fitModel() {
     if (!model) return;
+    model.position.set(0, 0, 0);
     const box = new THREE.Box3().setFromObject(model);
     const size = box.getSize(new THREE.Vector3());
     const center = box.getCenter(new THREE.Vector3());
-    model.position.sub(center);
-    model.position.y += size.y / 2;
-    const radius = Math.max(size.x, size.y, size.z) * .72 || 100;
-    camera.position.set(radius * .82, radius * .62, radius * .82);
-    controls.target.set(0, Math.max(size.y * .12, 0), 0);
-    controls.maxDistance = radius * 5;
-    controls.update();
+
+    if (controls) {
+        controls.target.copy(center);
+        const radius = Math.max(size.x, size.y, size.z) * .72 || 100;
+        camera.position.set(center.x + radius * .82, center.y + radius * .82, center.z + radius * .82);
+        controls.maxDistance = radius * 5;
+        controls.update();
+    }
 }
 
 function resize() {
@@ -1266,7 +1263,6 @@ function animate() {
     if (labelRenderer) labelRenderer.render(scene, camera);
 }
 
-// Show "Take Me Here" Floating Action Popup on Spatial Search / Label Focus
 export function focusSpatialLabel(id) {
     const label = sourceLabelObjects.get(id);
     if (!label || !camera || !controls) return;
@@ -1300,11 +1296,11 @@ export function focusSpatialLabel(id) {
 }
 
 const pgs3dInterface = {
-    show: async () => {
-        visible = true;
-        initialize();
-        resize();
-        await loadModel();
+    show: async () => { 
+        visible = true; 
+        initialize(); 
+        resize(); 
+        await loadModel(); 
     },
     hide: () => { visible = false; },
     reset: () => { if (controls) { controls.reset(); resize(); fitModel(); } },
@@ -1340,7 +1336,6 @@ const pgs3dInterface = {
     }
 };
 
-// Global API Bindings & Self-Healing Event Sync
 window.pgs3d = Object.assign(window.pgs3d || {}, pgs3dInterface);
 
 if (window.pgs3dNeedsShow || document.readyState === "complete" || document.readyState === "interactive") {
