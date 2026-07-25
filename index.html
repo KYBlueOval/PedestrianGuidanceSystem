@@ -16,7 +16,7 @@
     }
     </script>
     <style>
-        /* Sidebar Clean Layout & Overflow Fixes */
+        /* Sidebar Layout & Overflow Fixes */
         .sidebar {
             display: flex !important;
             flex-direction: column !important;
@@ -43,9 +43,30 @@
             color: #ffffff;
         }
 
-        .version-footer {
+        /* Sidebar Footer Logo Container */
+        .sidebar-logo-container {
             margin-top: auto !important;
-            padding-top: 16px !important;
+            padding-top: 14px;
+            padding-bottom: 6px;
+            display: flex;
+            align-items: center;
+            flex-shrink: 0;
+        }
+
+        .sidebar-footer-logo {
+            max-width: 110px;
+            height: auto;
+            opacity: 0.85;
+            transition: opacity 0.2s ease-in-out;
+        }
+
+        .sidebar-footer-logo:hover {
+            opacity: 1;
+        }
+
+        .version-footer {
+            margin-top: 0 !important;
+            padding-top: 8px !important;
             padding-bottom: 12px !important;
             font-size: 11px !important;
             color: #6c8ba7 !important;
@@ -129,12 +150,61 @@
         }
         .select-input:focus { border-color: #00a8ff; }
 
-        /* Navigation Controls */
+        /* Navigation Action Controls */
         .route-action-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px; }
-        .btn-cancel-nav { background: rgba(239, 51, 64, 0.2); border: 1px solid #ef3340; color: #ff6b78; padding: 10px; border-radius: 6px; font-weight: bold; cursor: pointer; transition: all 0.2s; }
-        .btn-cancel-nav:hover { background: #ef3340; color: #fff; }
-        .btn-clear-route { background: #15344d; border: 1px solid #23558c; color: #a0c0e0; padding: 10px; border-radius: 6px; font-weight: bold; cursor: pointer; transition: all 0.2s; }
+        
+        .btn-gps-toggle {
+            background: rgba(0, 168, 255, 0.12);
+            border: 1px solid #00a8ff;
+            color: #38d8ff;
+            padding: 10px;
+            border-radius: 6px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .btn-gps-toggle.active {
+            background: #00a8ff;
+            color: #ffffff;
+            box-shadow: 0 0 12px rgba(0, 168, 255, 0.5);
+        }
+
+        .btn-clear-route {
+            background: #15344d;
+            border: 1px solid #23558c;
+            color: #a0c0e0;
+            padding: 10px;
+            border-radius: 6px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
         .btn-clear-route:hover { background: #23558c; color: #fff; }
+
+        /* Floating Viewport Buttons */
+        #cancelNavBtn {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            z-index: 10001;
+            padding: 10px 16px;
+            background: rgba(239, 51, 64, 0.25);
+            border: 1px solid #ef3340;
+            color: #ff6b78;
+            border-radius: 6px;
+            font-weight: bold;
+            cursor: pointer;
+            backdrop-filter: blur(8px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+            transition: all 0.2s;
+        }
+        #cancelNavBtn:hover {
+            background: #ef3340;
+            color: #fff;
+        }
 
         /* 3D "Take Me Here" Tooltip Popup */
         .take-me-here-popup {
@@ -187,7 +257,7 @@
 
             <label class="field-label" for="startSearchInput">Start Location</label>
             <div class="combobox-container">
-                <input type="text" id="startSearchInput" class="combobox-input" placeholder="🔍 Type room or auto-detect..." autocomplete="off"/>
+                <input type="text" id="startSearchInput" class="combobox-input" placeholder="🔍 Type room or select below..." autocomplete="off"/>
             </div>
             <select id="startSelect" class="select-input"></select>
 
@@ -209,9 +279,9 @@
 
             <button id="routeBtn" class="primary-action">Generate Route</button>
 
-            <!-- Navigation Controls -->
+            <!-- Navigation Actions -->
             <div class="route-action-grid">
-                <button id="cancelNavBtn" class="btn-cancel-nav">🛑 Cancel Nav</button>
+                <button id="gpsToggleBtn" class="btn-gps-toggle">📡 GPS: OFF</button>
                 <button id="clearRouteBtn" class="btn-clear-route">❌ Clear Route</button>
             </div>
         </section>
@@ -223,11 +293,17 @@
             <div id="steps" class="turn-instructions-box"></div>
         </section>
 
+        <!-- Secondary Brand / Entity Logo directly above version footer -->
+        <div class="sidebar-logo-container">
+            <img class="sidebar-footer-logo" src="assets/logos/bwrdo.png" alt="RDO Logo" onerror="this.src='assets/bwrdo.png'"/>
+        </div>
+
         <footer class="version-footer">PGS v13.5.0 BETA</footer>
     </aside>
 
     <main class="workspace">
         <header class="topbar">
+            2.0
             <h2>BlueOval Glendale • Ground Floor</h2>
             <nav class="top-actions">
                 <button id="searchFocus">⌕ Search</button>
@@ -239,6 +315,9 @@
         </header>
 
         <section class="map-shell">
+            <!-- Floating Navigation Action Buttons on 3D Viewport -->
+            <button id="cancelNavBtn">🛑 Cancel Nav</button>
+
             <button id="recenterUserBtn" style="position: absolute; bottom: 20px; right: 20px; z-index: 10001; padding: 10px 14px; background: #00a8ff; color: #fff; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.4);">
                 🎯 Recenter Location
             </button>

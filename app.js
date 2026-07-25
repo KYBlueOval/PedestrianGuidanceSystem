@@ -16,6 +16,10 @@ const ORIGIN_LNG = -85.820120; // Longitude at GLB origin (0,0)
 const METERS_PER_LAT = 111000;
 const METERS_PER_LNG = 88000;  // Adjusted for local latitude
 
+// Live GPS Hardware Control States
+let gpsActive = false;
+let gpsWatchId = null;
+
 async function init() {
     if ('serviceWorker' in navigator) {
         navigator.serviceWorker.getRegistrations().then(regs => { for (let r of regs) r.unregister(); });
@@ -91,7 +95,6 @@ async function init() {
     updateClock();
     setInterval(updateClock, 30000);
 
-    initMobileGPS();
     initCompassHeading();
 }
 
@@ -308,7 +311,6 @@ function findNearestPedestrianNode(targetDestId) {
     return findNearestPedestrianNodeByPos(targetPos) || targetDestId;
 }
 
-// Convert Raw Node IDs to Human Friendly Name
 function humanReadableLocationName(nodeId) {
     const d = loc(nodeId);
     if (d && d.name) return d.name;
@@ -336,19 +338,50 @@ function humanReadableLocationName(nodeId) {
     return "Current Live Location";
 }
 
-function initMobileGPS() {
+// Controlled GPS Button Switch Handler
+function toggleGpsTracking(enable) {
+    gpsActive = enable;
+
+    const btn = $("gpsToggleBtn");
+    if (btn) {
+        btn.classList.toggle("active", gpsActive);
+        btn.innerHTML = gpsActive ? "📡 GPS: ON" : "📡 GPS: OFF";
+    }
+
+    if (!enable) {
+        if (gpsWatchId !== null && navigator.geolocation) {
+            navigator.geolocation.clearWatch(gpsWatchId);
+            gpsWatchId = null;
+        }
+        if (window.pgs3d?.clearUserMarker) {
+            window.pgs3d.clearUserMarker();
+        }
+        if (window.pgs3d?.toggleCameraFollow) {
+            window.pgs3d.toggleCameraFollow(false);
+        }
+        return;
+    }
+
     if (!navigator.geolocation) {
-        console.warn("Geolocation API not supported by browser.");
+        alert("Geolocation API is not supported by your device/browser.");
+        toggleGpsTracking(false);
         return;
     }
 
     const handlePos = (pos) => {
+        if (!gpsActive) return;
+
         const lat = pos.coords.latitude;
         const lng = pos.coords.longitude;
 
         const x3d = (lng - ORIGIN_LNG) * METERS_PER_LNG;
         const z3d = -(lat - ORIGIN_LAT) * METERS_PER_LAT;
         const userPos = { x: x3d, y: 0.35, z: z3d };
+
+        if (Math.abs(x3d) > 2500 || Math.abs(z3d) > 2500) {
+            console.warn(`GPS location (${lat}, ${lng}) is off-site. Suppressing position snap.`);
+            return;
+        }
 
         if (window.pgs3d?.updateUserPosition) {
             window.pgs3d.updateUserPosition(userPos);
@@ -363,28 +396,16 @@ function initMobileGPS() {
         }
     };
 
-    navigator.geolocation.getCurrentPosition(
+    gpsWatchId = navigator.geolocation.watchPosition(
         handlePos,
-        (err) => console.warn("Initial GPS Quick Probe Warning:", err.message),
-        { enableHighAccuracy: false, timeout: 6000, maximumAge: 10000 }
-    );
-
-    navigator.geolocation.watchPosition(
-        handlePos,
-        (err) => {
-            console.warn("GPS Tracking High Accuracy Failed, falling back:", err.message);
-            navigator.geolocation.watchPosition(
-                handlePos,
-                (e) => console.warn("Fallback GPS Tracking Error:", e.message),
-                { enableHighAccuracy: false, maximumAge: 5000, timeout: 15000 }
-            );
-        },
-        { enableHighAccuracy: true, maximumAge: 2000, timeout: 8000 }
+        (err) => console.warn("GPS Tracking Watch Error:", err.message),
+        { enableHighAccuracy: true, maximumAge: 2000, timeout: 10000 }
     );
 }
 
 function initCompassHeading() {
     const handleOrientation = (e) => {
+        if (!gpsActive) return;
         let heading = null;
 
         if (e.webkitCompassHeading !== undefined && e.webkitCompassHeading !== null) {
@@ -456,13 +477,11 @@ function populateSelects(category = $("destinationCategory")?.value || "all") {
     }
 }
 
-// Bi-Directional Typeable Search & Select Syncing
 function bindSearchAndSelectSync(inputId, selectId) {
     const input = $(inputId);
     const select = $(selectId);
     if (!input || !select) return;
 
-    // 1. When user selects from Dropdown -> Update Search Input Box
     select.onchange = () => {
         const selectedObj = loc(select.value);
         if (selectedObj) {
@@ -471,7 +490,6 @@ function bindSearchAndSelectSync(inputId, selectId) {
         generateRoute();
     };
 
-    // 2. When user types in Search Input Box -> Filter & Select Matching Option
     input.oninput = (e) => {
         const q = e.target.value.toLowerCase().trim();
         if (q.length < 1) return;
@@ -642,12 +660,20 @@ function wireEvents() {
     if ($("cancelNavBtn")) $("cancelNavBtn").onclick = clearRouteAndNavigation;
     if ($("destinationCategory")) $("destinationCategory").onchange = event => populateSelects(event.target.value);
 
-    // Wire Up Bi-Directional Search Inputs + Select Dropdowns
+    // Wire Up GPS Button Switch
+    if ($("gpsToggleBtn")) {
+        $("gpsToggleBtn").onclick = () => toggleGpsTracking(!gpsActive);
+    }
+
     bindSearchAndSelectSync("startSearchInput", "startSelect");
     bindSearchAndSelectSync("endSearchInput", "endSelect");
 
     if ($("recenterUserBtn")) {
         $("recenterUserBtn").onclick = () => {
+            if (!gpsActive) {
+                alert("Please enable '📡 GPS' to track and center your live location.");
+                return;
+            }
             window.pgs3d?.toggleCameraFollow(true);
         };
     }
