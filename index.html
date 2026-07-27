@@ -16,304 +16,76 @@
     }
     </script>
     <style>
-        /* Base Reset & Flex Container */
-        html, body {
-            margin: 0;
-            padding: 0;
-            width: 100vw;
-            height: 100vh;
-            overflow: hidden;
-            background-color: #071629;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-        }
+/* --- PATCHED STYLE BLOCK --- */
+:root { --safe-top: env(safe-area-inset-top, 0px); }
 
-        .app-shell {
-            display: flex;
-            width: 100vw;
-            height: 100vh;
-            overflow: hidden;
-            position: relative;
-        }
+/* Base Reset & Flex Container */
+html, body {
+    margin: 0; padding: 0; width: 100vw; height: 100vh;
+    overflow: hidden; background-color: #071629;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    padding-top: var(--safe-top); box-sizing: border-box;
+}
 
-        /* LANDSCAPE / DESKTOP MODE (Side-by-Side) */
-        @media (min-width: 901px) and (orientation: landscape), (min-aspect-ratio: 1/1) {
-            .app-shell {
-                flex-direction: row !important;
-            }
+.app-shell {
+    display: flex; width: 100vw; height: calc(100vh - var(--safe-top));
+    overflow: hidden; position: relative;
+}
 
-            .sidebar {
-                width: 360px !important;
-                min-width: 320px !important;
-                max-width: 400px !important;
-                height: 100vh !important;
-                max-height: 100vh !important;
-                overflow-y: auto !important;
-                padding: 16px !important;
-                box-sizing: border-box !important;
-                background: #071629;
-                border-right: 1px solid #1a3a5f;
-                display: flex !important;
-                flex-direction: column !important;
-                z-index: 100;
-                flex-shrink: 0;
-            }
+/* LANDSCAPE / DESKTOP MODE (Split Screen) */
+@media (min-width: 901px) and (orientation: landscape), (min-aspect-ratio: 1/1) {
+    .app-shell { flex-direction: row !important; }
+    .sidebar { 
+        flex: 0 0 360px !important; min-width: 320px !important; max-width: 400px !important;
+        height: 100% !important; overflow-y: auto !important; padding: 16px !important;
+        box-sizing: border-box !important; background: #071629; border-right: 1px solid #1a3a5f;
+        display: flex !important; flex-direction: column !important; z-index: 100; flex-shrink: 0;
+    }
+    .workspace { flex: 1 !important; display: flex !important; flex-direction: column !important; height: 100% !important; position: relative !important; overflow: hidden !important; }
+}
 
-            .workspace {
-                flex: 1 !important;
-                display: flex !important;
-                flex-direction: column !important;
-                height: 100vh !important;
-                position: relative !important;
-                overflow: hidden !important;
-            }
-        }
+/* PORTRAIT / MOBILE MODE (Vertical Stacked Layout) */
+@media (max-width: 900px) or (orientation: portrait) {
+    .app-shell { flex-direction: column !important; overflow-y: auto !important; }
+    .sidebar { width: 100% !important; height: auto !important; max-height: none !important; overflow-y: visible !important; padding: 16px !important; box-sizing: border-box !important; background: #071629; border-bottom: 2px solid #1a3a5f; flex-shrink: 0; }
+    .workspace { width: 100% !important; height: 70vh !important; min-height: 480px !important; display: flex !important; flex-direction: column !important; position: relative !important; flex-shrink: 0; }
+}
 
-        /* PORTRAIT / MOBILE MODE (Vertical Stacked Layout) */
-        @media (max-width: 900px) or (orientation: portrait) {
-            .app-shell {
-                flex-direction: column !important;
-                overflow-y: auto !important;
-            }
+/* 3D Map Viewport Frame Positioning Fix */
+.topbar { flex-shrink: 0; z-index: 20; position: relative; }
+.map-shell { flex: 1 !important; width: 100% !important; height: 100% !important; position: relative !important; overflow: hidden !important; z-index: 10; }
+#mapFrame { display: none !important; }
+#threeFrame, #threeCanvas, .three-canvas { width: 100% !important; height: 100% !important; position: absolute !important; top: 0; left: 0; overflow: hidden; }
+#threeCanvas canvas { width: 100% !important; height: 100% !important; display: block !important; }
 
-            .sidebar {
-                width: 100% !important;
-                height: auto !important;
-                max-height: none !important;
-                overflow-y: visible !important;
-                padding: 16px !important;
-                box-sizing: border-box !important;
-                background: #071629;
-                border-bottom: 2px solid #1a3a5f;
-                flex-shrink: 0;
-            }
+/* MODAL Z-INDEX FIXES (The "Layers on top" fix) */
+.layers-panel, .legend-panel {
+    display: none; position: absolute !important; top: 70px !important; right: 20px !important;
+    width: 280px; z-index: 999999 !important; background: rgba(6, 26, 51, 0.98);
+    border: 1px solid #00a8ff; max-height: 80vh !important; overflow-y: auto !important;
+    border-radius: 12px; padding: 16px; box-shadow: 0 10px 50px rgba(0,0,0,0.9);
+    backdrop-filter: blur(12px); box-sizing: border-box; flex-direction: column;
+}
+.layers-panel.show, .legend-panel.show { display: flex !important; }
+.panel-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #1a3a5f; padding-bottom: 8px; margin-bottom: 10px; flex-shrink: 0; }
+.panel-body { overflow-y: auto !important; max-height: calc(80vh - 60px); padding-right: 4px; }
 
-            .workspace {
-                width: 100% !important;
-                height: 70vh !important;
-                min-height: 480px !important;
-                display: flex !important;
-                flex-direction: column !important;
-                position: relative !important;
-                flex-shrink: 0;
-            }
-        }
+/* Sidebar Elements (Retained from your original file) */
+.control-section, .quick-routes, .route-status { flex-shrink: 0; margin-bottom: 12px; position: relative; }
+.route-status { background: rgba(15, 32, 58, 0.75); border: 1px solid #1a4b82; border-radius: 8px; padding: 12px; color: #ffffff; }
+.sidebar-logo-container { margin-top: auto !important; padding-top: 16px; padding-bottom: 8px; display: flex; justify-content: center; align-items: center; width: 100%; flex-shrink: 0; }
+.sidebar-footer-logo { width: 180px; max-width: 85%; height: auto; opacity: 0.92; filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.6)); }
+.version-footer { margin-top: 0 !important; padding-top: 8px !important; padding-bottom: 12px !important; font-size: 11px !important; color: #6c8ba7 !important; text-align: left; border-top: 1px solid rgba(255, 255, 255, 0.08); flex-shrink: 0; }
 
-        /* 3D Map Viewport Frame Positioning Fix */
-        .topbar {
-            flex-shrink: 0;
-            z-index: 20;
-            position: relative;
-        }
-
-        .map-shell {
-            flex: 1 !important;
-            width: 100% !important;
-            height: 100% !important;
-            position: relative !important;
-            overflow: hidden !important;
-            z-index: 10;
-        }
-
-        #mapFrame { display: none !important; }
-
-        #threeFrame, #threeCanvas, .three-canvas {
-            width: 100% !important;
-            height: 100% !important;
-            position: absolute !important;
-            top: 0;
-            left: 0;
-            overflow: hidden;
-        }
-
-        #threeCanvas canvas {
-            width: 100% !important;
-            height: 100% !important;
-            display: block !important;
-        }
-
-        /* Sidebar Sections & Footer Logos */
-        .control-section, .quick-routes, .route-status {
-            flex-shrink: 0;
-            margin-bottom: 12px;
-            position: relative;
-        }
-
-        .route-status {
-            background: rgba(15, 32, 58, 0.75);
-            border: 1px solid #1a4b82;
-            border-radius: 8px;
-            padding: 12px;
-            color: #ffffff;
-        }
-
-        .sidebar-logo-container {
-            margin-top: auto !important;
-            padding-top: 16px;
-            padding-bottom: 8px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            width: 100%;
-            flex-shrink: 0;
-        }
-
-        .sidebar-footer-logo {
-            width: 180px;
-            max-width: 85%;
-            height: auto;
-            opacity: 0.92;
-            filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.6));
-            transition: opacity 0.2s ease-in-out;
-        }
-        .sidebar-footer-logo:hover { opacity: 1; }
-
-        .version-footer {
-            margin-top: 0 !important;
-            padding-top: 8px !important;
-            padding-bottom: 12px !important;
-            font-size: 11px !important;
-            color: #6c8ba7 !important;
-            text-align: left;
-            border-top: 1px solid rgba(255, 255, 255, 0.08);
-            flex-shrink: 0;
-        }
-
-        /* Layer & Legend Modals */
-        .layers-panel, .legend-panel {
-            display: none;
-            position: absolute;
-            top: 60px;
-            right: 16px;
-            width: 280px;
-            max-width: calc(100vw - 32px);
-            max-height: 80vh !important;
-            background: rgba(6, 26, 51, 0.96);
-            border: 1px solid #1a4b82;
-            z-index: 99999 !important;
-            padding: 16px;
-            border-radius: 12px;
-            color: white;
-            box-shadow: 0 12px 35px rgba(0,0,0,0.85);
-            backdrop-filter: blur(12px);
-            box-sizing: border-box;
-            flex-direction: column;
-        }
-
-        .layers-panel.show, .legend-panel.show { display: flex !important; }
-
-        .panel-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid #1a3a5f;
-            padding-bottom: 8px;
-            margin-bottom: 10px;
-            flex-shrink: 0;
-        }
-
-        .panel-body {
-            overflow-y: auto !important;
-            max-height: calc(80vh - 60px);
-            padding-right: 4px;
-        }
-
-        .panel-body::-webkit-scrollbar { width: 5px; }
-        .panel-body::-webkit-scrollbar-thumb { background: #1a4b82; border-radius: 4px; }
-
-        /* Form Inputs & Combobox Controls */
-        .field-label {
-            font-size: 11px;
-            font-weight: bold;
-            color: #4da8da;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-top: 10px;
-            margin-bottom: 4px;
-            display: block;
-        }
-
-        .combobox-container { position: relative; width: 100%; margin-bottom: 6px; }
-        
-        .combobox-input {
-            background: linear-gradient(145deg, #0b2038, #102e52);
-            border: 1px solid #1a4b82;
-            border-radius: 8px;
-            color: #ffffff;
-            padding: 10px 14px;
-            font-size: 13px;
-            width: 100%;
-            box-sizing: border-box;
-            outline: none;
-            transition: border-color 0.2s, box-shadow 0.2s;
-        }
-        .combobox-input:focus { border-color: #00a8ff; box-shadow: 0 0 10px rgba(0, 168, 255, 0.4); }
-
-        .select-input {
-            background: rgba(15, 32, 58, 0.9);
-            border: 1px solid #23558c;
-            color: #fff;
-            padding: 10px;
-            border-radius: 8px;
-            font-size: 12px;
-            width: 100%;
-            box-sizing: border-box;
-            margin-bottom: 12px;
-            outline: none;
-        }
-        .select-input:focus { border-color: #00a8ff; }
-
-        /* Navigation Action Controls */
-        .route-action-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px; }
-        
-        .btn-gps-toggle {
-            background: rgba(0, 168, 255, 0.12);
-            border: 1px solid #00a8ff;
-            color: #38d8ff;
-            padding: 10px;
-            border-radius: 6px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: all 0.2s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .btn-gps-toggle.active {
-            background: #00a8ff;
-            color: #ffffff;
-            box-shadow: 0 0 12px rgba(0, 168, 255, 0.5);
-        }
-
-        .btn-clear-route {
-            background: #15344d;
-            border: 1px solid #23558c;
-            color: #a0c0e0;
-            padding: 10px;
-            border-radius: 6px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-        .btn-clear-route:hover { background: #23558c; color: #fff; }
-
-        /* Floating Viewport Overlay Buttons */
-        #cancelNavBtn {
-            position: absolute;
-            bottom: 20px;
-            left: 20px;
-            z-index: 10001;
-            padding: 10px 16px;
-            background: rgba(239, 51, 64, 0.25);
-            border: 1px solid #ef3340;
-            color: #ff6b78;
-            border-radius: 6px;
-            font-weight: bold;
-            cursor: pointer;
-            backdrop-filter: blur(8px);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
-            transition: all 0.2s;
-        }
-        #cancelNavBtn:hover { background: #ef3340; color: #fff; }
+/* Form Inputs & Navigation Controls */
+.field-label { font-size: 11px; font-weight: bold; color: #4da8da; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 10px; margin-bottom: 4px; display: block; }
+.combobox-input { background: linear-gradient(145deg, #0b2038, #102e52); border: 1px solid #1a4b82; border-radius: 8px; color: #ffffff; padding: 10px 14px; font-size: 13px; width: 100%; box-sizing: border-box; }
+.select-input { background: rgba(15, 32, 58, 0.9); border: 1px solid #23558c; color: #fff; padding: 10px; border-radius: 8px; font-size: 12px; width: 100%; box-sizing: border-box; }
+.route-action-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px; }
+.btn-gps-toggle { background: rgba(0, 168, 255, 0.12); border: 1px solid #00a8ff; color: #38d8ff; padding: 10px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+.btn-gps-toggle.active { background: #00a8ff; color: #fff; }
+.btn-clear-route { background: #15344d; border: 1px solid #23558c; color: #a0c0e0; padding: 10px; border-radius: 6px; cursor: pointer; }
+#cancelNavBtn { position: absolute; bottom: 20px; left: 20px; z-index: 10001; padding: 10px 16px; background: rgba(239, 51, 64, 0.25); border: 1px solid #ef3340; color: #ff6b78; border-radius: 6px; cursor: pointer; }
     </style>
 </head>
 <body>
